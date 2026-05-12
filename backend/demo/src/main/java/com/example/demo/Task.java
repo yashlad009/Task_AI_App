@@ -28,7 +28,7 @@ public class Task {
     @Column(name = "user_id", nullable = false)
     private String userId;
 
-    @Column(name = "priority", nullable = false)
+    @Column(name = "priority")
     private String priority = "Medium";
 
     @Column(name = "due_date")
@@ -44,6 +44,9 @@ public class Task {
     public void ensureId() {
         if (this.id == null || this.id.isBlank()) {
             this.id = UUID.randomUUID().toString();
+        }
+        if (this.priority == null || this.priority.isBlank()) {
+            this.priority = "Medium";
         }
     }
 
@@ -87,11 +90,11 @@ public class Task {
     public void setCategory(String category) { this.category = category; }
 
     public String getPriority() {
-        return priority;
+        return (priority == null || priority.isBlank()) ? "Medium" : priority;
     }
 
     public void setPriority(String priority) {
-        this.priority = priority;
+        this.priority = (priority == null || priority.isBlank()) ? "Medium" : priority;
     }
 
     public String getDueDate() {
