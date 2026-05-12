@@ -2,38 +2,242 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Master Portal | APMS PRO</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script>
         (function() {
             const savedTheme = localStorage.getItem('apms-theme') || 'dark';
             document.documentElement.setAttribute('data-theme', savedTheme);
         })();
     </script>
-    <script>
-        document.addEventListener('mousemove', function(e) {
-            document.body.style.setProperty('--mouse-x', (e.clientX / window.innerWidth) * 100 + '%');
-            document.body.style.setProperty('--mouse-y', (e.clientY / window.innerHeight) * 100 + '%');
-        });
-    </script>
     <script src="app-config.js"></script>
     <script src="theme.js" defer></script>
     <script src="network-theme.js" defer></script>
     <style>
-        .clickable-card { cursor: pointer; transition: 0.3s ease; }
-        .clickable-card:hover { transform: translateY(-5px); border-color: var(--sky-blue); }
-        .clickable-card.active { border: 2px solid var(--purple); background: rgba(157, 80, 187, 0.1); }
-        .data-panel { display: none; margin-top: 30px; animation: fadeIn 0.5s ease; }
-        .data-panel.active { display: block; }
-        .admin-table { width: 100%; border-collapse: collapse; background: var(--glass-panel); border-radius: 15px; overflow: hidden; }
-        .admin-table th { background: rgba(255,255,255,0.05); color: var(--sky-blue); padding: 15px; text-align: left; font-size: 13px; }
-        .admin-table td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-main); font-size: 14px; }
-        .user-tag { background: var(--purple); padding: 3px 10px; border-radius: 5px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .logout-btn { background: rgba(255, 59, 48, 0.2); color: #ff3b30 !important; border-radius: 8px; padding: 5px 15px !important; }
-        .query-card { background: rgba(255,255,255,0.05); border-left: 4px solid var(--purple); padding: 20px; border-radius: 10px; margin-bottom: 15px; }
+        :root {
+            --primary: #6C63FF;
+            --success: #22C55E;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --bg: #0F0F1A;
+            --card: #1A1A2E;
+            --text: #E2E8F0;
+            --muted: #94A3B8;
+        }
+
+        body {
+            font-family: "Inter", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 16% 16%, rgba(108,99,255,0.16), transparent 28%),
+                radial-gradient(circle at 84% 16%, rgba(34,197,94,0.08), transparent 22%),
+                linear-gradient(180deg, #0F0F1A 0%, #141427 100%);
+        }
+
+        .admin-shell {
+            display: grid;
+            gap: 22px;
+        }
+
+        .admin-hero,
+        .admin-card,
+        .data-panel {
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.07);
+            background: #1A1A2E;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+        }
+
+        .admin-hero {
+            padding: 28px;
+            background: linear-gradient(135deg, rgba(108,99,255,0.14), rgba(26,26,46,0.96));
+        }
+
+        .admin-hero h1 {
+            margin: 0 0 10px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            letter-spacing: -0.04em;
+        }
+
+        .admin-hero p,
+        .data-panel p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .stats-row {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .admin-card {
+            position: relative;
+            padding: 22px;
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .admin-card:hover,
+        .admin-card.active {
+            transform: scale(1.02);
+            border-color: rgba(108,99,255,0.3);
+            background: rgba(108,99,255,0.08);
+        }
+
+        .admin-card::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 3px;
+            border-radius: 0 0 16px 16px;
+            background: var(--accent-color, #6C63FF);
+        }
+
+        .admin-card i {
+            font-size: 24px;
+            color: var(--accent-color, #6C63FF);
+            margin-bottom: 14px;
+        }
+
+        .metric-number {
+            display: block;
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .metric-label {
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        .data-panel {
+            display: none;
+            padding: 24px;
+        }
+
+        .data-panel.active {
+            display: block;
+        }
+
+        .data-panel h2 {
+            margin: 0 0 8px;
+            font-size: 1.35rem;
+            font-weight: 600;
+        }
+
+        .admin-table-wrap,
+        .query-stack {
+            margin-top: 18px;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .admin-table th,
+        .admin-table td {
+            padding: 14px 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            font-size: 14px;
+        }
+
+        .admin-table th {
+            color: var(--muted);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+
+        .user-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 7px 10px;
+            border-radius: 999px;
+            background: rgba(108,99,255,0.12);
+            color: #C4B5FD;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .query-card {
+            padding: 18px;
+            border-radius: 14px;
+            border-left: 3px solid #6C63FF;
+            background: rgba(108,99,255,0.08);
+            margin-bottom: 12px;
+        }
+
+        .query-card textarea {
+            width: 100%;
+            min-height: 100px;
+            margin-top: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+            color: var(--text);
+            padding: 14px 16px;
+            font: inherit;
+            resize: vertical;
+        }
+
+        .primary-btn,
+        .logout-btn {
+            border: none;
+            border-radius: 10px;
+            padding: 10px 22px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .primary-btn {
+            background: #6C63FF;
+            color: white;
+        }
+
+        .logout-btn {
+            background: rgba(239,68,68,0.12);
+            color: #FCA5A5;
+        }
+
+        .primary-btn:hover,
+        .logout-btn:hover {
+            transform: scale(1.03);
+        }
+
+        .empty-state {
+            padding: 26px 16px;
+            text-align: center;
+            color: var(--muted);
+            border-radius: 14px;
+            border: 1px dashed rgba(255,255,255,0.08);
+        }
+
+        @media (max-width: 960px) {
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-table-wrap {
+                overflow-x: auto;
+            }
+        }
     </style>
 </head>
 <body>
@@ -49,56 +253,69 @@
     </nav>
 
     <div class="main-wrapper">
-        <header class="content-header">
-            <h1>Global System Overview</h1>
-            <br>
-            <p>Master Control: Real-time tracking of all users, tasks, and milestones.</p>
-            <br>
-        </header>
+        <section class="admin-shell">
+            <header class="admin-hero">
+                <h1>Global System Overview</h1>
+                <p>Competition-ready admin visibility for all users, tasks, milestones, and support queries in one consistent dashboard.</p>
+            </header>
 
-        <div class="stats-row">
-            <div class="stat-card clickable-card" id="cardUsers" onclick="showPanel('users')">
-                <div class="stat-icon purple"><i class="fas fa-users"></i></div>
-                <div><span class="label">Total Users</span><br><span id="totalUsers" class="value">0</span></div>
-            </div>
-            <div class="stat-card clickable-card" id="cardTasks" onclick="showPanel('tasks')">
-                <div class="stat-icon sky"><i class="fas fa-tasks"></i></div>
-                <div><span class="label">Global Tasks</span><br><span id="totalTasks" class="value">0</span></div>
-            </div>
-            <div class="stat-card clickable-card" id="cardMiles" onclick="showPanel('milestones')">
-                <div class="stat-icon green" style="background: #27ae60;"><i class="fas fa-chart-pie"></i></div>
-                <div><span class="label">Avg. Milestone %</span><br><span id="sysEfficiency" class="value">0%</span></div>
-            </div>
-        </div>
+            <section class="stats-row">
+                <article class="admin-card active" id="cardUsers" style="--accent-color:#6C63FF;" onclick="showPanel('users')">
+                    <i class="fas fa-users"></i>
+                    <span id="totalUsers" class="metric-number">0</span>
+                    <div class="metric-label">Total Users</div>
+                </article>
+                <article class="admin-card" id="cardTasks" style="--accent-color:#22C55E;" onclick="showPanel('tasks')">
+                    <i class="fas fa-tasks"></i>
+                    <span id="totalTasks" class="metric-number">0</span>
+                    <div class="metric-label">Global Tasks</div>
+                </article>
+                <article class="admin-card" id="cardMiles" style="--accent-color:#F59E0B;" onclick="showPanel('milestones')">
+                    <i class="fas fa-chart-line"></i>
+                    <span id="sysEfficiency" class="metric-number">0%</span>
+                    <div class="metric-label">Avg. Milestone %</div>
+                </article>
+            </section>
 
-        <div id="panel-users" class="data-panel panel">
-            <h3>User Directory</h3>
-            <table class="admin-table">
-                <thead><tr><th>User ID</th><th>Email Address</th><th>Role</th></tr></thead>
-                <tbody id="list-users"></tbody>
-            </table>
-        </div>
+            <section id="panel-users" class="data-panel active">
+                <h2>User Directory</h2>
+                <p>Live registry of everyone in the system and their current role.</p>
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead><tr><th>User ID</th><th>Email Address</th><th>Role</th></tr></thead>
+                        <tbody id="list-users"></tbody>
+                    </table>
+                </div>
+            </section>
 
-        <div id="panel-tasks" class="data-panel panel">
-            <h3>Global Task Monitor</h3>
-            <table class="admin-table">
-                <thead><tr><th>User Email</th><th>Task Description</th><th>Status</th></tr></thead>
-                <tbody id="list-tasks"></tbody>
-            </table>
-        </div>
+            <section id="panel-tasks" class="data-panel">
+                <h2>Global Task Monitor</h2>
+                <p>Cross-user task visibility for judging live workload and completion flow.</p>
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead><tr><th>User Email</th><th>Task Description</th><th>Status</th></tr></thead>
+                        <tbody id="list-tasks"></tbody>
+                    </table>
+                </div>
+            </section>
 
-        <div id="panel-milestones" class="data-panel panel">
-            <h3>Performance & Milestones</h3>
-            <table class="admin-table">
-                <thead><tr><th>User Email</th><th>Milestone Name</th><th>Progress</th></tr></thead>
-                <tbody id="list-milestones"></tbody>
-            </table>
-        </div>
+            <section id="panel-milestones" class="data-panel">
+                <h2>Performance and Milestones</h2>
+                <p>High-level project progress across users and long-term objectives.</p>
+                <div class="admin-table-wrap">
+                    <table class="admin-table">
+                        <thead><tr><th>User Email</th><th>Milestone Name</th><th>Progress</th></tr></thead>
+                        <tbody id="list-milestones"></tbody>
+                    </table>
+                </div>
+            </section>
 
-        <div id="panel-queries" class="data-panel panel">
-            <h3>User Support Inbox</h3>
-            <div id="list-queries" style="margin-top: 20px;"></div>
-        </div>
+            <section id="panel-queries" class="data-panel">
+                <h2>User Support Inbox</h2>
+                <p>Review incoming messages and reply directly from the admin portal.</p>
+                <div id="list-queries" class="query-stack"></div>
+            </section>
+        </section>
     </div>
 
     <footer class="site-footer">
@@ -122,67 +339,69 @@
     <script>
         const API_URL = window.getApiBaseUrl();
         let masterData = { users: [], tasks: [], milestones: [] };
-        let userMap = {}; 
+        let userMap = {};
 
         window.onload = async function() {
             const admin = window.requireAdminSession();
             if (!admin) {
                 return;
             }
-            
+
             await loadAllData();
-            // Start by showing the Users panel
-            showPanel('users'); 
+            showPanel('users');
+
+            gsap.from(".admin-hero, .admin-card, .data-panel", {
+                duration: 0.7,
+                y: 26,
+                opacity: 0,
+                stagger: 0.1,
+                ease: "power3.out"
+            });
         };
 
         async function loadAllData() {
             try {
-                // We fetch everything first
                 const [uRes, tRes, mRes] = await Promise.all([
                     fetch(`${API_URL}/auth/users`),
                     fetch(`${API_URL}/tasks/all`),
                     fetch(`${API_URL}/milestones/all`)
                 ]);
-                
+
                 masterData.users = await uRes.json();
                 masterData.tasks = await tRes.json();
                 masterData.milestones = await mRes.json();
 
-                // Build lookup map for Emails (Handles both u.id and u._id)
                 userMap = {};
-                masterData.users.forEach(u => {
-                    const id = u.id || u._id;
-                    if(id) userMap[String(id).trim()] = u.email;
+                masterData.users.forEach((user) => {
+                    const id = user.id || user._id;
+                    if (id) userMap[String(id).trim()] = user.email;
                 });
 
                 document.getElementById('totalUsers').innerText = masterData.users.length;
                 document.getElementById('totalTasks').innerText = masterData.tasks.length;
-                
-                const totalProgress = masterData.milestones.reduce((acc, m) => acc + (m.progress || 0), 0);
-                const avgProgress = masterData.milestones.length > 0 
-                    ? Math.round(totalProgress / masterData.milestones.length) 
+
+                const totalProgress = masterData.milestones.reduce((acc, item) => acc + (item.progress || 0), 0);
+                const avgProgress = masterData.milestones.length > 0
+                    ? Math.round(totalProgress / masterData.milestones.length)
                     : 0;
                 document.getElementById('sysEfficiency').innerText = avgProgress + "%";
 
-                // Refresh all views now that data is definitely here
                 renderUsers();
                 renderTasks();
                 renderMilestones();
-
-            } catch(e) { 
-                console.error("Global Sync Error", e); 
-                Swal.fire('Sync Error', 'Check IntelliJ Console', 'error');
+            } catch (error) {
+                Swal.fire('Sync Error', 'Could not fetch admin dashboard data.', 'error');
             }
         }
 
         function showPanel(type) {
-            document.querySelectorAll('.data-panel').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.clickable-card').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
-            
+            document.querySelectorAll('.data-panel').forEach((panel) => panel.classList.remove('active'));
+            document.querySelectorAll('.admin-card').forEach((card) => card.classList.remove('active'));
+            document.querySelectorAll('.nav-links a').forEach((link) => link.classList.remove('active'));
+
             document.getElementById(`panel-${type}`).classList.add('active');
-            
-            if(type === 'queries') {
+
+            if (type === 'queries') {
                 document.getElementById('nav-queries').classList.add('active');
                 renderQueries();
             } else {
@@ -193,61 +412,44 @@
         }
 
         function renderUsers() {
-            document.getElementById('list-users').innerHTML = masterData.users.map(u => `
+            document.getElementById('list-users').innerHTML = masterData.users.map((user) => `
                 <tr>
-                    <td><code>${(u.id || u._id || 'N/A').substring(0,8)}...</code></td>
-                    <td>${u.email}</td>
-                    <td><span class="user-tag">${u.role || 'USER'}</span></td>
-                </tr>`).join('');
+                    <td><code>${String(user.id || user._id || 'N/A').slice(0, 8)}...</code></td>
+                    <td>${escapeHtml(user.email || 'Unknown')}</td>
+                    <td><span class="user-tag">${escapeHtml(user.role || 'USER')}</span></td>
+                </tr>
+            `).join('');
         }
 
         function renderTasks() {
-            const categoryColors = { 
-                'Study': '#9d50bb', 'Health': '#27ae60', 'Entertainment': '#ff7675', 
-                'Work': '#00d2ff', 'Personal': '#ffb547' 
-            };
             const taskList = document.getElementById('list-tasks');
             const sortedTasks = [...masterData.tasks].reverse();
 
-            taskList.innerHTML = sortedTasks.map(t => {
-                const userIdKey = String(t.userId).trim();
-                const email = userMap[userIdKey] || `<span style="color:#ff7675">ID Mismatch (${userIdKey.substring(0,5)})</span>`;
-                
-                const catName = t.category || "Personal";
-                const catColor = categoryColors[catName] || "#777";
-                const isDone = t.status === 'Completed';
-
+            taskList.innerHTML = sortedTasks.map((task) => {
+                const userIdKey = String(task.userId).trim();
+                const email = userMap[userIdKey] || `Unknown (${userIdKey.slice(0, 5)})`;
+                const isDone = task.status === 'Completed';
                 return `
-                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                        <td><strong style="color:var(--sky-blue); font-size:13px;">${email}</strong></td>
-                        <td>
-                            <span style="background:${catColor}; font-size:9px; padding:2px 7px; border-radius:4px; margin-right:10px; font-weight:bold; text-transform:uppercase; color:white;">${catName}</span>
-                            <span style="color:#eee;">${t.text || t.description || 'No Description'}</span>
-                        </td>
-                        <td style="color:${isDone ? '#27ae60' : '#f1c40f'}">
-                            <i class="fas ${isDone ? 'fa-check-circle' : 'fa-spinner fa-spin'}"></i> 
-                            <span style="font-size:12px; font-weight:bold; margin-left:5px;">${t.status || 'Pending'}</span>
-                        </td>
-                    </tr>`;
+                    <tr>
+                        <td>${escapeHtml(email)}</td>
+                        <td>${escapeHtml(task.text || task.description || 'No description')}</td>
+                        <td style="color:${isDone ? '#86EFAC' : '#FCD34D'};">${escapeHtml(task.status || 'Pending')}</td>
+                    </tr>
+                `;
             }).join('');
         }
 
         function renderMilestones() {
-            document.getElementById('list-milestones').innerHTML = masterData.milestones.map(m => {
-                const userIdKey = String(m.userId).trim();
+            document.getElementById('list-milestones').innerHTML = masterData.milestones.map((milestone) => {
+                const userIdKey = String(milestone.userId).trim();
                 const email = userMap[userIdKey] || 'Unknown User';
-                return `<tr>
-                    <td><strong>${email}</strong></td>
-                    <td>${m.name}</td>
-                    <td>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <div style="flex:1; background:rgba(255,255,255,0.1); height:8px; border-radius:10px; overflow:hidden;">
-                                <div style="width:${m.progress}%; background:linear-gradient(90deg, #00d2ff, #9d50bb); height:100%;"></div>
-                            </div>
-                            <span style="font-weight:bold; color:var(--sky-blue);">${m.progress}%</span>
-                        </div>
-                    </td>
-                </tr>`;
+                return `
+                    <tr>
+                        <td>${escapeHtml(email)}</td>
+                        <td>${escapeHtml(milestone.name || 'Untitled')}</td>
+                        <td>${milestone.progress || 0}%</td>
+                    </tr>
+                `;
             }).join('');
         }
 
@@ -255,31 +457,53 @@
             try {
                 const res = await fetch(`${API_URL}/queries/all`);
                 const queries = await res.json();
-                document.getElementById('list-queries').innerHTML = queries.map(q => `
+                const list = document.getElementById('list-queries');
+
+                if (!Array.isArray(queries) || queries.length === 0) {
+                    list.innerHTML = `<div class="empty-state">No user queries yet.</div>`;
+                    return;
+                }
+
+                list.innerHTML = queries.map((query) => `
                     <div class="query-card">
-                        <strong>From: ${q.userEmail}</strong>
-                        <p>${q.message}</p>
-                        <hr>
-                        ${q.adminReply ? `<p style="color:var(--purple)">Replied: ${q.adminReply}</p>` : 
-                        `<textarea id="replyText-${q.id}" placeholder="Type reply..." style="width:100%; margin-bottom:10px; background:var(--input-bg); color:var(--text-main); border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:8px;"></textarea>
-                         <button onclick="submitReply('${q.id}')" class="btn-primary" style="padding:5px 15px; font-size:12px; border:none; cursor:pointer;">Send Reply</button>`}
-                    </div>`).join('');
-            } catch(e) { console.error(e); }
+                        <strong>From: ${escapeHtml(query.userEmail || 'Unknown')}</strong>
+                        <p style="margin-top:8px;">${escapeHtml(query.message || '')}</p>
+                        ${query.adminReply
+                            ? `<p style="margin-top:12px; color:#C4B5FD;"><strong>Replied:</strong> ${escapeHtml(query.adminReply)}</p>`
+                            : `
+                                <textarea id="replyText-${query.id}" placeholder="Type reply..."></textarea>
+                                <button type="button" class="primary-btn" style="margin-top:12px;" onclick="submitReply('${query.id}')">Send Reply</button>
+                            `}
+                    </div>
+                `).join('');
+            } catch (error) {
+                document.getElementById('list-queries').innerHTML = `<div class="empty-state">Could not load user queries.</div>`;
+            }
         }
 
         async function submitReply(id) {
-            const reply = document.getElementById(`replyText-${id}`).value;
-            if(!reply) return;
+            const reply = document.getElementById(`replyText-${id}`).value.trim();
+            if (!reply) return;
+
             await fetch(`${API_URL}/queries/reply/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ reply: reply })
+                body: JSON.stringify({ reply })
             });
             renderQueries();
         }
 
         function logoutAdmin() {
             window.redirectToLogin();
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
         }
     </script>
 </body>

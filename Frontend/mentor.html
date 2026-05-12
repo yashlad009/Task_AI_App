@@ -307,10 +307,15 @@
         }
 
         .response-shell {
-            min-height: 320px;
+            min-height: 360px;
             display: grid;
             gap: 14px;
             align-content: start;
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.02);
+            overflow: hidden;
         }
 
         .user-bubble {
@@ -337,13 +342,14 @@
 
         .composer {
             display: grid;
-            grid-template-columns: 1fr auto;
+            grid-template-columns: minmax(0, 1fr) 220px;
             gap: 12px;
-            align-items: end;
+            align-items: stretch;
         }
 
         .composer textarea {
             min-height: 110px;
+            height: 100%;
             resize: vertical;
             border-radius: 14px;
             border: 1px solid rgba(255,255,255,0.08);
@@ -359,6 +365,16 @@
 
         .button-column {
             display: grid;
+            gap: 10px;
+            align-content: stretch;
+        }
+
+        .button-column .primary-btn {
+            min-height: 48px;
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             gap: 10px;
         }
 

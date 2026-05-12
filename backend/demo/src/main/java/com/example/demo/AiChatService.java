@@ -33,7 +33,6 @@ public class AiChatService {
     }
 
     public String getChatResponse(String userId, String userMessage) {
-        // 1. Gather User Context
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) {
             return "User not found. Cannot provide personalized advice.";
@@ -41,56 +40,41 @@ public class AiChatService {
         User user = userOpt.get();
 
         List<Task> tasks = taskRepository.findByUserId(userId);
-        List<Milestone> milestones = milestoneRepository.findByUserId(userId);
-        
-        int level = Math.max(1, (user.getTokens() / 100) + 1);
+        List<Task> pendingTasks = tasks.stream()
+                .filter(task -> !isCompleted(task))
+                .toList();
 
-        // 2. Build the Context Prompt
-        StringBuilder context = new StringBuilder();
-        context.append("You are an AI Mentor inside a productivity and task tracking application called 'APMS PRO' or 'TaskTracker'.\n");
-        context.append("Your goal is to provide brief, encouraging, and highly strategic advice for career and task planning based on the user's current level and pending tasks.\n\n");
-        
-        context.append("### User Context:\n");
-        context.append("- **Level:** ").append(level).append("\n");
-        context.append("- **Tokens:** ").append(user.getTokens()).append("\n");
-        context.append("- **Role:** ").append(user.getRole() != null ? user.getRole() : "Standard User").append("\n\n");
+        String taskList = buildPendingTaskList(pendingTasks);
 
-        context.append("### Active Tasks:\n");
-        if (tasks.isEmpty()) {
-            context.append("No active tasks at the moment.\n");
-        } else {
-            for (Task t : tasks) {
-                if (!"Completed".equalsIgnoreCase(t.getStatus())) {
-                    context.append("- ")
-                            .append(t.getText())
-                            .append(" | Priority: ").append(t.getPriority() != null ? t.getPriority() : "Medium")
-                            .append(" | Due: ").append(t.getDueDate() != null && !t.getDueDate().isBlank() ? t.getDueDate() : "No deadline")
-                            .append(" | Status: ").append(t.getStatus())
-                            .append("\n");
-                }
-            }
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("You are a productivity mentor for an engineering student. ");
+        prompt.append("Here are their pending tasks: ").append(taskList).append(". ");
+        prompt.append("Give them a focused, specific 3-point action plan for today. ");
+        prompt.append("Be direct and motivating. Max 80 words. ");
+        prompt.append("Use Markdown bullet points. ");
+        prompt.append("If the user's message adds extra context, incorporate it: ").append(userMessage);
+
+        return callGeminiApi(prompt.toString());
+    }
+
+    private boolean isCompleted(Task task) {
+        return task != null && "Completed".equalsIgnoreCase(task.getStatus());
+    }
+
+    private String buildPendingTaskList(List<Task> pendingTasks) {
+        if (pendingTasks.isEmpty()) {
+            return "No pending tasks right now";
         }
-        context.append("\n");
 
-        context.append("### Active Milestones:\n");
-        if (milestones.isEmpty()) {
-            context.append("No active milestones at the moment.\n");
-        } else {
-            for (Milestone m : milestones) {
-                context.append("- ").append(m.getName()).append(" (Progress: ").append(m.getProgress()).append("%)\n");
-            }
+        StringJoiner joiner = new StringJoiner("; ");
+        for (Task task : pendingTasks) {
+            String title = task.getText() != null && !task.getText().isBlank() ? task.getText() : "Untitled task";
+            String priority = task.getPriority() != null && !task.getPriority().isBlank() ? task.getPriority() : "Medium";
+            String dueDate = task.getDueDate() != null && !task.getDueDate().isBlank() ? task.getDueDate() : "No deadline";
+            joiner.add(title + " [Priority: " + priority + ", Deadline: " + dueDate + "]");
         }
-        context.append("\n");
 
-        context.append("### User Query:\n");
-        context.append(userMessage).append("\n\n");
-
-        context.append("### Instructions:\n");
-        context.append("You are a productivity mentor for an engineering student. Here are their pending tasks with priorities and deadlines. ");
-        context.append("Give them a focused, specific 3-point action plan for today. Be direct and motivating. Max 80 words. Format the answer in Markdown bullet points.");
-
-        // 3. Call Gemini API
-        return callGeminiApi(context.toString());
+        return joiner.toString();
     }
 
     private String callGeminiApi(String prompt) {

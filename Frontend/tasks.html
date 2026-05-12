@@ -2,82 +2,275 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Daily Planning | APMS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Planning | APMS PRO</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script>
         (function() {
             const savedTheme = localStorage.getItem('apms-theme') || 'dark';
             document.documentElement.setAttribute('data-theme', savedTheme);
         })();
     </script>
-    <script>
-        document.addEventListener('mousemove', function(e) {
-            document.body.style.setProperty('--mouse-x', (e.clientX / window.innerWidth) * 100 + '%');
-            document.body.style.setProperty('--mouse-y', (e.clientY / window.innerHeight) * 100 + '%');
-        });
-    </script>
     <script src="app-config.js"></script>
     <script src="theme.js" defer></script>
     <script src="network-theme.js" defer></script>
     <style>
-        /* Category Card Grid */
+        :root {
+            --primary: #6C63FF;
+            --success: #22C55E;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --bg: #0F0F1A;
+            --card: #1A1A2E;
+            --text: #E2E8F0;
+            --muted: #94A3B8;
+        }
+
+        body {
+            font-family: "Inter", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 12% 18%, rgba(108, 99, 255, 0.14), transparent 28%),
+                radial-gradient(circle at 88% 12%, rgba(34, 197, 94, 0.08), transparent 20%),
+                linear-gradient(180deg, #0F0F1A 0%, #141427 100%);
+        }
+
+        .planner-shell {
+            display: grid;
+            gap: 22px;
+        }
+
+        .planner-hero {
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.07);
+            background: linear-gradient(135deg, rgba(108,99,255,0.14), rgba(26,26,46,0.96));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+            padding: 28px;
+        }
+
+        .planner-hero h1 {
+            margin: 0 0 10px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            letter-spacing: -0.04em;
+        }
+
+        .planner-hero p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.7;
+            max-width: 64ch;
+        }
+
+        .planner-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 22px;
+            align-items: start;
+        }
+
+        .planner-card {
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.07);
+            background: #1A1A2E;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+            padding: 24px;
+        }
+
+        .planner-card h2 {
+            margin: 0 0 8px;
+            font-size: 1.35rem;
+            font-weight: 600;
+        }
+
+        .planner-card p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
         .category-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 20px;
         }
 
         .cat-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border);
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(255,255,255,0.03);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+            padding: 18px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .cat-card:hover,
+        .cat-card.active {
+            background: rgba(108,99,255,0.12);
+            border-color: rgba(108,99,255,0.32);
+            transform: scale(1.03);
         }
 
         .cat-card i {
-            font-size: 24px;
+            font-size: 20px;
             margin-bottom: 10px;
+        }
+
+        .cat-card strong {
             display: block;
+            margin-bottom: 4px;
+            font-size: 15px;
+            font-weight: 600;
         }
 
         .cat-card span {
+            color: var(--muted);
             font-size: 13px;
-            font-weight: 600;
-            color: var(--text-dim);
         }
 
-        /* Active State for Cards */
-        .cat-card.active {
-            background: rgba(0, 210, 255, 0.1);
-            border-color: var(--sky-blue);
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 210, 255, 0.2);
-        }
-
-        .cat-card.active span { color: #fff; }
-
-        /* Badge in Table */
-        .category-badge {
-            font-size: 10px;
-            font-weight: bold;
-            padding: 4px 10px;
-            border-radius: 6px;
-            text-transform: uppercase;
-            margin-right: 12px;
-            display: inline-block;
-        }
-
-        .task-meta-grid {
+        .planner-form {
             display: grid;
-            grid-template-columns: 1.4fr 0.8fr 0.9fr auto;
+            gap: 14px;
+            margin-top: 22px;
+        }
+
+        .planner-form input,
+        .planner-form select {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+            color: var(--text);
+            padding: 14px 16px;
+            font: inherit;
+        }
+
+        .planner-form input::placeholder {
+            color: var(--muted);
+        }
+
+        .planner-form button {
+            justify-self: start;
+        }
+
+        .primary-btn {
+            background: #6C63FF;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 22px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .primary-btn:hover {
+            background: #5A52E0;
+            transform: scale(1.03);
+        }
+
+        .task-stack {
+            margin-top: 18px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .task-row {
+            position: relative;
+            display: grid;
+            grid-template-columns: 1fr auto auto;
             gap: 12px;
             align-items: center;
+            padding: 16px 18px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.03);
+            overflow: hidden;
+        }
+
+        .task-row::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--priority-color, var(--primary));
+        }
+
+        .task-main strong {
+            display: block;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .task-meta {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .task-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 12px;
+            min-width: 86px;
+            border-radius: 999px;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            background: var(--priority-color, var(--primary));
+        }
+
+        .task-delete {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.04);
+            color: var(--text);
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .task-delete:hover {
+            background: rgba(239,68,68,0.16);
+            transform: scale(1.03);
+        }
+
+        .empty-state {
+            padding: 26px 16px;
+            text-align: center;
+            color: var(--muted);
+            border-radius: 14px;
+            border: 1px dashed rgba(255,255,255,0.08);
+        }
+
+        @media (max-width: 980px) {
+            .planner-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .category-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .task-row {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -85,7 +278,7 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <img src="apms3.png" alt="APMS PRO Logo" style="height: 90px; margin-right: 10px; vertical-align: middle;">
+                <img src="apms3.png" alt="APMS PRO Logo" style="height: 72px; margin-right: 10px; vertical-align: middle;">
                 Task<span>Tracker</span>
             </div>
             <ul class="nav-links">
@@ -101,65 +294,59 @@
     </nav>
 
     <div class="main-wrapper">
-        <header class="content-header">
-            <h1>Daily Planning</h1>
-            <br>
-            <p>Select a category and add your tasks below.</p>
-            <br>
-        </header>
+        <section class="planner-shell">
+            <header class="planner-hero">
+                <h1>Plan the day before the day controls you.</h1>
+                <p>Pick a category, assign a deadline, choose a priority, and keep the rest of APMS PRO fed with cleaner task data for analytics, reminders, and AI Mentor guidance.</p>
+            </header>
 
-        <div class="category-grid">
-            <div class="cat-card active" onclick="selectCategory(this, 'Study')">
-                <i class="fas fa-book" style="color: #9d50bb;"></i>
-                <span>Study</span>
-            </div>
-            <div class="cat-card" onclick="selectCategory(this, 'Health')">
-                <i class="fas fa-heartbeat" style="color: #27ae60;"></i>
-                <span>Health</span>
-            </div>
-            <div class="cat-card" onclick="selectCategory(this, 'Entertainment')">
-                <i class="fas fa-film" style="color: #ff7675;"></i>
-                <span>Fun</span>
-            </div>
-            <div class="cat-card" onclick="selectCategory(this, 'Work')">
-                <i class="fas fa-briefcase" style="color: #00d2ff;"></i>
-                <span>Work</span>
-            </div>
-            <div class="cat-card" onclick="selectCategory(this, 'Personal')">
-                <i class="fas fa-home" style="color: #ffb547;"></i>
-                <span>Personal</span>
-            </div>
-        </div>
+            <section class="planner-grid">
+                <article class="planner-card">
+                    <h2>Task Composer</h2>
+                    <p>Choose where this task belongs, then add the deadline and urgency so your dashboard and AI advice stay accurate.</p>
 
-        <div class="panel" style="margin-bottom: 30px;">
-            <div class="task-meta-grid">
-                <input type="text" id="taskInput" placeholder="Add Study task..." style="padding: 12px; border-radius: 10px; border: 1px solid var(--glass-border); background: var(--input-bg); color: var(--text-main);">
-                <input type="date" id="taskDueDate" style="padding: 12px; border-radius: 10px; border: 1px solid var(--glass-border); background: var(--input-bg); color: var(--text-main);">
-                <select id="taskPriority" style="padding: 12px; border-radius: 10px; border: 1px solid var(--glass-border); background: var(--input-bg); color: var(--text-main);">
-                    <option value="High">High Priority</option>
-                    <option value="Medium" selected>Medium Priority</option>
-                    <option value="Low">Low Priority</option>
-                </select>
-                <button onclick="addTask()" class="btn-primary" style="width: 150px;">Add Task</button>
-            </div>
-        </div>
+                    <div class="category-grid">
+                        <button class="cat-card active" type="button" onclick="selectCategory(this, 'Study')">
+                            <i class="fas fa-book" style="color:#6C63FF;"></i>
+                            <strong>Study</strong>
+                            <span>Assignments, revision, practicals</span>
+                        </button>
+                        <button class="cat-card" type="button" onclick="selectCategory(this, 'Health')">
+                            <i class="fas fa-heart-pulse" style="color:#22C55E;"></i>
+                            <strong>Health</strong>
+                            <span>Sleep, exercise, well-being</span>
+                        </button>
+                        <button class="cat-card" type="button" onclick="selectCategory(this, 'Work')">
+                            <i class="fas fa-briefcase" style="color:#F59E0B;"></i>
+                            <strong>Work</strong>
+                            <span>Project tasks and coordination</span>
+                        </button>
+                        <button class="cat-card" type="button" onclick="selectCategory(this, 'Personal')">
+                            <i class="fas fa-house" style="color:#EF4444;"></i>
+                            <strong>Personal</strong>
+                            <span>Life admin and personal plans</span>
+                        </button>
+                    </div>
 
-        <div class="panel">
-            <h3>Today's Track</h3>
-            <table class="task-table" style="width: 100%;">
-                <thead>
-                    <tr style="text-align: left; color: var(--sky-blue); font-size: 12px;">
-                        <th style="padding: 10px;">Planned Task</th>
-                        <th>Deadline</th>
-                        <th>Priority</th>
-                        <th style="text-align: center;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="planning-list">
-                    <tr><td colspan="4" style="text-align: center; padding: 20px;">Loading tasks...</td></tr>
-                </tbody>
-            </table>
-        </div>
+                    <div class="planner-form">
+                        <input type="text" id="taskInput" placeholder="Add Study task...">
+                        <input type="date" id="taskDueDate">
+                        <select id="taskPriority">
+                            <option value="High">High Priority</option>
+                            <option value="Medium" selected>Medium Priority</option>
+                            <option value="Low">Low Priority</option>
+                        </select>
+                        <button type="button" class="primary-btn" onclick="addTask()">Add Task</button>
+                    </div>
+                </article>
+
+                <article class="planner-card">
+                    <h2>Today’s Track</h2>
+                    <p>Your live planning queue. Priority color follows the same competition-ready design language used on the dashboard.</p>
+                    <div id="planning-list" class="task-stack"></div>
+                </article>
+            </section>
+        </section>
     </div>
 
     <footer class="site-footer">
@@ -180,126 +367,168 @@
         </div>
     </footer>
 
-<script>
-    const API_URL = window.getApiBaseUrl();
-    let selectedCategory = "Study"; 
+    <script>
+        const API_URL = window.getApiBaseUrl();
+        let selectedCategory = "Study";
 
-    const categoryColors = {
-        'Study': '#9d50bb', 'Health': '#27ae60', 'Entertainment': '#ff7675', 
-        'Work': '#00d2ff', 'Personal': '#ffb547'
-    };
+        const categoryCopy = {
+            Study: "Assignments, revision, practicals",
+            Health: "Sleep, exercise, well-being",
+            Work: "Project tasks and coordination",
+            Personal: "Life admin and personal plans"
+        };
 
-    // --- GATEKEEPER LOGIC (BREAKS THE LOOP) ---
-    window.onload = function() {
-        const user = window.requireUserSession();
-        if (!user) { 
-            return; 
+        const priorityColors = {
+            High: "#EF4444",
+            Medium: "#F59E0B",
+            Low: "#22C55E"
+        };
+
+        window.onload = function() {
+            const user = window.requireUserSession();
+            if (!user) {
+                return;
+            }
+            displayTasks();
+            gsap.from(".planner-hero, .planner-card", {
+                duration: 0.7,
+                y: 26,
+                opacity: 0,
+                stagger: 0.12,
+                ease: "power3.out"
+            });
+        };
+
+        function selectCategory(element, category) {
+            document.querySelectorAll(".cat-card").forEach((card) => card.classList.remove("active"));
+            element.classList.add("active");
+            selectedCategory = category;
+            document.getElementById("taskInput").placeholder = `Add ${category} task...`;
         }
-        displayTasks();
-    };
 
-    function selectCategory(element, catName) {
-        document.querySelectorAll('.cat-card').forEach(card => card.classList.remove('active'));
-        element.classList.add('active');
-        selectedCategory = catName;
-        document.getElementById('taskInput').placeholder = `Add ${catName} task...`;
-    }
+        async function displayTasks() {
+            const user = window.requireUserSession();
+            if (!user) return;
 
-    async function displayTasks() {
-        const user = window.requireUserSession();
-        if (!user) return;
-        const userId = user.id || user._id; // Bulletproof ID
-        const table = document.getElementById('planning-list');
+            const userId = user.id || user._id;
+            const list = document.getElementById("planning-list");
 
-        try {
-            const response = await fetch(`${API_URL}/tasks/user/${userId}`);
-            const tasks = await response.json();
-            
-            if (!tasks || tasks.length === 0) {
-                table.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px; color:gray;">No tasks yet. Select a category and add one!</td></tr>`;
+            try {
+                const response = await fetch(`${API_URL}/tasks/user/${userId}`);
+                const tasks = await response.json();
+
+                if (!Array.isArray(tasks) || tasks.length === 0) {
+                    list.innerHTML = `<div class="empty-state">No tasks yet. Start with one focused win.</div>`;
+                    return;
+                }
+
+                list.innerHTML = tasks.slice().reverse().map((task) => {
+                    const priority = task.priority || "Medium";
+                    const priorityColor = priorityColors[priority] || "#6C63FF";
+                    const due = task.dueDate || "No due date";
+                    const category = task.category || selectedCategory;
+                    const title = escapeHtml(task.text || task.description || "Untitled task");
+
+                    return `
+                        <div class="task-row" style="--priority-color:${priorityColor};">
+                            <div class="task-main">
+                                <strong>${title}</strong>
+                                <div class="task-meta">${escapeHtml(category)} • Due ${escapeHtml(due)}</div>
+                            </div>
+                            <span class="task-pill" style="--priority-color:${priorityColor};">${escapeHtml(priority)}</span>
+                            <button class="task-delete" type="button" onclick="deleteTask('${task.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                }).join("");
+
+                gsap.from(".task-row", {
+                    duration: 0.4,
+                    x: -30,
+                    opacity: 0,
+                    stagger: 0.08,
+                    ease: "power2.out"
+                });
+            } catch (error) {
+                list.innerHTML = `<div class="empty-state">Task sync failed. Please check the backend connection.</div>`;
+            }
+        }
+
+        async function addTask() {
+            const input = document.getElementById("taskInput");
+            const dueDate = document.getElementById("taskDueDate").value;
+            const priority = document.getElementById("taskPriority").value;
+            const value = input.value.trim();
+            const user = window.requireUserSession();
+
+            if (!user || !value) {
                 return;
             }
 
-            table.innerHTML = tasks.reverse().map(t => {
-                const catName = t.category || 'Study';
-                const catColor = categoryColors[catName] || '#777';
-                const priority = t.priority || 'Medium';
-                const priorityColor = priority === 'High' ? '#ef4444' : priority === 'Low' ? '#22c55e' : '#f59e0b';
-                
-                return `
-                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <td style="padding:15px;">
-                        <span class="category-badge" style="background: ${catColor}; color: white;">${catName}</span>
-                        <span style="color: var(--text-main);">${t.text || t.description}</span>
-                    </td>
-                    <td style="color: var(--text-dim);">${t.dueDate || 'No due date'}</td>
-                    <td><span class="category-badge" style="background:${priorityColor}; color:white;">${priority}</span></td>
-                    <td style="text-align:center;">
-                        <button onclick="deleteTask('${t.id}')" style="background:none; border:none; color:#ff7675; cursor:pointer; font-size:16px;">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            `}).join('');
-        } catch (err) { 
-            table.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px; color:#ff7675;">Sync Error. Check Backend.</td></tr>`;
-        }
-    }
+            const userId = user.id || user._id;
+            const taskData = {
+                text: value,
+                category: selectedCategory,
+                priority,
+                dueDate,
+                status: "Pending",
+                userId
+            };
 
-    async function addTask() {
-        const val = document.getElementById('taskInput').value;
-        const dueDate = document.getElementById('taskDueDate').value;
-        const priority = document.getElementById('taskPriority').value;
-        const user = window.requireUserSession();
-        if (!user || !val) return;
-
-        const userId = user.id || user._id;
-
-        const taskData = {
-            text: val,
-            category: selectedCategory,
-            priority: priority,
-            dueDate: dueDate,
-            status: "Pending",
-            userId: userId 
-        };
-
-        try {
-            const response = await fetch(`${API_URL}/tasks/add`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(taskData)
-            });
-            if (response.ok) {
-                document.getElementById('taskInput').value = "";
-                document.getElementById('taskDueDate').value = "";
-                document.getElementById('taskPriority').value = "Medium";
-                displayTasks();
-            }
-        } catch (err) { 
-            Swal.fire('Error', 'Failed to save task', 'error'); 
-        }
-    }
-
-    async function deleteTask(id) {
-        const result = await Swal.fire({
-            title: 'Delete Task?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ff7675',
-            background: '#1a1a2e',
-            color: '#fff'
-        });
-
-        if (result.isConfirmed) {
             try {
-                const response = await fetch(`${API_URL}/tasks/${id}`, { method: 'DELETE' });
-                if (response.ok) displayTasks();
-            } catch (err) { 
-                console.error(err); 
+                const response = await fetch(`${API_URL}/tasks/add`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(taskData)
+                });
+
+                if (!response.ok) {
+                    throw new Error("Task save failed");
+                }
+
+                input.value = "";
+                document.getElementById("taskDueDate").value = "";
+                document.getElementById("taskPriority").value = "Medium";
+                await displayTasks();
+            } catch (error) {
+                Swal.fire("Error", "Failed to save task.", "error");
             }
         }
-    }
-</script>
+
+        async function deleteTask(id) {
+            const result = await Swal.fire({
+                title: "Delete task?",
+                text: "This task will be removed from your planning queue.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Delete",
+                confirmButtonColor: "#EF4444",
+                background: "#1A1A2E",
+                color: "#E2E8F0"
+            });
+
+            if (!result.isConfirmed) return;
+
+            try {
+                const response = await fetch(`${API_URL}/tasks/${id}`, { method: "DELETE" });
+                if (!response.ok) {
+                    throw new Error("Delete failed");
+                }
+                await displayTasks();
+            } catch (error) {
+                Swal.fire("Error", "Task deletion failed.", "error");
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#39;");
+        }
+    </script>
 </body>
 </html>
