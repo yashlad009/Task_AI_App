@@ -2,101 +2,216 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Analytics | APMS PRO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Progress | APMS PRO</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script>
         (function() {
             const savedTheme = localStorage.getItem('apms-theme') || 'dark';
             document.documentElement.setAttribute('data-theme', savedTheme);
         })();
     </script>
-    <script>
-        document.addEventListener('mousemove', function(e) {
-            document.body.style.setProperty('--mouse-x', (e.clientX / window.innerWidth) * 100 + '%');
-            document.body.style.setProperty('--mouse-y', (e.clientY / window.innerHeight) * 100 + '%');
-        });
-    </script>
     <script src="app-config.js"></script>
     <script src="theme.js" defer></script>
     <script src="network-theme.js" defer></script>
     <style>
-        /* Interactive Tab Styling */
-        .analytics-tabs {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 25px;
+        body {
+            font-family: 'Inter', sans-serif;
+            background:
+                radial-gradient(circle at 15% 12%, rgba(108, 99, 255, 0.14), transparent 28%),
+                linear-gradient(180deg, #0F0F1A 0%, #141427 100%);
+            color: #E2E8F0;
         }
 
-        .tab-btn {
-            flex: 1;
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.05);
-            color: var(--text-main);
-            cursor: pointer;
-            font-weight: 600;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+        .progress-shell {
+            display: grid;
+            gap: 22px;
         }
 
-        .tab-btn.active {
-            background: linear-gradient(135deg, var(--sky-blue), var(--purple));
-            border: none;
-            box-shadow: 0 5px 15px rgba(0, 210, 255, 0.3);
+        .progress-header h1 {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 10px;
         }
 
-        .chart-container {
-            display: flex; 
-            align-items: flex-end; 
-            justify-content: space-around; 
-            height: 350px; 
-            padding: 40px 30px 20px 30px; 
-            background: var(--glass-panel-strong); 
-            border-radius: 20px; 
-            border: 1px solid var(--glass-border);
-            margin-top: 10px;
-        }
-        
-        .bar-label {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-dim);
-            margin-top: 15px;
-            text-align: center;
+        .progress-header p {
+            color: #94A3B8;
+            font-size: 15px;
         }
 
-        .bar-value {
-            color: var(--text-main);
-            font-weight: 800;
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .stat-card {
+            position: relative;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.07);
+            background: #1A1A2E;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+            padding: 22px;
+        }
+
+        .stat-card::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 3px;
+            border-radius: 0 0 16px 16px;
+            background: var(--accent-color, #6C63FF);
+        }
+
+        .stat-card i {
+            font-size: 24px;
+            color: var(--accent-color, #6C63FF);
+            margin-bottom: 16px;
+        }
+
+        .metric-number {
+            font-size: 28px;
+            font-weight: 700;
+            display: block;
             margin-bottom: 8px;
+        }
+
+        .metric-label {
+            color: #94A3B8;
+            font-size: 15px;
+        }
+
+        .progress-grid {
+            display: grid;
+            grid-template-columns: 1.35fr 0.9fr;
+            gap: 22px;
+            align-items: start;
+        }
+
+        .panel-card {
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.07);
+            background: #1A1A2E;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+            padding: 24px;
+        }
+
+        .panel-card h2 {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .panel-card p {
+            color: #94A3B8;
+            font-size: 15px;
+            margin-bottom: 18px;
+        }
+
+        #progress-chart {
+            position: relative;
+            min-height: 360px;
+        }
+
+        .streak-row {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .streak-day {
+            display: grid;
+            justify-items: center;
+            gap: 12px;
+        }
+
+        .streak-bubble {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            border: 2px solid rgba(148, 163, 184, 0.25);
+            display: grid;
+            place-items: center;
+            color: #94A3B8;
+            font-weight: 600;
+            background: rgba(255,255,255,0.03);
+        }
+
+        .streak-bubble.completed {
+            background: #22C55E;
+            border-color: #22C55E;
+            color: white;
+        }
+
+        .streak-bubble.today {
+            border-color: #6C63FF;
+            color: #E2E8F0;
+            animation: pulse 1.8s infinite;
+        }
+
+        .streak-copy {
+            color: #94A3B8;
+            font-size: 13px;
+        }
+
+        .insight-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .insight-card {
+            padding: 16px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .insight-card strong {
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .insight-card span {
+            color: #94A3B8;
             font-size: 14px;
-            text-shadow: 0 0 10px rgba(0,0,0,0.5);
-            transition: 0.8s;
+            line-height: 1.6;
         }
 
-        .viz-bar {
-            width: 75px; 
-            height: 5px; 
-            border-radius: 10px 10px 0 0; 
-            transition: all 0.8s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(108,99,255,0.5); }
+            50% { box-shadow: 0 0 0 8px rgba(108,99,255,0); }
         }
 
-        #bar1 { box-shadow: 0 0 20px rgba(157, 80, 187, 0.5); }
-        #bar2 { box-shadow: 0 0 20px rgba(39, 174, 96, 0.5); }
-        #bar3 { box-shadow: 0 0 20px rgba(0, 210, 255, 0.5); }
+        @media (max-width: 1024px) {
+            .overview-grid,
+            .progress-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .streak-row {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+        }
     </style>
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <img src="apms3.png" alt="APMS PRO Logo" style="height: 90px; margin-right: 10px; vertical-align: middle;">
+                <img src="apms3.png" alt="APMS PRO Logo" style="height: 72px; margin-right: 10px; vertical-align: middle;">
                 Task<span>Tracker</span>
             </div>
             <ul class="nav-links">
@@ -112,61 +227,56 @@
     </nav>
 
     <div class="main-wrapper">
-        <header class="content-header">
-            <h1>Performance Analytics</h1>
-            <br>
-            <p>Visual data tracking for your tasks and milestones.</p>
-            <br>
-        </header>
+        <section class="progress-shell">
+            <header class="progress-header">
+                <h1>My Progress</h1>
+                <p>Your last 7 days, your consistency pattern, and the momentum you are building right now.</p>
+            </header>
 
-        <div class="stats-row">
-            <div class="stat-card">
-                <div class="stat-icon purple"><i class="fas fa-chart-line"></i></div>
-                <div><span class="label">Efficiency</span><br><span id="taskRate" class="value">0%</span></div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon sky"><i class="fas fa-tasks"></i></div>
-                <div><span class="label">Pending</span><br><span id="pendingCount" class="value">0</span></div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon green" style="background: #27ae60;"><i class="fas fa-trophy" style="color:white"></i></div>
-                <div><span class="label">Milestones</span><br><span id="totalMilestones" class="value">0</span></div>
-            </div>
-        </div>
+            <section class="overview-grid">
+                <article class="stat-card" style="--accent-color:#6C63FF;">
+                    <i class="fas fa-calendar-week"></i>
+                    <span id="weeklyComplete" class="metric-number">0</span>
+                    <div class="metric-label">Tasks finished this week</div>
+                </article>
+                <article class="stat-card" style="--accent-color:#22C55E;">
+                    <i class="fas fa-chart-line"></i>
+                    <span id="weeklyEfficiency" class="metric-number">0</span>
+                    <div class="metric-label">Weekly completion rate</div>
+                </article>
+                <article class="stat-card" style="--accent-color:#F59E0B;">
+                    <i class="fas fa-fire"></i>
+                    <span id="weeklyStreak" class="metric-number">0</span>
+                    <div class="metric-label">Current consistency streak</div>
+                </article>
+            </section>
 
-        <div class="analytics-tabs">
-            <button class="tab-btn active" id="tabTasks" onclick="switchView('tasks')">
-                <i class="fas fa-list-check"></i> Task Analysis
-            </button>
-            <button class="tab-btn" id="tabMilestones" onclick="switchView('milestones')">
-                <i class="fas fa-flag-checkered"></i> Milestone Analysis
-            </button>
-        </div>
+            <section class="progress-grid">
+                <article class="panel-card">
+                    <h2>Completion Rhythm</h2>
+                    <p>Tasks completed per day over the last seven days.</p>
+                    <div id="progress-chart">
+                        <canvas id="taskChart"></canvas>
+                    </div>
+                </article>
 
-        <div class="panel">
-            <h3 id="vizTitle">Task Productivity</h3>
-            <p id="vizDesc" style="margin-bottom: 20px;">Comparison of total vs completed tasks.</p>
-            
-            <div class="chart-container">
-                <div style="display: flex; flex-direction: column; align-items: center;">
-                    <span id="val1" class="bar-value">0</span>
-                    <div id="bar1" class="viz-bar" style="background: var(--purple);"></div>
-                    <span class="bar-label" id="label1">Total Tasks</span>
-                </div>
-                
-                <div style="display: flex; flex-direction: column; align-items: center;">
-                    <span id="val2" class="bar-value">0</span>
-                    <div id="bar2" class="viz-bar" style="background: #27ae60;"></div>
-                    <span class="bar-label" id="label2">Completed</span>
-                </div>
-                
-                <div style="display: flex; flex-direction: column; align-items: center;">
-                    <span id="val3" class="bar-value" style="color: var(--sky-blue);">0%</span>
-                    <div id="bar3" class="viz-bar" style="background: var(--sky-blue);"></div>
-                    <span class="bar-label" id="label3">Efficiency %</span>
-                </div>
-            </div>
-        </div>
+                <aside class="panel-card">
+                    <h2>Streak Tracker</h2>
+                    <p>Keep the chain alive. Green means done, purple pulse means today still needs work.</p>
+                    <div id="streakRow" class="streak-row"></div>
+                    <div class="insight-list" style="margin-top:22px;">
+                        <div class="insight-card">
+                            <strong id="insightPrimary">No data yet</strong>
+                            <span id="insightSecondary">Start completing tasks with deadlines to unlock richer analytics.</span>
+                        </div>
+                        <div class="insight-card">
+                            <strong>Milestone Snapshot</strong>
+                            <span id="milestoneInsight">We are still fetching your milestone progress.</span>
+                        </div>
+                    </div>
+                </aside>
+            </section>
+        </section>
     </div>
 
     <footer class="site-footer">
@@ -189,93 +299,218 @@
 
     <script>
         const API_URL = window.getApiBaseUrl();
-        let cachedStats = null;
-        let cachedMilestones = [];
+        let progressChart = null;
 
-        window.onload = function() {
+        window.onload = async function() {
             const user = window.requireUserSession();
-            if (!user) {
-                return;
-            }
-            const userId = user.id || user._id; // Bulletproof ID mapping
-            loadData(userId);
+            if (!user) return;
+            await loadProgress(user.id || user._id);
         };
 
-        async function loadData(userId) {
+        async function loadProgress(userId) {
             try {
-                const [statsRes, milesRes] = await Promise.all([
-                    fetch(`${API_URL}/analytics/user/${userId}`),
+                const [taskRes, milestoneRes] = await Promise.all([
+                    fetch(`${API_URL}/tasks/user/${userId}`),
                     fetch(`${API_URL}/milestones/user/${userId}`)
                 ]);
-                
-                cachedStats = await statsRes.json();
-                cachedMilestones = await milesRes.json();
 
-                document.getElementById('taskRate').innerText = (cachedStats.efficiency || 0) + "%";
-                document.getElementById('pendingCount').innerText = cachedStats.pending || 0;
-                document.getElementById('totalMilestones').innerText = cachedMilestones.length;
+                if (!taskRes.ok || !milestoneRes.ok) {
+                    throw new Error('Progress data failed');
+                }
 
-                switchView('tasks');
-            } catch (err) { 
-                console.error("Data fetch failed", err); 
+                const tasks = await taskRes.json();
+                const milestones = await milestoneRes.json();
+
+                const chartData = buildWeeklyCompletionData(tasks);
+                renderStats(chartData);
+                renderChart(chartData);
+                renderStreakRow(chartData);
+                renderInsights(chartData, milestones);
+                animateSections();
+            } catch (error) {
+                document.getElementById('progress-chart').innerHTML = `<p style="color:#94A3B8;">Progress analytics are unavailable right now.</p>`;
             }
         }
 
-        function switchView(mode) {
-            const tTab = document.getElementById('tabTasks');
-            const mTab = document.getElementById('tabMilestones');
-            const title = document.getElementById('vizTitle');
-            const desc = document.getElementById('vizDesc');
-
-            if (mode === 'tasks') {
-                tTab.classList.add('active');
-                mTab.classList.remove('active');
-                title.innerText = "Task Productivity";
-                desc.innerText = "Real-time tracking of task volume vs completion.";
-                
-                updateVisuals(cachedStats.total || 0, cachedStats.completed || 0, cachedStats.efficiency || 0, "Tasks");
-            } else {
-                mTab.classList.add('active');
-                tTab.classList.remove('active');
-                title.innerText = "Milestone Achievements";
-                desc.innerText = "Comparing total milestones created vs fully finished goals.";
-                
-                const finished = cachedMilestones.filter(m => m.progress === 100).length;
-                const avgProgress = cachedMilestones.length > 0 
-                    ? (cachedMilestones.reduce((acc, m) => acc + (m.progress || 0), 0) / cachedMilestones.length) 
-                    : 0;
-                
-                updateVisuals(cachedMilestones.length, finished, Math.round(avgProgress), "Milestones");
+        function buildWeeklyCompletionData(tasks) {
+            const today = startOfToday();
+            const days = [];
+            for (let i = 6; i >= 0; i -= 1) {
+                const day = new Date(today);
+                day.setDate(today.getDate() - i);
+                days.push(day);
             }
+
+            const completedTasks = tasks.filter((task) => (task.status || '').toLowerCase() === 'completed' && task.completedAt);
+            const completedByDay = new Map();
+
+            completedTasks.forEach((task) => {
+                const key = startOfDayKey(task.completedAt);
+                completedByDay.set(key, (completedByDay.get(key) || 0) + 1);
+            });
+
+            return days.map((day) => {
+                const key = startOfDayKey(day);
+                return {
+                    key,
+                    label: day.toLocaleDateString('en-US', { weekday: 'short' }),
+                    count: completedByDay.get(key) || 0,
+                    isToday: key === startOfDayKey(today)
+                };
+            });
         }
 
-        function updateVisuals(v1, v2, v3, labelType) {
-            document.getElementById('val1').innerText = v1;
-            document.getElementById('val2').innerText = v2;
-            document.getElementById('val3').innerText = v3 + "%";
+        function renderStats(chartData) {
+            const totalCompleted = chartData.reduce((sum, day) => sum + day.count, 0);
+            const activeDays = chartData.filter((day) => day.count > 0).length;
+            const efficiency = Math.round((activeDays / chartData.length) * 100);
+            const streak = calculateWeeklyStreak(chartData);
 
-            document.getElementById('label1').innerText = `Total ${labelType}`;
-            document.getElementById('label2').innerText = `Completed`;
-            document.getElementById('label3').innerText = labelType === "Tasks" ? "Efficiency %" : "Avg Progress %";
+            animateMetric('weeklyComplete', totalCompleted);
+            animateMetric('weeklyEfficiency', efficiency);
+            animateMetric('weeklyStreak', streak);
 
-            const b1 = document.getElementById('bar1');
-            const b2 = document.getElementById('bar2');
-            const b3 = document.getElementById('bar3');
-
-            // Scaling logic for bars
-            const h1 = Math.min(v1 * 10, 250); // Scale total count
-            const h2 = Math.min(v2 * 10, 250); // Scale completed count
-            const h3 = (v3 / 100) * 250;      // Efficiency is always % of 250px
-
-            b1.style.height = (v1 > 0 ? h1 : 5) + "px";
-            b2.style.height = (v2 > 0 ? h2 : 5) + "px";
-            b3.style.height = (v3 > 0 ? h3 : 5) + "px";
-
-            b1.style.background = (labelType === "Tasks") ? "var(--purple)" : "#f1c40f"; 
+            document.getElementById('weeklyEfficiency').dataset.suffix = '%';
+            document.getElementById('weeklyStreak').dataset.suffix = ' days';
         }
 
-        function logoutUser() {
-            window.redirectToLogin();
+        function renderChart(chartData) {
+            const ctx = document.getElementById('taskChart').getContext('2d');
+            if (progressChart) {
+                progressChart.destroy();
+            }
+
+            progressChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.map((day) => day.label),
+                    datasets: [{
+                        data: chartData.map((day) => day.count),
+                        backgroundColor: '#6C63FF',
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: '#94A3B8',
+                                font: { family: 'Inter', size: 12 }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: {
+                                color: '#94A3B8',
+                                font: { family: 'Inter', size: 12 },
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderStreakRow(chartData) {
+            const row = document.getElementById('streakRow');
+            row.innerHTML = chartData.map((day) => {
+                const stateClass = day.count > 0 ? 'completed' : (day.isToday ? 'today' : '');
+                const icon = day.count > 0 ? '<i class="fas fa-check"></i>' : day.label.charAt(0);
+                return `
+                    <div class="streak-day">
+                        <div class="streak-bubble ${stateClass}">${icon}</div>
+                        <span class="streak-copy">${day.label}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderInsights(chartData, milestones) {
+            const bestDay = [...chartData].sort((a, b) => b.count - a.count)[0];
+            const completedDays = chartData.filter((day) => day.count > 0).length;
+            document.getElementById('insightPrimary').textContent = bestDay && bestDay.count > 0
+                ? `${bestDay.label} was your strongest day with ${bestDay.count} completed task${bestDay.count > 1 ? 's' : ''}.`
+                : 'Your strongest day will appear here once you complete tasks.';
+            document.getElementById('insightSecondary').textContent = completedDays > 0
+                ? `You completed tasks on ${completedDays} of the last 7 days. Keep the pattern tight and finish today strong.`
+                : 'No completions recorded in the last 7 days yet. Start with one focused win today.';
+
+            if (!milestones.length) {
+                document.getElementById('milestoneInsight').textContent = 'No milestones found yet. Add one to track long-term progress.';
+                return;
+            }
+
+            const averageProgress = Math.round(milestones.reduce((sum, milestone) => sum + (milestone.progress || 0), 0) / milestones.length);
+            document.getElementById('milestoneInsight').textContent = `Across ${milestones.length} milestone${milestones.length > 1 ? 's' : ''}, your average progress is ${averageProgress}%.`;
+        }
+
+        function animateSections() {
+            gsap.from(".stat-card", {
+                duration: 0.6,
+                y: 40,
+                opacity: 0,
+                stagger: 0.12,
+                ease: "power3.out"
+            });
+
+            gsap.from("#progress-chart", {
+                duration: 0.7,
+                x: 60,
+                opacity: 0,
+                ease: "power3.out"
+            });
+        }
+
+        function animateMetric(id, targetValue) {
+            const node = document.getElementById(id);
+            const suffix = node.dataset.suffix || '';
+            gsap.fromTo(node, {
+                innerHTML: 0
+            }, {
+                duration: 1.5,
+                innerHTML: targetValue,
+                snap: { innerHTML: 1 },
+                ease: "power1.out",
+                onUpdate: () => {
+                    node.textContent = `${Math.round(Number(node.innerHTML))}${suffix}`;
+                },
+                onComplete: () => {
+                    node.textContent = `${targetValue}${suffix}`;
+                }
+            });
+        }
+
+        function calculateWeeklyStreak(chartData) {
+            let streak = 0;
+            for (let i = chartData.length - 1; i >= 0; i -= 1) {
+                const day = chartData[i];
+                if (day.count > 0) {
+                    streak += 1;
+                } else if (!day.isToday) {
+                    break;
+                }
+            }
+            return streak;
+        }
+
+        function startOfToday() {
+            const date = new Date();
+            date.setHours(0, 0, 0, 0);
+            return date;
+        }
+
+        function startOfDayKey(dateInput) {
+            const date = new Date(dateInput);
+            date.setHours(0, 0, 0, 0);
+            return date.toISOString().slice(0, 10);
         }
     </script>
 </body>

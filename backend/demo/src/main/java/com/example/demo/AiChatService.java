@@ -60,7 +60,14 @@ public class AiChatService {
             context.append("No active tasks at the moment.\n");
         } else {
             for (Task t : tasks) {
-                context.append("- [").append(t.getStatus()).append("] ").append(t.getText()).append(" (Category: ").append(t.getCategory()).append(")\n");
+                if (!"Completed".equalsIgnoreCase(t.getStatus())) {
+                    context.append("- ")
+                            .append(t.getText())
+                            .append(" | Priority: ").append(t.getPriority() != null ? t.getPriority() : "Medium")
+                            .append(" | Due: ").append(t.getDueDate() != null && !t.getDueDate().isBlank() ? t.getDueDate() : "No deadline")
+                            .append(" | Status: ").append(t.getStatus())
+                            .append("\n");
+                }
             }
         }
         context.append("\n");
@@ -77,9 +84,10 @@ public class AiChatService {
 
         context.append("### User Query:\n");
         context.append(userMessage).append("\n\n");
-        
+
         context.append("### Instructions:\n");
-        context.append("Respond directly to the user query utilizing the context above. Keep the response formatted nicely using Markdown. Be motivational and practical.");
+        context.append("You are a productivity mentor for an engineering student. Here are their pending tasks with priorities and deadlines. ");
+        context.append("Give them a focused, specific 3-point action plan for today. Be direct and motivating. Max 80 words. Format the answer in Markdown bullet points.");
 
         // 3. Call Gemini API
         return callGeminiApi(context.toString());

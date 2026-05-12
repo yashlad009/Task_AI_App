@@ -21,6 +21,56 @@ revoke all on table public.user_queries from anon, authenticated;
 revoke all on table public.user_reward_unlock_dates from anon, authenticated;
 revoke all on table public.user_unlocked_rewards from anon, authenticated;
 
+drop policy if exists backend_access_users on public.users;
+drop policy if exists backend_access_tasks on public.tasks;
+drop policy if exists backend_access_milestones on public.milestones;
+drop policy if exists backend_access_important_tasks on public.important_tasks;
+drop policy if exists backend_access_user_queries on public.user_queries;
+drop policy if exists backend_access_user_reward_unlock_dates on public.user_reward_unlock_dates;
+drop policy if exists backend_access_user_unlocked_rewards on public.user_unlocked_rewards;
+
+create policy backend_access_users
+    on public.users
+    for all
+    using (true)
+    with check (true);
+
+create policy backend_access_tasks
+    on public.tasks
+    for all
+    using (true)
+    with check (true);
+
+create policy backend_access_milestones
+    on public.milestones
+    for all
+    using (true)
+    with check (true);
+
+create policy backend_access_important_tasks
+    on public.important_tasks
+    for all
+    using (true)
+    with check (true);
+
+create policy backend_access_user_queries
+    on public.user_queries
+    for all
+    using (true)
+    with check (true);
+
+create policy backend_access_user_reward_unlock_dates
+    on public.user_reward_unlock_dates
+    for all
+    using (true)
+    with check (true);
+
+create policy backend_access_user_unlocked_rewards
+    on public.user_unlocked_rewards
+    for all
+    using (true)
+    with check (true);
+
 do $$
 begin
     if not exists (

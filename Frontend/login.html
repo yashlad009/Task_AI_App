@@ -4,432 +4,465 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login & Register | APMS PRO</title>
-    <link rel="stylesheet" href="login.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="app-config.js"></script>
+    <style>
+        :root {
+            --primary: #6C63FF;
+            --success: #22C55E;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --bg: #0F0F1A;
+            --card: #1A1A2E;
+            --text: #E2E8F0;
+            --muted: #94A3B8;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 12% 16%, rgba(108,99,255,0.15), transparent 24%),
+                radial-gradient(circle at 88% 22%, rgba(34,197,94,0.08), transparent 18%),
+                linear-gradient(180deg, #0F0F1A 0%, #141428 100%);
+        }
+
+        .auth-page {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 28px;
+            align-items: center;
+            padding: 38px;
+        }
+
+        .hero-panel,
+        .auth-card {
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.07);
+            background: #1A1A2E;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+        }
+
+        .hero-panel {
+            padding: 40px;
+            min-height: 620px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-panel::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 82% 18%, rgba(108,99,255,0.22), transparent 20%),
+                radial-gradient(circle at 18% 80%, rgba(34,197,94,0.08), transparent 24%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 640px;
+        }
+
+        .hero-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: var(--muted);
+        }
+
+        .hero-logo img {
+            height: 60px;
+        }
+
+        .hero-content h1 {
+            margin: 0 0 18px;
+            font-size: 42px;
+            line-height: 1.08;
+            font-weight: 700;
+            letter-spacing: -0.04em;
+        }
+
+        .hero-content p {
+            margin: 0 0 28px;
+            font-size: 18px;
+            color: var(--muted);
+            line-height: 1.7;
+            max-width: 52ch;
+        }
+
+        .feature-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .feature-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 18px;
+            border-radius: 999px;
+            background: rgba(108,99,255,0.12);
+            border: 1px solid rgba(108,99,255,0.3);
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .primary-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #6C63FF;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 22px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .primary-btn:hover {
+            background: #5A52E0;
+            transform: scale(1.03);
+        }
+
+        .auth-card {
+            padding: 28px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            color: var(--muted);
+            padding: 12px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease, color 0.2s ease;
+        }
+
+        .auth-tab.active {
+            background: rgba(108,99,255,0.16);
+            color: var(--text);
+            border-color: rgba(108,99,255,0.34);
+        }
+
+        .auth-panel h2 {
+            margin: 0 0 10px;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .auth-panel p {
+            margin: 0 0 22px;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        .auth-form {
+            display: grid;
+            gap: 14px;
+        }
+
+        .auth-form input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+            color: var(--text);
+            font-size: 15px;
+        }
+
+        .auth-form input::placeholder {
+            color: var(--muted);
+        }
+
+        .auth-form small {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: -4px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .mini-about {
+            margin-top: 24px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .mini-about-card {
+            padding: 16px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .mini-about-card strong {
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .mini-about-card span {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 980px) {
+            .auth-page {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+
+            .hero-panel {
+                min-height: auto;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="page-shell">
-    <div class="background-orb orb-one"></div>
-    <div class="background-orb orb-two"></div>
-    <div class="background-orb orb-three"></div>
-    <div class="background-grid"></div>
-    <canvas id="networkCanvas" class="background-network" aria-hidden="true"></canvas>
-
-    <main class="auth-stage">
-        <section class="form-shell">
-            <div class="form-logo-wrap">
-                <img src="apms3.png" alt="APMS PRO logo" class="form-logo">
-            </div>
-            <div class="form-shell-header">
-                <span class="status-dot"></span>
-                <span class="status-copy">Secure access portal</span>
-            </div>
-            <div class="form-tabs">
-                <button type="button" class="tab-btn active" data-panel="login" onclick="setActivePanel('login')">Login</button>
-                <button type="button" class="tab-btn" data-panel="register" onclick="setActivePanel('register')">Register</button>
-                <button type="button" class="tab-btn" data-panel="about" onclick="setActivePanel('about')">About</button>
-            </div>
-
-            <div class="container">
-                <div id="loginSection" class="animate__animated animate__fadeIn">
-                    <p class="form-tag">Welcome back</p>
-                    <h2>Login</h2>
-                    <p class="form-subtitle">Enter your credentials to continue into your APMS dashboard.</p>
-                    <form id="loginForm">
-                        <input type="email" id="loginEmail" placeholder="Email" required>
-                        <input type="password" id="loginPassword" placeholder="Password" required>
-                        <button type="submit">Login</button>
-                    </form>
-                    <p class="toggle-link" onclick="setActivePanel('register')">Don't have an account? Register</p>
+    <main class="auth-page">
+        <section class="hero-panel">
+            <div class="hero-content">
+                <div class="hero-logo">
+                    <img src="apms3.png" alt="APMS PRO logo">
+                    <span>APMS PRO</span>
                 </div>
-
-                <div id="registerSection" class="hidden animate__animated animate__fadeIn">
-                    <p class="form-tag">New here</p>
-                    <h2>Register</h2>
-                    <p class="form-subtitle">Create your workspace and verify your email with a one-time password.</p>
-                    <form id="registerForm">
-                        <input type="email" id="regEmail" placeholder="Email" required>
-                        <input type="password" id="regPassword" placeholder="Password" required>
-                        
-                        <div class="admin-key-group">
-                            <input type="text" id="regAdminKey" placeholder="Admin Key (Optional)">
-                            <small>Only required for administrative access.</small>
-                        </div>
-
-                        <button type="submit">Register</button>
-                    </form>
-                    <p class="toggle-link" onclick="setActivePanel('login')">Already have an account? Login</p>
+                <h1>Stop losing track. Start owning your day.</h1>
+                <p>APMS PRO is the AI-powered task workspace built for engineering students - smarter reminders, real progress, zero chaos.</p>
+                <div class="feature-pills">
+                    <span class="feature-pill"><i class="fas fa-robot"></i> AI Mentor</span>
+                    <span class="feature-pill"><i class="fas fa-bell"></i> Smart Reminders</span>
+                    <span class="feature-pill"><i class="fas fa-chart-column"></i> Progress Analytics</span>
                 </div>
+                <button type="button" class="primary-btn" onclick="setActivePanel('register')">Get started free <span>&rarr;</span></button>
+            </div>
+        </section>
 
-                <div id="aboutSection" class="hidden animate__animated animate__fadeIn">
-                    <p class="form-tag">About APMS Pro</p>
-                    <h2>Mission Control</h2>
-                    <p class="form-subtitle">A focused productivity system that blends planning, reminders, and AI guidance in one secure workspace.</p>
-                    <div class="about-cards">
-                        <article class="about-card">
-                            <span class="card-kicker">Focus Engine</span>
-                            <strong>Track tasks, milestones, and deadlines in a single mission feed.</strong>
-                        </article>
-                        <article class="about-card">
-                            <span class="card-kicker">AI Mentor</span>
-                            <strong>Get practical, context-aware next steps from your current workload.</strong>
-                        </article>
-                        <article class="about-card">
-                            <span class="card-kicker">Reminder Pulse</span>
-                            <strong>Use OTP onboarding and reminders so critical work never slips.</strong>
-                        </article>
-                    </div>
-                    <div class="about-metrics">
-                        <div><span class="metric-value">24/7</span><span class="metric-label">task visibility</span></div>
-                        <div><span class="metric-value">smart</span><span class="metric-label">mentor assistance</span></div>
-                        <div><span class="metric-value">live</span><span class="metric-label">email reminders</span></div>
-                    </div>
+        <section class="auth-card">
+            <div class="auth-tabs">
+                <button type="button" class="auth-tab active" data-panel="login" onclick="setActivePanel('login')">Login</button>
+                <button type="button" class="auth-tab" data-panel="register" onclick="setActivePanel('register')">Register</button>
+                <button type="button" class="auth-tab" data-panel="about" onclick="setActivePanel('about')">About</button>
+            </div>
+
+            <div id="loginSection" class="auth-panel">
+                <h2>Welcome back</h2>
+                <p>Use your verified account to jump back into tasks, streaks, and AI planning.</p>
+                <form id="loginForm" class="auth-form">
+                    <input type="email" id="loginEmail" placeholder="Email address" required>
+                    <input type="password" id="loginPassword" placeholder="Password" required>
+                    <button type="submit" class="primary-btn">Login</button>
+                </form>
+            </div>
+
+            <div id="registerSection" class="auth-panel hidden">
+                <h2>Create your workspace</h2>
+                <p>Register with OTP verification and start organizing your academic workload.</p>
+                <form id="registerForm" class="auth-form">
+                    <input type="email" id="regEmail" placeholder="Email address" required>
+                    <input type="password" id="regPassword" placeholder="Password" required>
+                    <input type="text" id="regAdminKey" placeholder="Admin Key (Optional)">
+                    <small>Use the admin key only if you were explicitly given one.</small>
+                    <button type="submit" class="primary-btn">Register</button>
+                </form>
+            </div>
+
+            <div id="aboutSection" class="auth-panel hidden">
+                <h2>Why students love APMS PRO</h2>
+                <p>One place to plan, focus, and finish work without losing momentum.</p>
+                <div class="mini-about">
+                    <article class="mini-about-card">
+                        <strong>Deadline-aware planning</strong>
+                        <span>Create tasks with deadlines, priorities, and progress visibility built in.</span>
+                    </article>
+                    <article class="mini-about-card">
+                        <strong>AI that uses your real workload</strong>
+                        <span>Gemini-powered mentor responses now work from pending tasks, deadlines, and priorities.</span>
+                    </article>
+                    <article class="mini-about-card">
+                        <strong>Competition-ready analytics</strong>
+                        <span>Watch streaks, completion patterns, and certificates stack up as your work gets done.</span>
+                    </article>
                 </div>
             </div>
         </section>
     </main>
 
-    <footer class="login-footer">
-        <div class="login-footer-content">
-            <div>
-                Contact:
-                <a class="login-footer-email" href="mailto:task_tracker_351@gmail.com">task_tracker_351</a>
-            </div>
-            <div class="login-footer-socials">
-                <a href="https://github.com/yashlad009" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-                    <i class="fab fa-github"></i>
-                </a>
-                <a href="https://www.linkedin.com/in/yash-lad-4bb46632a" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-                    <i class="fab fa-linkedin-in"></i>
-                </a>
-            </div>
-            <div class="login-footer-rights">All rights are reserved.</div>
-        </div>
-    </footer>
-</div>
+    <script>
+        const API_URL = `${window.getApiBaseUrl()}/auth`;
 
-<script>
-    const API_URL = `${window.getApiBaseUrl()}/auth`;
+        function setActivePanel(panel) {
+            const sections = {
+                login: document.getElementById('loginSection'),
+                register: document.getElementById('registerSection'),
+                about: document.getElementById('aboutSection')
+            };
 
-    // --- UI HELPERS ---
-    function showSuccess(msg) {
-        Swal.fire({
-            title: 'Success!',
-            text: msg,
-            icon: 'success',
-            background: 'rgba(255, 255, 255, 0.9)',
-            showConfirmButton: false,
-            timer: 2000
-        });
-    }
-
-    function showError(msg) {
-        Swal.fire({
-            title: 'Error',
-            text: msg,
-            icon: 'error',
-            background: 'rgba(255, 255, 255, 0.9)',
-            confirmButtonColor: '#ff3b30'
-        });
-    }
-
-    function setActivePanel(panel) {
-        const sections = {
-            login: document.getElementById('loginSection'),
-            register: document.getElementById('registerSection'),
-            about: document.getElementById('aboutSection')
-        };
-
-        Object.entries(sections).forEach(([key, element]) => {
-            element.classList.toggle('hidden', key !== panel);
-        });
-
-        document.querySelectorAll('.tab-btn').forEach((btn) => {
-            btn.classList.toggle('active', btn.dataset.panel === panel);
-        });
-    }
-
-    // --- REGISTRATION LOGIC ---
-    document.getElementById('registerForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('regEmail').value;
-        const password = document.getElementById('regPassword').value;
-        const adminKey = document.getElementById('regAdminKey').value;
-
-        Swal.fire({ title: 'Sending OTP...', didOpen: () => { Swal.showLoading(); } });
-
-        try {
-            const otpRes = await fetch(`${API_URL}/send-otp`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email }) 
+            Object.entries(sections).forEach(([key, element]) => {
+                element.classList.toggle('hidden', key !== panel);
             });
 
-            const otpPayload = await otpRes.json().catch(() => ({}));
+            document.querySelectorAll('.auth-tab').forEach((button) => {
+                button.classList.toggle('active', button.dataset.panel === panel);
+            });
+        }
 
-            if (otpRes.ok) {
-                const otpPromptText = otpPayload.delivery === 'debug'
-                    ? `Local OTP: ${otpPayload.otp}`
-                    : `Code sent to ${email}`;
+        function showSuccess(message) {
+            Swal.fire({
+                title: 'Success',
+                text: message,
+                icon: 'success',
+                background: '#1A1A2E',
+                color: '#E2E8F0',
+                confirmButtonColor: '#6C63FF'
+            });
+        }
+
+        function showError(message) {
+            Swal.fire({
+                title: 'Error',
+                text: message,
+                icon: 'error',
+                background: '#1A1A2E',
+                color: '#E2E8F0',
+                confirmButtonColor: '#6C63FF'
+            });
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const adminKey = document.getElementById('regAdminKey').value;
+
+            Swal.fire({ title: 'Sending OTP...', didOpen: () => Swal.showLoading(), background: '#1A1A2E', color: '#E2E8F0' });
+
+            try {
+                const otpRes = await fetch(`${API_URL}/send-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const otpPayload = await otpRes.json().catch(() => ({}));
+                if (!otpRes.ok) {
+                    showError(otpPayload.error || 'Could not send OTP.');
+                    return;
+                }
 
                 const { value: otpCode } = await Swal.fire({
                     title: 'Verify Email',
-                    text: otpPromptText,
+                    text: `Code sent to ${email}`,
                     input: 'text',
                     inputPlaceholder: 'Enter OTP',
-                    showCancelButton: true
+                    showCancelButton: true,
+                    background: '#1A1A2E',
+                    color: '#E2E8F0',
+                    confirmButtonColor: '#6C63FF'
                 });
 
-                if (otpCode) {
-                    const finalRes = await fetch(`${API_URL}/verify-and-register`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email, password, otp: otpCode, adminKey })
-                    });
+                if (!otpCode) return;
 
-                    if (finalRes.ok) {
-                        showSuccess("Account Created Successfully!");
-                        setActivePanel('login');
-                    } else {
-                        const finalPayload = await finalRes.json().catch(() => ({}));
-                        showError(finalPayload.error || "Invalid OTP or registration failed.");
-                    }
-                }
-            } else {
-                showError(otpPayload.error || "Could not send OTP. Check if email is valid.");
-            }
-        } catch (error) {
-            showError("Backend connection failed. Ensure IntelliJ is running.");
-        }
-    });
+                const finalRes = await fetch(`${API_URL}/verify-and-register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, otp: otpCode, adminKey })
+                });
 
-   // --- LOGIN LOGIC (TAB-SYNC FIX) ---
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-
-        try {
-            const response = await fetch(`${API_URL}/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
-
-            const payload = await response.json().catch(() => ({}));
-
-            if (response.ok) {
-                const userData = payload;
-                
-                if (userData.role === "ADMIN") {
-                    // Remove any old admin data, but LEAVE 'user_session' alone
-                    localStorage.removeItem('admin_session');
-                    localStorage.setItem('admin_session', JSON.stringify(userData));
-                    
-                    showSuccess("Welcome, System Admin!");
-                    setTimeout(() => { window.location.href = "admin.html"; }, 1500);
+                if (finalRes.ok) {
+                    showSuccess('Account created successfully. You can log in now.');
+                    setActivePanel('login');
                 } else {
-                    // Remove any old user data, but LEAVE 'admin_session' alone
-                    localStorage.removeItem('user_session');
-                    localStorage.setItem('user_session', JSON.stringify(userData));
-                    
-                    showSuccess("Welcome back!");
-                    setTimeout(() => { window.location.href = "index.html"; }, 1500);
+                    const finalPayload = await finalRes.json().catch(() => ({}));
+                    showError(finalPayload.error || 'Registration failed.');
+                }
+            } catch (error) {
+                showError('Backend connection failed.');
+            }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const payload = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    showError(payload.error || 'Invalid email or password.');
+                    return;
                 }
 
-            } else {
-                showError(payload.error || "Invalid email or password.");
+                if (payload.role === 'ADMIN') {
+                    localStorage.setItem('admin_session', JSON.stringify(payload));
+                    showSuccess('Welcome, System Admin!');
+                    setTimeout(() => window.location.href = 'admin.html', 900);
+                } else {
+                    localStorage.setItem('user_session', JSON.stringify(payload));
+                    showSuccess('Welcome back!');
+                    setTimeout(() => window.location.href = 'index.html', 900);
+                }
+            } catch (error) {
+                showError('Server is offline.');
             }
-        } catch (error) {
-            showError("Server is offline.");
-        }
-    });
+        });
 
-    // --- BACKGROUND ANIMATION ---
-    document.addEventListener('mousemove', (e) => {
-        const x = (e.clientX / window.innerWidth) * 100;
-        const y = (e.clientY / window.innerHeight) * 100;
-        document.body.style.setProperty('--mouse-x', `${x}%`);
-        document.body.style.setProperty('--mouse-y', `${y}%`);
-    });
-
-    const networkCanvas = document.getElementById('networkCanvas');
-    const ctx = networkCanvas.getContext('2d');
-    const pointer = { x: window.innerWidth * 0.5, y: window.innerHeight * 0.5 };
-    const nodes = [];
-    const NODE_COUNT = 62;
-    const LINK_DISTANCE = 220;
-    const CURSOR_INFLUENCE = 170;
-    const STAR_CROSS_SIZE = 1.8;
-    const WAVE_SPEED = 0.0024;
-    const WAVE_LENGTH = 0.038;
-    const WAVE_MIN = 0.15;
-    const FLOW_SPEED = 0.0009;
-    const TWINKLE_SPEED = 0.0017;
-
-    function resizeNetwork() {
-        networkCanvas.width = window.innerWidth;
-        networkCanvas.height = window.innerHeight;
-    }
-
-    function seedNodes() {
-        nodes.length = 0;
-        for (let i = 0; i < NODE_COUNT; i += 1) {
-            nodes.push({
-                x: Math.random() * networkCanvas.width,
-                y: Math.random() * networkCanvas.height,
-                vx: (Math.random() - 0.5) * 0.24,
-                vy: (Math.random() - 0.5) * 0.24,
-                r: Math.random() * 1.6 + 1.1
+        document.addEventListener('DOMContentLoaded', () => {
+            gsap.from(".hero-content > *", {
+                duration: 0.7,
+                y: 30,
+                opacity: 0,
+                stagger: 0.15,
+                ease: "power3.out"
             });
-        }
-    }
 
-    function drawStarNode(node, glowBoost) {
-        const alpha = 0.42 + glowBoost * 0.58;
-        const glow = 8 + glowBoost * 18;
-        ctx.save();
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = '#bff7ff';
-        ctx.shadowColor = '#79e3ff';
-        ctx.shadowBlur = glow;
-        ctx.beginPath();
-        ctx.arc(node.x, node.y, node.r + glowBoost * 0.8, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.lineWidth = 0.9;
-        ctx.strokeStyle = `rgba(190, 244, 255, ${0.35 + glowBoost * 0.5})`;
-        ctx.beginPath();
-        ctx.moveTo(node.x - STAR_CROSS_SIZE, node.y);
-        ctx.lineTo(node.x + STAR_CROSS_SIZE, node.y);
-        ctx.moveTo(node.x, node.y - STAR_CROSS_SIZE);
-        ctx.lineTo(node.x, node.y + STAR_CROSS_SIZE);
-        ctx.stroke();
-        ctx.restore();
-    }
-
-    function drawNebulaAura(time) {
-        const pulse = (Math.sin(time * 0.0012) + 1) * 0.5;
-        const coreRadius = 120 + pulse * 36;
-        const haloRadius = 280 + pulse * 70;
-        const grad = ctx.createRadialGradient(pointer.x, pointer.y, 0, pointer.x, pointer.y, haloRadius);
-        grad.addColorStop(0, `rgba(124, 228, 255, ${0.12 + pulse * 0.08})`);
-        grad.addColorStop(0.35, 'rgba(77, 180, 255, 0.09)');
-        grad.addColorStop(0.75, 'rgba(33, 112, 182, 0.035)');
-        grad.addColorStop(1, 'rgba(10, 32, 56, 0)');
-
-        ctx.save();
-        ctx.globalCompositeOperation = 'lighter';
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(pointer.x, pointer.y, haloRadius, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = `rgba(151, 236, 255, ${0.07 + pulse * 0.08})`;
-        ctx.lineWidth = 1.2;
-        ctx.beginPath();
-        ctx.arc(pointer.x, pointer.y, coreRadius, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
-    }
-
-    function drawEdgeTraveler(a, b, progress, intensity) {
-        const x = a.x + (b.x - a.x) * progress;
-        const y = a.y + (b.y - a.y) * progress;
-        ctx.save();
-        ctx.globalAlpha = 0.25 + intensity * 0.5;
-        ctx.fillStyle = '#d7fbff';
-        ctx.shadowColor = 'rgba(161, 240, 255, 0.9)';
-        ctx.shadowBlur = 8 + intensity * 16;
-        ctx.beginPath();
-        ctx.arc(x, y, 1 + intensity * 1.4, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-    }
-
-    function animateNetwork(time = 0) {
-        ctx.clearRect(0, 0, networkCanvas.width, networkCanvas.height);
-        drawNebulaAura(time);
-
-        for (const node of nodes) {
-            node.x += node.vx;
-            node.y += node.vy;
-
-            if (node.x < 0 || node.x > networkCanvas.width) node.vx *= -1;
-            if (node.y < 0 || node.y > networkCanvas.height) node.vy *= -1;
-        }
-
-        for (let i = 0; i < nodes.length; i += 1) {
-            const a = nodes[i];
-            const dPointerA = Math.hypot(a.x - pointer.x, a.y - pointer.y);
-            const glowA = Math.max(0, 1 - dPointerA / CURSOR_INFLUENCE);
-
-            for (let j = i + 1; j < nodes.length; j += 1) {
-                const b = nodes[j];
-                const dist = Math.hypot(a.x - b.x, a.y - b.y);
-                if (dist > LINK_DISTANCE) continue;
-
-                const dPointerB = Math.hypot(b.x - pointer.x, b.y - pointer.y);
-                const glowB = Math.max(0, 1 - dPointerB / CURSOR_INFLUENCE);
-                const cursorGlow = Math.max(glowA, glowB);
-                const baseAlpha = 0.05 + (1 - dist / LINK_DISTANCE) * 0.18;
-                const wavePhase = (time * WAVE_SPEED) - (dist * WAVE_LENGTH) + ((i * 0.41) + (j * 0.63));
-                const wave = (Math.sin(wavePhase) + 1) * 0.5;
-                const waveGlow = WAVE_MIN + wave * (1 - WAVE_MIN);
-                const activeAlpha = baseAlpha + cursorGlow * 0.35 + waveGlow * 0.2;
-                const edgeWidth = 0.55 + cursorGlow * 1.35 + waveGlow * 0.45;
-                const flowOffset = ((i * 0.09) + (j * 0.17)) % 1;
-                const travelerProgress = (time * FLOW_SPEED + flowOffset) % 1;
-
-                ctx.beginPath();
-                ctx.moveTo(a.x, a.y);
-                ctx.lineTo(b.x, b.y);
-                ctx.lineWidth = edgeWidth;
-                ctx.strokeStyle = `rgba(137, 232, 255, ${activeAlpha})`;
-                ctx.shadowColor = 'rgba(123, 225, 255, 0.8)';
-                ctx.shadowBlur = 2 + cursorGlow * 10 + waveGlow * 8;
-                ctx.stroke();
-
-                // A guided pulse particle travels along selected edges for a majestic "energy flow".
-                if (((i + j) % 5 === 0) && dist < LINK_DISTANCE * 0.78) {
-                    drawEdgeTraveler(a, b, travelerProgress, (cursorGlow * 0.7) + (waveGlow * 0.5));
-                }
-            }
-        }
-
-        for (const node of nodes) {
-            const dPointer = Math.hypot(node.x - pointer.x, node.y - pointer.y);
-            const glow = Math.max(0, 1 - dPointer / CURSOR_INFLUENCE);
-            const twinkle = (Math.sin((time * TWINKLE_SPEED) + (node.x * 0.02) + (node.y * 0.017)) + 1) * 0.5;
-            const finalGlow = Math.min(1, glow + twinkle * 0.28);
-            drawStarNode(node, finalGlow);
-        }
-
-        requestAnimationFrame(animateNetwork);
-    }
-
-    window.addEventListener('resize', () => {
-        resizeNetwork();
-        seedNodes();
-    });
-
-    window.addEventListener('mousemove', (event) => {
-        pointer.x = event.clientX;
-        pointer.y = event.clientY;
-    });
-
-    resizeNetwork();
-    seedNodes();
-    animateNetwork();
-</script>
-
-<style>
-    /* CSS Helpers for Toggle */
-    .hidden { display: none !important; }
-</style>
-
+            gsap.from(".auth-card", {
+                duration: 0.8,
+                x: 34,
+                opacity: 0,
+                ease: "power3.out",
+                delay: 0.2
+            });
+        });
+    </script>
 </body>
 </html>

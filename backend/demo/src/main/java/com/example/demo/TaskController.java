@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/tasks")
@@ -29,6 +30,9 @@ public class TaskController {
         }
         if (task.getCategory() == null || task.getCategory().isEmpty()) {
             task.setCategory("Personal");
+        }
+        if (task.getPriority() == null || task.getPriority().isEmpty()) {
+            task.setPriority("Medium");
         }
         return taskRepository.save(task);
     }
@@ -62,6 +66,9 @@ public class TaskController {
             }
 
             task.setStatus("Completed");
+            if (task.getCompletedAt() == null || task.getCompletedAt().isBlank()) {
+                task.setCompletedAt(LocalDate.now().toString());
+            }
             taskRepository.save(task);
 
             response.put("task", task);

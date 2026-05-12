@@ -2,66 +2,425 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Mentor | APMS PRO</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        (function() {
-            const savedTheme = localStorage.getItem('apms-theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-        })();
-    </script>
-    <script>
-        document.addEventListener('mousemove', function(e) {
-            document.body.style.setProperty('--mouse-x', (e.clientX / window.innerWidth) * 100 + '%');
-            document.body.style.setProperty('--mouse-y', (e.clientY / window.innerHeight) * 100 + '%');
-        });
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="app-config.js"></script>
-    <script src="theme.js" defer></script>
     <script src="network-theme.js" defer></script>
     <style>
-        /* Specific page layout fixes */
-        .mentor-layout {
-            display: grid;
-            grid-template-columns: 1fr 3fr;
-            gap: 24px;
-            align-items: start;
+        :root {
+            --primary: #6C63FF;
+            --success: #22C55E;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --bg: #0F0F1A;
+            --card: #1A1A2E;
+            --text: #E2E8F0;
+            --muted: #94A3B8;
         }
-        @media (max-width: 900px) {
-            .mentor-layout {
-                grid-template-columns: 1fr;
-            }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Inter", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 16% 18%, rgba(108,99,255,0.18), transparent 22%),
+                radial-gradient(circle at 84% 22%, rgba(108,99,255,0.14), transparent 18%),
+                linear-gradient(180deg, #0F0F1A 0%, #141428 100%);
         }
-        .ai-sidebar-card {
-            padding: 24px;
-            border-radius: 20px;
-            background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
-            border: 1px solid var(--glass-border);
-            text-align: center;
+
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            padding: 18px 24px;
+            backdrop-filter: blur(18px);
+            background: rgba(15, 15, 26, 0.82);
+            border-bottom: 1px solid rgba(255,255,255,0.07);
         }
-        .ai-avatar {
-            width: 80px;
-            height: 80px;
+
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+        }
+
+        .nav-logo span {
+            color: var(--primary);
+        }
+
+        .nav-logo img {
+            height: 56px;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 14px;
+            margin: 0;
+            padding: 0;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: var(--muted);
+            text-decoration: none;
+            padding: 10px 14px;
+            border-radius: 999px;
+            transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: rgba(108,99,255,0.14);
+            color: var(--text);
+            transform: scale(1.03);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .theme-toggle,
+        .user-avatar {
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
-            background: var(--accent-gradient);
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.04);
+            color: var(--text);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 36px;
-            color: #fff;
-            margin-bottom: 16px;
-            box-shadow: 0 0 24px var(--neon-glow);
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            font-weight: 700;
+            background: linear-gradient(135deg, #6C63FF, #5148e0);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            right: 20px;
+            top: 78px;
+            z-index: 50;
+        }
+
+        .modal-content {
+            width: 260px;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.07);
+            background: #1A1A2E;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+        }
+
+        .btn-sm,
+        .primary-btn {
+            border: none;
+            border-radius: 10px;
+            padding: 10px 22px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .btn-sm:hover,
+        .primary-btn:hover {
+            transform: scale(1.03);
+        }
+
+        .primary-btn {
+            background: #6C63FF;
+            color: white;
+        }
+
+        .primary-btn:hover {
+            background: #5A52E0;
+        }
+
+        .main-wrapper {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 32px 24px 52px;
+        }
+
+        .page-shell {
+            display: grid;
+            gap: 24px;
+        }
+
+        .hero-strip {
+            padding: 24px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.07);
+            background: linear-gradient(135deg, rgba(108,99,255,0.12), rgba(26,26,46,0.96));
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+        }
+
+        .hero-strip h1 {
+            margin: 0 0 10px;
+            font-size: 34px;
+            font-weight: 700;
+            letter-spacing: -0.04em;
+        }
+
+        .hero-strip p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.7;
+            max-width: 60ch;
+        }
+
+        .mentor-grid {
+            display: grid;
+            grid-template-columns: 0.92fr 1.28fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .panel {
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.07);
+            background: #1A1A2E;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+        }
+
+        .context-panel {
+            padding: 24px;
+            position: sticky;
+            top: 96px;
+        }
+
+        .panel-label {
+            margin: 0 0 8px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .context-panel h2,
+        .chat-panel h2 {
+            margin: 0 0 12px;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.04em;
+        }
+
+        .context-panel p,
+        .chat-panel p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .chip-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+        .task-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+            font-size: 13px;
+            color: var(--text);
+        }
+
+        .task-chip.high { border-color: rgba(239,68,68,0.42); }
+        .task-chip.medium { border-color: rgba(245,158,11,0.4); }
+        .task-chip.low { border-color: rgba(34,197,94,0.36); }
+
+        .task-chip .chip-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .task-chip.high .chip-dot { background: var(--danger); }
+        .task-chip.medium .chip-dot { background: var(--warning); }
+        .task-chip.low .chip-dot { background: var(--success); }
+
+        .mentor-stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .mini-stat {
+            padding: 14px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .mini-stat strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .mini-stat span {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .chat-panel {
+            padding: 24px;
+            display: grid;
+            gap: 18px;
+        }
+
+        .response-shell {
+            min-height: 320px;
+            display: grid;
+            gap: 14px;
+            align-content: start;
+        }
+
+        .user-bubble {
+            justify-self: end;
+            max-width: min(100%, 640px);
+            padding: 14px 16px;
+            border-radius: 12px 12px 0 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            line-height: 1.7;
+        }
+
+        #ai-response-box {
+            display: none;
+            max-width: min(100%, 700px);
+            padding: 16px;
+            background: rgba(108,99,255,0.1);
+            border-left: 3px solid #6C63FF;
+            border-radius: 0 12px 12px 12px;
+            line-height: 1.7;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+
+        .composer {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+            align-items: end;
+        }
+
+        .composer textarea {
+            min-height: 110px;
+            resize: vertical;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.03);
+            color: var(--text);
+            padding: 16px;
+            font: inherit;
+        }
+
+        .composer textarea::placeholder {
+            color: var(--muted);
+        }
+
+        .button-column {
+            display: grid;
+            gap: 10px;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            display: none;
+        }
+
+        .spinner.show {
+            display: inline-block;
+        }
+
+        .helper-note,
+        .empty-state {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        @media (max-width: 1080px) {
+            .mentor-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .context-panel {
+                position: static;
+            }
+        }
+
+        @media (max-width: 860px) {
+            .navbar {
+                padding: 16px;
+            }
+
+            .nav-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .nav-links {
+                justify-content: center;
+            }
+
+            .main-wrapper {
+                padding: 24px 16px 40px;
+            }
+
+            .composer {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <img src="apms3.png" alt="APMS PRO Logo" style="height: 90px; margin-right: 10px; vertical-align: middle;">
+                <img src="apms3.png" alt="APMS PRO Logo">
                 Task<span>Tracker</span>
             </div>
             <ul class="nav-links">
@@ -74,190 +433,308 @@
                 <li><a href="mentor.html" class="active">AI Mentor</a></li>
             </ul>
             <div class="nav-actions">
-                <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle theme">
-                    <i class="fas fa-moon"></i>
-                    <i class="fas fa-sun"></i>
-                </button>
-                <div id="nav-initials" class="user-avatar" onclick="toggleProfile()" style="background:linear-gradient(135deg, #9d50bb, #6e48aa); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:bold;">U</div>
+                <button id="themeToggle" class="theme-toggle" type="button" aria-label="Theme"><i class="fas fa-moon"></i></button>
+                <div id="nav-initials" class="user-avatar" onclick="toggleProfile()">U</div>
             </div>
         </div>
     </nav>
 
-    <div id="profileModal" class="modal" style="display:none; position: fixed; z-index: 1000; right: 20px; top: 70px;">
-        <div class="modal-content panel" style="width: 250px; background: var(--glass-panel-strong); border: 1px solid var(--glass-border);">
-            <div style="text-align: center;">
-                <div id="user-initials-large" style="width:60px; height:60px; background:var(--purple); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; margin:0 auto 10px auto; font-weight:bold;">US</div>
-                <p id="display-email" style="font-weight:bold; margin-bottom:5px; font-size: 14px; overflow: hidden; text-overflow: ellipsis;">User Email</p>
-                <p id="display-role" style="color:var(--sky-blue); font-size:11px; text-transform: uppercase; letter-spacing: 1px;">Standard User</p>
-                <hr style="margin: 15px 0; border: 0; border-top: 1px solid rgba(255,255,255,0.1);">
-                <button class="btn-sm" onclick="logoutUser()" style="background:#ff7675; width:100%;">Logout Session</button>
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <div style="text-align:center;">
+                <div id="user-initials-large" class="user-avatar" style="margin:0 auto 12px; width:64px; height:64px;">U</div>
+                <p id="display-email" style="font-weight:700; margin:0 0 6px; overflow:hidden; text-overflow:ellipsis;">User Email</p>
+                <p id="display-role" style="margin:0 0 16px; color:#94A3B8; font-size:12px; text-transform:uppercase; letter-spacing:0.14em;">User</p>
+                <button class="btn-sm" onclick="logoutUser()" style="width:100%; background:#EF4444; color:white;">Logout Session</button>
             </div>
         </div>
     </div>
 
-    <div class="main-wrapper">
-        <header class="content-header">
-            <h1>AI Mentor</h1>
-            <p>Get personalized career and task planning advice based on your current progress.</p>
-        </header>
+    <main class="main-wrapper">
+        <div class="page-shell">
+            <section class="hero-strip">
+                <p class="panel-label">AI Planning</p>
+                <h1>Talk to your workload, not a generic chatbot.</h1>
+                <p>APMS PRO now builds mentor guidance from your real pending tasks, deadlines, and priorities so the answer feels like a study coach instead of a random generator.</p>
+            </section>
 
-        <div class="mentor-layout">
-            <div class="ai-sidebar-card">
-                <div class="ai-avatar"><i class="fas fa-robot"></i></div>
-                <h3>TaskTracker AI</h3>
-                <p style="color: var(--text-dim); font-size: 13px; margin-top: 8px;">
-                    Your intelligent guide to achieving your goals. I analyze your tasks, milestones, and gamification level to provide strategic advice.
-                </p>
-                <div style="margin-top: 20px; font-size: 12px; color: var(--text-soft); text-align: left;">
-                    <strong>Topics I can help with:</strong>
-                    <ul style="margin-left: 15px; margin-top: 5px;">
-                        <li>Prioritizing today's tasks</li>
-                        <li>Overcoming roadblocks</li>
-                        <li>Strategies for leveling up</li>
-                        <li>Balancing different categories</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="chat-container">
-                <div class="chat-history" id="chat-history">
-                    <div class="chat-message message-ai">
-                        Hello! I'm your AI Mentor. I have reviewed your current level and tasks. How can I help you strategize today?
+            <section class="mentor-grid">
+                <aside class="context-panel panel">
+                    <p class="panel-label">Live Context</p>
+                    <h2>Pending Task Radar</h2>
+                    <p>These chips are fed into the mentor prompt so the action plan is based on what is actually waiting for you today.</p>
+                    <div id="task-chip-stack" class="chip-stack"></div>
+                    <div id="empty-chip-state" class="empty-state" style="display:none; margin-top:18px;">No pending tasks found. Add a few tasks first to get sharper mentor advice.</div>
+                    <div class="mentor-stats">
+                        <div class="mini-stat">
+                            <strong id="pending-count">0</strong>
+                            <span>Pending tasks</span>
+                        </div>
+                        <div class="mini-stat">
+                            <strong id="urgent-count">0</strong>
+                            <span>High priority</span>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="chat-input-area">
-                    <input type="text" id="chat-input" placeholder="Ask for advice, e.g., 'What should I prioritize today?'..." onkeypress="handleKeyPress(event)">
-                    <button class="btn-primary" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
-                </div>
-            </div>
+                </aside>
+
+                <section class="chat-panel panel">
+                    <div>
+                        <p class="panel-label">Mentor Console</p>
+                        <h2>Focused plan for today</h2>
+                        <p>Ask for prioritization, deadline rescue, or a study sprint plan. The response is kept short, direct, and built for action.</p>
+                    </div>
+
+                    <div id="response-shell" class="response-shell">
+                        <div class="user-bubble">Try: "Give me a 3-point plan for today based on my pending tasks."</div>
+                        <div id="ai-response-box"></div>
+                    </div>
+
+                    <div class="composer">
+                        <textarea id="mentor-input" placeholder="Ask AI Mentor what to focus on today, how to recover from backlog, or how to beat upcoming deadlines."></textarea>
+                        <div class="button-column">
+                            <button id="ask-ai-btn" class="primary-btn" type="button" onclick="askAiMentor()">
+                                <span id="ask-ai-label">Ask AI</span>
+                                <span id="mentor-spinner" class="spinner"></span>
+                            </button>
+                            <span class="helper-note">Response arrives with a typewriter reveal once Gemini returns.</span>
+                        </div>
+                    </div>
+                </section>
+            </section>
         </div>
-    </div>
+    </main>
 
     <script>
         const API_URL = window.getApiBaseUrl();
         let currentUser = null;
+        let pendingTasks = [];
+        let spinnerTween = null;
 
-        window.onload = function() {
+        document.addEventListener('DOMContentLoaded', async () => {
             const sessionUser = window.requireUserSession();
             if (!sessionUser) {
                 return;
             }
 
-            try {
-                currentUser = sessionUser;
-                setupUserProfile(currentUser);
-            } catch (e) {
-                window.redirectToLogin();
-            }
+            currentUser = sessionUser;
+            setupUserProfile(currentUser);
+            bindProfileDismiss();
+            await loadPendingTasks();
 
-            window.onclick = function(event) {
+            gsap.from('.hero-strip, .context-panel, .chat-panel', {
+                duration: 0.7,
+                y: 24,
+                opacity: 0,
+                stagger: 0.12,
+                ease: 'power3.out'
+            });
+        });
+
+        function bindProfileDismiss() {
+            window.addEventListener('click', (event) => {
                 if (!event.target.closest('.nav-actions') && !event.target.closest('#profileModal')) {
                     document.getElementById('profileModal').style.display = 'none';
                 }
-            }
-        };
+            });
+        }
 
         function setupUserProfile(user) {
             const initial = user.email ? user.email.charAt(0).toUpperCase() : 'U';
-            document.getElementById("nav-initials").innerText = initial;
-            document.getElementById("user-initials-large").innerText = initial;
-            document.getElementById("display-email").innerText = user.email || "Unknown User";
-            document.getElementById("display-role").innerText = user.role || "Standard User";
+            document.getElementById('nav-initials').innerText = initial;
+            document.getElementById('user-initials-large').innerText = initial;
+            document.getElementById('display-email').innerText = user.email || 'Unknown User';
+            document.getElementById('display-role').innerText = user.role || 'User';
         }
 
         function toggleProfile() {
             const modal = document.getElementById('profileModal');
-            modal.style.display = (modal.style.display === 'block') ? 'none' : 'block';
+            modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
         }
 
         function logoutUser() {
             window.redirectToLogin();
         }
 
-        function handleKeyPress(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
+        function normalizePriority(priority) {
+            const value = (priority || 'Medium').toLowerCase();
+            if (value === 'high') return 'high';
+            if (value === 'low') return 'low';
+            return 'medium';
+        }
+
+        function formatDate(dateValue) {
+            if (!dateValue) return 'No deadline';
+            const parsed = new Date(dateValue);
+            if (Number.isNaN(parsed.getTime())) return dateValue;
+            return parsed.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        }
+
+        function isCompleted(task) {
+            return task.completed === true || String(task.status || '').toUpperCase() === 'COMPLETED';
+        }
+
+        async function loadPendingTasks() {
+            const userId = currentUser.id || currentUser._id;
+            try {
+                const response = await fetch(`${API_URL}/tasks/user/${userId}`);
+                if (!response.ok) {
+                    throw new Error('Could not load tasks.');
+                }
+
+                const tasks = await response.json();
+                pendingTasks = Array.isArray(tasks) ? tasks.filter((task) => !isCompleted(task)) : [];
+                renderPendingTaskChips();
+            } catch (error) {
+                document.getElementById('empty-chip-state').style.display = 'block';
+                document.getElementById('empty-chip-state').textContent = 'Task context could not be loaded right now. AI Mentor can still answer, but it may have less context.';
             }
         }
 
-        async function sendMessage() {
-            const inputField = document.getElementById('chat-input');
-            const sendButton = document.querySelector('.chat-input-area button');
-            const message = inputField.value.trim();
-            if (!message) return;
+        function renderPendingTaskChips() {
+            const stack = document.getElementById('task-chip-stack');
+            const emptyState = document.getElementById('empty-chip-state');
+            stack.innerHTML = '';
 
-            // Clear input
-            inputField.value = '';
-            inputField.disabled = true;
-            sendButton.disabled = true;
+            document.getElementById('pending-count').textContent = String(pendingTasks.length);
+            document.getElementById('urgent-count').textContent = String(
+                pendingTasks.filter((task) => normalizePriority(task.priority) === 'high').length
+            );
 
-            // Add user message
-            addMessageToChat(message, 'user');
+            if (!pendingTasks.length) {
+                emptyState.style.display = 'block';
+                return;
+            }
 
-            // Show typing indicator
-            const typingIndicatorId = addTypingIndicator();
+            emptyState.style.display = 'none';
+
+            pendingTasks
+                .slice(0, 10)
+                .forEach((task) => {
+                    const priority = normalizePriority(task.priority);
+                    const chip = document.createElement('span');
+                    chip.className = `task-chip ${priority}`;
+                    chip.innerHTML = `
+                        <span class="chip-dot"></span>
+                        <span>${escapeHtml(task.title || task.name || task.task || 'Untitled')}</span>
+                        <span style="color:#94A3B8;">${formatDate(task.dueDate)}</span>
+                    `;
+                    stack.appendChild(chip);
+                });
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function startSpinner() {
+            const spinner = document.getElementById('mentor-spinner');
+            spinner.classList.add('show');
+            if (spinnerTween) {
+                spinnerTween.kill();
+            }
+            spinnerTween = gsap.to(spinner, {
+                rotation: 360,
+                duration: 0.75,
+                ease: 'none',
+                repeat: -1
+            });
+        }
+
+        function stopSpinner() {
+            const spinner = document.getElementById('mentor-spinner');
+            spinner.classList.remove('show');
+            gsap.set(spinner, { clearProps: 'rotation' });
+            if (spinnerTween) {
+                spinnerTween.kill();
+                spinnerTween = null;
+            }
+        }
+
+        function appendUserBubble(message) {
+            const shell = document.getElementById('response-shell');
+            const bubble = document.createElement('div');
+            bubble.className = 'user-bubble';
+            bubble.textContent = message;
+            shell.appendChild(bubble);
+            shell.scrollTop = shell.scrollHeight;
+        }
+
+        function typewriterReveal(text) {
+            const box = document.getElementById('ai-response-box');
+            box.style.display = 'block';
+            box.textContent = '';
+
+            gsap.from('#ai-response-box', {
+                duration: 0.5,
+                opacity: 0,
+                y: 20,
+                ease: 'back.out(1.4)'
+            });
+
+            let index = 0;
+            const interval = setInterval(() => {
+                box.textContent += text.charAt(index);
+                index += 1;
+                if (index >= text.length) {
+                    clearInterval(interval);
+                }
+            }, 18);
+        }
+
+        async function askAiMentor() {
+            const input = document.getElementById('mentor-input');
+            const button = document.getElementById('ask-ai-btn');
+            const label = document.getElementById('ask-ai-label');
+            const message = input.value.trim();
+
+            if (!message) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Ask something first',
+                    text: 'Write a question for the AI Mentor before sending.',
+                    background: '#1A1A2E',
+                    color: '#E2E8F0',
+                    confirmButtonColor: '#6C63FF'
+                });
+                return;
+            }
+
+            const userId = currentUser.id || currentUser._id;
+            appendUserBubble(message);
+            input.value = '';
+            input.disabled = true;
+            button.disabled = true;
+            label.textContent = 'Thinking';
+            startSpinner();
 
             try {
-                const userId = currentUser.id || currentUser._id;
                 const response = await fetch(`${API_URL}/api/ai/chat/${userId}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: message })
+                    body: JSON.stringify({ message })
                 });
 
-                removeTypingIndicator(typingIndicatorId);
-                inputField.disabled = false;
-                sendButton.disabled = false;
-                inputField.focus();
-
                 const data = await response.json().catch(() => ({}));
-                if (response.ok) {
-                    addMessageToChat(data.response || "I couldn't generate a response just now. Please try again.", 'ai');
+                const reply = data.response || data.error || 'AI Mentor could not produce a response right now.';
+
+                if (!response.ok) {
+                    typewriterReveal(reply);
                 } else {
-                    addMessageToChat(data.response || data.error || "Sorry, I encountered an error. Please try again.", 'ai');
+                    typewriterReveal(reply);
                 }
-            } catch (err) {
-                removeTypingIndicator(typingIndicatorId);
-                inputField.disabled = false;
-                sendButton.disabled = false;
-                inputField.focus();
-                addMessageToChat("Could not connect to the AI Mentor service right now. Please try again in a moment.", 'ai');
-            }
-        }
-
-        function addMessageToChat(text, sender) {
-            const history = document.getElementById('chat-history');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `chat-message message-${sender}`;
-            
-            if (sender === 'ai') {
-                // Parse markdown for AI
-                msgDiv.innerHTML = marked.parse(text);
-            } else {
-                msgDiv.textContent = text;
-            }
-            
-            history.appendChild(msgDiv);
-            history.scrollTop = history.scrollHeight;
-        }
-
-        function addTypingIndicator() {
-            const id = 'typing-' + Date.now();
-            const history = document.getElementById('chat-history');
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'typing-indicator';
-            typingDiv.id = id;
-            typingDiv.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
-            history.appendChild(typingDiv);
-            history.scrollTop = history.scrollHeight;
-            return id;
-        }
-
-        function removeTypingIndicator(id) {
-            const element = document.getElementById(id);
-            if (element) {
-                element.remove();
+            } catch (error) {
+                typewriterReveal('The AI Mentor service could not be reached. Please try again in a moment.');
+            } finally {
+                stopSpinner();
+                input.disabled = false;
+                button.disabled = false;
+                label.textContent = 'Ask AI';
+                input.focus();
             }
         }
     </script>

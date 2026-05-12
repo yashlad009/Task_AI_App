@@ -28,6 +28,15 @@ public class Task {
     @Column(name = "user_id", nullable = false)
     private String userId;
 
+    @Column(name = "priority", nullable = false)
+    private String priority = "Medium";
+
+    @Column(name = "due_date")
+    private String dueDate;
+
+    @Column(name = "completed_at")
+    private String completedAt;
+
     public Task() {}
 
     // Getters and Setters
@@ -76,4 +85,28 @@ public class Task {
     // Add Getter and Setter
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
+
+    public String getPriority() {
+        return priority;
+    }
+
+    public void setPriority(String priority) {
+        this.priority = priority;
+    }
+
+    public String getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(String dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public String getCompletedAt() {
+        return completedAt;
+    }
+
+    public void setCompletedAt(String completedAt) {
+        this.completedAt = completedAt;
+    }
 }
