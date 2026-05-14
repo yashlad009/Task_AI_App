@@ -323,13 +323,8 @@
         gsap.from("h1, .page-title, .hero-title", { y: 35, opacity: 0, duration: 0.7, ease: "power3.out", delay: 0.2 });
 
         // Page Specific: Milestones
-        gsap.to(".primary-btn", { y: -7, duration: 2.2, ease: "sine.inOut", yoyo: true, repeat: -1 });
-        gsap.from(".milestone-card", {
+        gsap.from(".milestone-card, .milestone-item", {
             y: 40, opacity: 0, duration: 0.7, ease: "power3.out", stagger: 0.15, delay: 0.3
-        });
-
-        document.querySelectorAll(".milestone-card").forEach((card, i) => {
-            gsap.to(card, { y: -8, duration: 2.0 + i * 0.4, ease: "sine.inOut", yoyo: true, repeat: -1, delay: i * 0.2 });
         });
     </script>
 </body>
