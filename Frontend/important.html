@@ -33,7 +33,7 @@
             </a>
             <ul class="nav-links">
                 <li><a href="index.html">Dashboard</a></li>
-                <li><a href="tasks.html">Daily</a></li>
+                <li><a href="tasks.html">Daily Tasks</a></li>
                 <li><a href="important.html" class="active">Important</a></li>
                 <li><a href="milestone.html">Milestones</a></li>
                 <li><a href="analytics.html">Analytics</a></li>
@@ -253,18 +253,11 @@
             y: 40, opacity: 0, duration: 0.7, ease: "power3.out", stagger: 0.15, delay: 0.3
         });
 
-        document.querySelectorAll(".important-card").forEach((card, i) => {
-            gsap.to(card, { y: -8, duration: 2.2 + i * 0.4, ease: "sine.inOut", yoyo: true, repeat: -1, delay: i * 0.2 });
-        });
-
         // Reminder rows stagger
         gsap.from(".reminder-row", {
             y: 20, opacity: 0, duration: 0.4, stagger: 0.1, ease: "power2.out",
             scrollTrigger: { trigger: ".reminder-stack", start: "top 85%" }
         });
-
-        // Pulse for status badges
-        gsap.to(".status-active", { boxShadow: "0 0 12px rgba(34,197,94,0.4)", duration: 1.2, ease: "sine.inOut", yoyo: true, repeat: -1 });
     </script>
 </body>
 </html>

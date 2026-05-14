@@ -34,7 +34,7 @@
             </a>
             <ul class="nav-links">
                 <li><a href="index.html" class="active">Dashboard</a></li>
-                <li><a href="tasks.html">Daily</a></li>
+                <li><a href="tasks.html">Daily Tasks</a></li>
                 <li><a href="important.html">Important</a></li>
                 <li><a href="milestone.html">Milestones</a></li>
                 <li><a href="analytics.html">Analytics</a></li>
@@ -429,10 +429,10 @@
             const node = document.getElementById(id);
             node.textContent = '0';
             gsap.to(node, {
-                duration: 1.5,
+                duration: 1,
                 innerHTML: targetValue,
                 snap: { innerHTML: 1 },
-                ease: "power1.out"
+                ease: "power2.out"
             });
         }
 
@@ -602,9 +602,6 @@
         gsap.from("h1, .page-title, .hero-title", { y: 35, opacity: 0, duration: 0.7, ease: "power3.out", delay: 0.2 });
 
         // Page Specific: Dashboard
-        document.querySelectorAll(".hero-pill").forEach((pill, i) => {
-            gsap.to(pill, { y: -6, duration: 1.8 + i * 0.3, ease: "sine.inOut", yoyo: true, repeat: -1, delay: i * 0.2 });
-        });
 
         // Token number count up is handled in setMetricValue, but let's ensure it runs for all metrics
         
@@ -613,8 +610,8 @@
 
         // Achievement cards pop in
         gsap.from(".achievement-card", {
-            scale: 0.85, opacity: 0, duration: 0.5, stagger: 0.12, ease: "back.out(1.6)",
-            scrollTrigger: { trigger: "#achievementList", start: "top 85%" }
+            y: 20, opacity: 0, duration: 0.5, stagger: 0.1, ease: "power2.out",
+            scrollTrigger: { trigger: "#achievementList", start: "top 90%" }
         });
 
         // Milestone progress bars (handled by progress-circle in dashboard, but we can add more if needed)

@@ -33,7 +33,7 @@
             </a>
             <ul class="nav-links">
                 <li><a href="index.html">Dashboard</a></li>
-                <li><a href="tasks.html" class="active">Daily</a></li>
+                <li><a href="tasks.html" class="active">Daily Tasks</a></li>
                 <li><a href="important.html">Important</a></li>
                 <li><a href="milestone.html">Milestones</a></li>
                 <li><a href="analytics.html">Analytics</a></li>
@@ -211,7 +211,7 @@
                 list.innerHTML = tasks.slice().reverse().map((task) => {
                     const priority = task.priority || "Medium";
                     const priorityColor = priorityColors[priority] || "#6C63FF";
-                    const due = task.dueDate || "No due date";
+                    const formattedDue = formatDate(task.dueDate);
                     const category = task.category || selectedCategory;
                     const title = escapeHtml(task.text || task.description || "Untitled task");
 
@@ -219,7 +219,7 @@
                         <div class="task-row" style="--priority-color:${priorityColor};">
                             <div class="task-main">
                                 <strong>${title}</strong>
-                                <div class="task-meta">${escapeHtml(category)} • Due ${escapeHtml(due)}</div>
+                                <div class="task-meta">${escapeHtml(category)} • ${escapeHtml(formattedDue)}</div>
                             </div>
                             <span class="task-pill" style="--priority-color:${priorityColor};">${escapeHtml(priority)}</span>
                             <button class="task-delete" type="button" onclick="deleteTask('${task.id}')">
@@ -315,6 +315,18 @@
                 .replaceAll('"', "&quot;")
                 .replaceAll("'", "&#39;");
         }
+
+        function formatDate(dateValue) {
+            if (!dateValue) return "No deadline";
+            const date = new Date(dateValue);
+            if (isNaN(date.getTime())) return dateValue;
+            return date.toLocaleDateString('en-IN', {
+                day: '2-digit',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
         gsap.registerPlugin(ScrollTrigger);
 
         // Global Cursor Glow
@@ -327,19 +339,13 @@
         gsap.from("h1, .page-title, .hero-title", { y: 35, opacity: 0, duration: 0.7, ease: "power3.out", delay: 0.2 });
 
         // Page Specific: Daily Planning
-        document.querySelectorAll(".cat-card").forEach((card, i) => {
-            gsap.to(card, { y: -10, duration: 2.0 + i * 0.35, ease: "sine.inOut", yoyo: true, repeat: -1, delay: i * 0.25 });
-            
-            card.addEventListener("mouseenter", () => {
-                gsap.to(card, { y: -18, scale: 1.04, duration: 0.3, ease: "power2.out", boxShadow: "0 0 20px rgba(108,99,255,0.3)" });
-            });
-            card.addEventListener("mouseleave", () => {
-                gsap.to(card, { y: -10, scale: 1, duration: 0.3, ease: "power2.out", boxShadow: "none" });
-            });
+        gsap.from(".cat-card", {
+            y: 20, opacity: 0, duration: 0.5, stagger: 0.1, ease: "power2.out", delay: 0.4
         });
 
-        gsap.from(".planner-card:first-child", { x: -50, opacity: 0, duration: 0.7, ease: "power3.out", delay: 0.3 });
-        gsap.from(".planner-card:last-child", { x: 50, opacity: 0, duration: 0.7, ease: "power3.out", delay: 0.3 });
+        gsap.from(".planner-card", { 
+            y: 30, opacity: 0, duration: 0.7, stagger: 0.15, ease: "power3.out", delay: 0.5 
+        });
     </script>
 </body>
 </html>

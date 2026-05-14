@@ -368,10 +368,9 @@
 
         // Page Specific: Analytics
         gsap.from(".stat-card", {
-            scale: 0.8, opacity: 0, duration: 0.5, stagger: 0.15, ease: "back.out(1.7)", delay: 0.4
+            y: 30, opacity: 0, duration: 0.5, stagger: 0.12, ease: "power2.out", delay: 0.4
         });
 
-        gsap.to(".stat-card", { y: -8, duration: 2.5, ease: "sine.inOut", yoyo: true, repeat: -1 });
 
         // Chart area fade in
         gsap.from("#progress-chart", {
