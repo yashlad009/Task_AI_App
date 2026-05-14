@@ -437,7 +437,7 @@ code {
 
 .stats-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
+    grid-template-columns: repeat(2, 1fr) !important; /* STRICT 2X2 ALWAYS */
     gap: 24px;
     margin-bottom: 40px;
     align-items: stretch;
@@ -1320,26 +1320,31 @@ select:focus {
 
 
 
-/* --- MOBILE NAVIGATION OVERRIDE (MUST BE LAST) --- */
+/* --- MOBILE NAVIGATION OVERRIDE (CRITICAL FIX) --- */
 @media (max-width: 900px) {
     .mobile-menu-btn {
         display: block !important;
-        z-index: 2001;
+        z-index: 5001 !important;
     }
     .nav-links {
         display: none !important;
         position: fixed !important;
         top: 0 !important;
         right: 0 !important;
-        width: 280px !important;
+        width: 300px !important;
         height: 100vh !important;
-        background: #0b0b14 !important; /* ULTRA SOLID BLACK-BLUE */
+        background-color: #0d0d1a !important; /* ABSOLUTELY SOLID DARK */
+        background: #0d0d1a !important;
+        backdrop-filter: none !important; /* REMOVE TRANSPARENCY */
+        -webkit-backdrop-filter: none !important;
         flex-direction: column !important;
-        padding: 100px 30px !important;
-        gap: 15px !important;
-        border-left: 1px solid rgba(255,255,255,0.15) !important;
-        z-index: 2000 !important;
-        box-shadow: -20px 0 60px rgba(0,0,0,0.9) !important;
+        padding: 110px 35px !important;
+        gap: 12px !important;
+        border-left: 1px solid rgba(255,255,255,0.1) !important;
+        z-index: 5000 !important;
+        box-shadow: -20px 0 80px rgba(0,0,0,1) !important;
+        margin: 0 !important;
+        list-style: none !important;
     }
     .nav-links.active {
         display: flex !important;
@@ -1349,17 +1354,20 @@ select:focus {
         margin: 0 !important;
     }
     .nav-links li a {
-        font-size: 1.15rem !important;
-        color: #ffffff !important;
+        font-size: 1.1rem !important;
+        color: #ffffff !important; /* PURE WHITE */
         display: block !important;
-        padding: 14px 20px !important;
-        border-radius: 10px !important;
+        padding: 16px 24px !important;
+        border-radius: 12px !important;
         background: rgba(255,255,255,0.06) !important;
-        border: 1px solid rgba(255,255,255,0.03) !important;
+        border: 1px solid rgba(255,255,255,0.05) !important;
         text-align: left !important;
+        width: 100% !important;
+        transition: all 0.2s ease !important;
     }
+    .nav-links li a.active,
     .nav-links li a:hover {
-        background: rgba(255,255,255,0.12) !important;
-        color: var(--primary) !important;
+        background: var(--primary) !important;
+        color: #fff !important;
     }
 }
