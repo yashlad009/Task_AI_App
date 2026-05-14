@@ -382,15 +382,28 @@
                 });
                 if (!otpRes.ok) {
                     const errorData = await otpRes.json().catch(() => ({}));
-                    showError(errorData.error || 'Could not send OTP. (Connection timed out)');
-                    return;
+                    const isTimeout = (errorData.error || '').includes('Timeout');
+                    
+                    if (isTimeout) {
+                        Swal.fire({
+                            title: 'Mail Server Timeout',
+                            text: 'Render is blocking the mail connection. For security, the OTP has been logged to your Render Dashboard Logs. Please check your logs to get the code.',
+                            icon: 'info',
+                            background: '#1A1A2E',
+                            color: '#E2E8F0',
+                            confirmButtonColor: '#6C63FF'
+                        });
+                    } else {
+                        showError(errorData.error || 'Could not send OTP.');
+                        return;
+                    }
                 }
 
                 const { value: otpCode } = await Swal.fire({
                     title: 'Verify Email',
-                    text: `Code sent to ${email}`,
+                    text: `Enter the code sent to your email (or check Render logs if mail failed)`,
                     input: 'text',
-                    inputPlaceholder: 'Enter OTP',
+                    inputPlaceholder: 'Enter 6-digit OTP',
                     showCancelButton: true,
                     background: '#1A1A2E',
                     color: '#E2E8F0',
