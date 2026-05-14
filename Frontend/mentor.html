@@ -67,41 +67,39 @@
                 <aside class="context-panel panel">
                     <p class="panel-label">Live Context</p>
                     <h2>Pending Task Radar</h2>
-                    <p>These chips are fed into the mentor prompt so the action plan is based on what is actually waiting for you today.</p>
+                    <p style="font-size: 13px; margin-bottom: 16px;">Real-time data feeding your mentor advice.</p>
                     <div id="task-chip-stack" class="chip-stack"></div>
-                    <div id="empty-chip-state" class="empty-state" style="display:none; margin-top:18px;">No pending tasks found. Add a few tasks first to get sharper mentor advice.</div>
+                    <div id="empty-chip-state" class="empty-state" style="display:none; margin-top:18px;">No pending tasks found.</div>
                     <div class="mentor-stats">
                         <div class="mini-stat">
                             <strong id="pending-count">0</strong>
-                            <span>Pending tasks</span>
+                            <span>Pending</span>
                         </div>
                         <div class="mini-stat">
                             <strong id="urgent-count">0</strong>
-                            <span>High priority</span>
+                            <span>High Priority</span>
                         </div>
                     </div>
                 </aside>
 
                 <section class="chat-panel panel">
-                    <div>
+                    <div class="chat-header">
                         <p class="panel-label">Mentor Console</p>
-                        <h2>Focused plan for today</h2>
-                        <p>Ask for prioritization, deadline rescue, or a study sprint plan. The response is kept short, direct, and built for action.</p>
+                        <h2>Daily Strategy</h2>
                     </div>
 
                     <div id="response-shell" class="response-shell">
-                        <div class="user-bubble">Try: "Give me a 3-point plan for today based on my pending tasks."</div>
-                        <div id="ai-response-box"></div>
+                        <div class="ai-bubble">Identity confirmed. I am Antigravity. Ask me for a 3-point plan, prioritization, or a rescue strategy for your backlog.</div>
                     </div>
 
                     <div class="composer">
-                        <textarea id="mentor-input" placeholder="Ask AI Mentor what to focus on today, how to recover from backlog, or how to beat upcoming deadlines."></textarea>
+                        <textarea id="mentor-input" placeholder="Ask Antigravity anything..."></textarea>
                         <div class="button-column">
                             <button id="ask-ai-btn" class="primary-btn" type="button" onclick="askAiMentor()">
                                 <span id="ask-ai-label">Ask AI</span>
                                 <span id="mentor-spinner" class="spinner"></span>
                             </button>
-                            <span class="helper-note">Response arrives with a typewriter reveal once Gemini returns.</span>
+                            <span class="helper-note">Response reveals in real-time</span>
                         </div>
                     </div>
                 </section>
@@ -117,9 +115,7 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             const sessionUser = window.requireUserSession();
-            if (!sessionUser) {
-                return;
-            }
+            if (!sessionUser) return;
 
             currentUser = sessionUser;
             setupUserProfile(currentUser);
@@ -162,16 +158,13 @@
 
         function normalizePriority(priority) {
             const value = (priority || 'Medium').toLowerCase();
-            if (value === 'high') return 'high';
-            if (value === 'low') return 'low';
-            return 'medium';
+            return (value === 'high' || value === 'low') ? value : 'medium';
         }
 
         function formatDate(dateValue) {
             if (!dateValue) return 'No deadline';
             const parsed = new Date(dateValue);
-            if (Number.isNaN(parsed.getTime())) return dateValue;
-            return parsed.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+            return Number.isNaN(parsed.getTime()) ? dateValue : parsed.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
         }
 
         function isCompleted(task) {
@@ -182,16 +175,14 @@
             const userId = currentUser.id || currentUser._id;
             try {
                 const response = await fetch(`${API_URL}/tasks/user/${userId}`);
-                if (!response.ok) {
-                    throw new Error('Could not load tasks.');
-                }
+                if (!response.ok) throw new Error('Could not load tasks.');
 
                 const tasks = await response.json();
                 pendingTasks = Array.isArray(tasks) ? tasks.filter((task) => !isCompleted(task)) : [];
                 renderPendingTaskChips();
             } catch (error) {
                 document.getElementById('empty-chip-state').style.display = 'block';
-                document.getElementById('empty-chip-state').textContent = 'Task context could not be loaded right now. AI Mentor can still answer, but it may have less context.';
+                document.getElementById('empty-chip-state').textContent = 'Context sync failed.';
             }
         }
 
@@ -211,74 +202,56 @@
             }
 
             emptyState.style.display = 'none';
-
-            pendingTasks
-                .slice(0, 10)
-                .forEach((task) => {
-                    const priority = normalizePriority(task.priority);
-                    const chip = document.createElement('span');
-                    chip.className = `task-chip ${priority}`;
-                    chip.innerHTML = `
-                        <span class="chip-dot"></span>
-                        <span>${escapeHtml(task.title || task.name || task.task || 'Untitled')}</span>
-                        <span style="color:#94A3B8;">${formatDate(task.dueDate)}</span>
-                    `;
-                    stack.appendChild(chip);
-                });
+            pendingTasks.slice(0, 12).forEach((task) => {
+                const priority = normalizePriority(task.priority);
+                const chip = document.createElement('span');
+                chip.className = `task-chip ${priority}`;
+                chip.innerHTML = `<span>${escapeHtml(task.text || 'Untitled')}</span>`;
+                stack.appendChild(chip);
+            });
         }
 
         function escapeHtml(value) {
-            return String(value)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
+            return String(value).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
         }
 
         function startSpinner() {
             const spinner = document.getElementById('mentor-spinner');
             spinner.classList.add('show');
-            if (spinnerTween) {
-                spinnerTween.kill();
-            }
-            spinnerTween = gsap.to(spinner, {
-                rotation: 360,
-                duration: 0.75,
-                ease: 'none',
-                repeat: -1
-            });
+            if (spinnerTween) spinnerTween.kill();
+            spinnerTween = gsap.to(spinner, { rotation: 360, duration: 0.75, ease: 'none', repeat: -1 });
         }
 
         function stopSpinner() {
             const spinner = document.getElementById('mentor-spinner');
             spinner.classList.remove('show');
+            if (spinnerTween) { spinnerTween.kill(); spinnerTween = null; }
             gsap.set(spinner, { clearProps: 'rotation' });
-            if (spinnerTween) {
-                spinnerTween.kill();
-                spinnerTween = null;
-            }
         }
 
-        function appendUserBubble(message) {
+        function appendBubble(message, isAi = false) {
             const shell = document.getElementById('response-shell');
             const bubble = document.createElement('div');
-            bubble.className = 'user-bubble';
-            bubble.textContent = message;
+            bubble.className = isAi ? 'ai-bubble' : 'user-bubble';
             shell.appendChild(bubble);
-            shell.scrollTop = shell.scrollHeight;
+            if (!isAi) {
+                bubble.textContent = message;
+                shell.scrollTop = shell.scrollHeight;
+            }
+            return bubble;
         }
 
         function typewriterReveal(element, text) {
-            element.style.display = 'block';
             element.textContent = "";
             let i = 0;
             const timer = setInterval(() => {
                 element.textContent += text[i];
                 i++;
-                if (i >= text.length) clearInterval(timer);
-            }, 18);
-            gsap.from(element, { opacity: 0, y: 15, duration: 0.4, ease: "power2.out" });
+                if (i >= text.length) {
+                    clearInterval(timer);
+                    document.getElementById('response-shell').scrollTop = document.getElementById('response-shell').scrollHeight;
+                }
+            }, 15);
         }
 
         async function askAiMentor() {
@@ -287,20 +260,10 @@
             const label = document.getElementById('ask-ai-label');
             const message = input.value.trim();
 
-            if (!message) {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Ask something first',
-                    text: 'Write a question for the AI Mentor before sending.',
-                    background: '#1A1A2E',
-                    color: '#E2E8F0',
-                    confirmButtonColor: '#6C63FF'
-                });
-                return;
-            }
+            if (!message) return;
 
             const userId = currentUser.id || currentUser._id;
-            appendUserBubble(message);
+            appendBubble(message, false);
             input.value = '';
             input.disabled = true;
             button.disabled = true;
@@ -315,17 +278,12 @@
                 });
 
                 const data = await response.json().catch(() => ({}));
-                const reply = data.response || data.error || 'AI Mentor could not produce a response right now.';
-
-                const box = document.getElementById('ai-response-box');
-                if (!response.ok) {
-                    typewriterReveal(box, reply);
-                } else {
-                    typewriterReveal(box, reply);
-                }
+                const reply = data.response || data.error || 'Antigravity is busy.';
+                
+                const bubble = appendBubble("", true);
+                typewriterReveal(bubble, reply);
             } catch (error) {
-                const box = document.getElementById('ai-response-box');
-                typewriterReveal(box, 'The AI Mentor service could not be reached. Please try again in a moment.');
+                appendBubble('Service unavailable.', true);
             } finally {
                 stopSpinner();
                 input.disabled = false;
@@ -334,35 +292,14 @@
                 input.focus();
             }
         }
-        gsap.registerPlugin(ScrollTrigger);
 
-        // Global Cursor Glow
+        gsap.registerPlugin(ScrollTrigger);
         document.addEventListener("mousemove", e => {
             gsap.to("#cursor-glow", { x: e.clientX, y: e.clientY, duration: 0.7, ease: "power2.out" });
         });
 
-        // Global Navbar & Title Entrance
         gsap.from("nav, .navbar", { y: -50, opacity: 0, duration: 0.6, ease: "power2.out" });
-        
-        // Hero Typewriter
-        const heroH1 = document.querySelector(".hero-strip h1");
-        const heroText = heroH1.textContent;
-        heroH1.textContent = "";
-        let charIndex = 0;
-        const heroTimer = setInterval(() => {
-            heroH1.textContent += heroText[charIndex];
-            charIndex++;
-            if (charIndex >= heroText.length) clearInterval(heroTimer);
-        }, 40);
-
-        // Page Specific: AI Mentor
         gsap.from(".chat-panel", { x: 50, opacity: 0, duration: 0.8, ease: "power3.out", delay: 0.4 });
-        gsap.to("#ask-ai-btn", { y: -6, duration: 1.5, ease: "sine.inOut", yoyo: true, repeat: -1 });
-
-        // Task chips micro-float
-        document.querySelectorAll(".task-chip").forEach((chip, i) => {
-            gsap.to(chip, { y: -4, duration: 1.5 + i * 0.2, ease: "sine.inOut", yoyo: true, repeat: -1, delay: i * 0.1 });
-        });
     </script>
 </body>
 </html>

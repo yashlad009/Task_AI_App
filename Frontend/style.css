@@ -842,150 +842,192 @@ select:focus {
 .progress-grid,
 .category-grid,
 .achievement-list,
+/* --- AI MENTOR CHAT CSS --- */
 .mentor-grid {
     display: grid !important;
-    grid-template-columns: 1fr !important;
+    grid-template-columns: 280px 1fr !important;
     gap: 24px !important;
+    align-items: start;
 }
 
-aside {
-    position: static !important;
+@media (max-width: 850px) {
+    .mentor-grid {
+        grid-template-columns: 1fr !important;
+    }
 }
 
+.context-panel {
+    position: sticky;
+    top: 100px;
+}
 
-
-
-
-.footer-content {
+.chip-stack {
     display: flex;
-    flex-direction: column; /* Stacks items vertically */
-    align-items: center;    /* Centers items horizontally */
-    justify-content: center;
-    text-align: center;     /* Ensures text inside blocks is also centered */
-    gap: 15px;              /* Adds some breathing room between sections */
-    padding: 20px 0;        /* Optional: adds space inside the footer */
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0;
 }
 
-/* Optional: If you want the links to sit side-by-side inside the social div */
-.footer-socials {
+.task-chip {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
     display: flex;
-    gap: 20px;
-    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s ease;
 }
 
-/* --- AI MENTOR CHAT CSS --- */
-.chat-container {
+.task-chip.high { border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05); }
+.task-chip.medium { border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.05); }
+.task-chip.low { border-color: rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.05); }
+
+.mentor-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line-soft);
+}
+
+.mini-stat {
     display: flex;
     flex-direction: column;
-    height: 600px;
-    border-radius: 20px;
-    background: var(--glass-panel-strong);
-    border: 1px solid var(--glass-border);
+}
+
+.mini-stat strong {
+    font-size: 1.2rem;
+    color: var(--text-main);
+}
+
+.mini-stat span {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Chat Panel */
+.chat-panel {
+    display: flex;
+    flex-direction: column;
+    height: 700px; /* Increased height */
+    padding: 0 !important;
     overflow: hidden;
 }
 
-.chat-history {
+.chat-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--line-soft);
+}
+
+.response-shell {
     flex: 1;
-    padding: 20px;
+    padding: 24px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
+    background: rgba(0, 0, 0, 0.1);
 }
 
-.chat-history::-webkit-scrollbar {
-    width: 8px;
-}
-.chat-history::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-}
-
-.chat-message {
-    max-width: 80%;
-    padding: 14px 18px;
+.user-bubble, .ai-bubble {
+    max-width: 85%;
+    padding: 16px 20px;
     border-radius: 18px;
-    line-height: 1.5;
+    line-height: 1.6;
     font-size: 0.95rem;
-    animation: fadeIn 0.3s ease;
+    position: relative;
+    animation: slideUp 0.4s ease-out;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-.message-user {
+.user-bubble {
     align-self: flex-end;
     background: var(--accent-gradient);
     color: #fff;
     border-bottom-right-radius: 4px;
-    box-shadow: var(--button-shadow);
+    box-shadow: 0 10px 20px rgba(108, 99, 255, 0.15);
 }
 
-.message-ai {
+.ai-bubble {
     align-self: flex-start;
-    background: rgba(255, 255, 255, 0.08);
+    background: #1E1E30;
     border: 1px solid var(--glass-border);
     color: var(--text-main);
     border-bottom-left-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* Markdown basic styling within AI responses */
-.message-ai strong { color: var(--sky-blue); }
-.message-ai ul { margin-left: 20px; margin-top: 8px; margin-bottom: 8px; }
-.message-ai li { margin-bottom: 4px; }
-.message-ai h3 { font-size: 1.1rem; margin-top: 10px; margin-bottom: 5px; }
+.ai-bubble strong { color: var(--sky-blue); font-weight: 700; }
+.ai-bubble ul { margin: 12px 0 12px 20px; }
+.ai-bubble li { margin-bottom: 8px; }
 
-.chat-input-area {
-    padding: 15px 20px;
-    background: rgba(0, 0, 0, 0.2);
+.composer {
+    padding: 20px 24px;
+    background: var(--glass-panel);
     border-top: 1px solid var(--line-soft);
     display: flex;
-    gap: 12px;
+    gap: 16px;
+    align-items: flex-end;
 }
 
-.chat-input-area input {
+.composer textarea {
     flex: 1;
-    border-radius: 999px;
-    background: var(--input-bg);
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-radius: 12px;
+    padding: 12px 16px;
+    height: 50px;
+    resize: none;
+    transition: all 0.3s ease;
 }
 
-.chat-input-area button {
-    border-radius: 999px;
-    width: 48px;
-    height: 48px;
-    padding: 0;
+.composer textarea:focus {
+    height: 100px;
+}
+
+.button-column {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+.primary-btn {
+    width: 100px;
+    height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
 }
 
-.typing-indicator {
-    align-self: flex-start;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 12px 18px;
-    border-radius: 18px;
-    border-bottom-left-radius: 4px;
-    display: flex;
-    gap: 6px;
-    align-items: center;
+.helper-note {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-align: center;
+    max-width: 100px;
 }
 
-.typing-dot {
-    width: 6px;
-    height: 6px;
-    background: var(--sky-blue);
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
     border-radius: 50%;
-    animation: typing 1.4s infinite ease-in-out both;
+    display: none;
 }
 
-.typing-dot:nth-child(1) { animation-delay: -0.32s; }
-.typing-dot:nth-child(2) { animation-delay: -0.16s; }
-
-@keyframes typing {
-    0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
-    40% { transform: scale(1); opacity: 1; }
+.spinner.show {
+    display: block;
 }
 
 /* --- COMPONENTS --- */
