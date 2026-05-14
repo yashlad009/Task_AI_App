@@ -68,10 +68,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("error", "Email and password are required."));
         }
 
-        boolean isOtpValid = registrationOtpService.verifyOtp(email, otp);
-        boolean isCompetitionBypass = "777777".equals(otp);
-
-        if (isOtpValid || isCompetitionBypass) {
+        if (registrationOtpService.verifyOtp(email, otp)) {
             if (userRepository.findByEmail(email).isPresent()) {
                 return ResponseEntity.badRequest().body(Map.of("error", "User already exists!"));
             }

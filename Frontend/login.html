@@ -382,26 +382,13 @@
                 });
                 if (!otpRes.ok) {
                     const errorData = await otpRes.json().catch(() => ({}));
-                    const isTimeout = (errorData.error || '').includes('Timeout') || (errorData.error || '').includes('Mail');
-                    
-                    if (isTimeout) {
-                        Swal.fire({
-                            title: 'Network Optimization',
-                            text: 'To ensure a smooth presentation, we have enabled Competition Mode. Please use the verification code: 777777',
-                            icon: 'info',
-                            background: '#1A1A2E',
-                            color: '#E2E8F0',
-                            confirmButtonColor: '#6C63FF'
-                        });
-                    } else {
-                        showError(errorData.error || 'Could not send OTP.');
-                        return;
-                    }
+                    showError(errorData.error || 'Could not send OTP.');
+                    return;
                 }
 
                 const { value: otpCode } = await Swal.fire({
                     title: 'Security Verification',
-                    text: `Enter the code sent to your email (or use 777777 for competition demo)`,
+                    text: `Enter the code sent to ${email}`,
                     input: 'text',
                     inputPlaceholder: '6-digit code',
                     showCancelButton: true,
@@ -411,12 +398,11 @@
                 });
 
                 if (!otpCode) return;
-                const actualCode = (otpRes.ok) ? otpCode : (otpCode || '777777');
-
+                
                 const finalRes = await fetch(`${API_URL}/verify-and-register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password, otp: actualCode, adminKey })
+                    body: JSON.stringify({ email, password, otp: otpCode, adminKey })
                 });
 
                 if (finalRes.ok) {

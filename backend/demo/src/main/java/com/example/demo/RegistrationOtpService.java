@@ -45,13 +45,12 @@ public class RegistrationOtpService {
 
     public void sendOtpEmail(String toEmail, String otp) {
         if (senderEmail == null || senderEmail.isBlank()) {
-            System.err.println("WARNING: MAIL_USERNAME is missing. Falling back to Competition Mode.");
+            throw new IllegalStateException("MAIL_USERNAME is missing from your environment variables.");
         }
         if (senderPassword == null || senderPassword.isBlank()) {
-            System.err.println("WARNING: MAIL_PASSWORD is missing. Falling back to Competition Mode.");
+            throw new IllegalStateException("MAIL_PASSWORD is missing from your environment variables.");
         }
 
-        System.out.println(">>> COMPETITION MODE: If mail fails, use code: 777777 <<<");
         MimeMessage message = mailSender.createMimeMessage();
 
         try {
@@ -111,11 +110,8 @@ public class RegistrationOtpService {
 
             helper.setText(htmlContent, true);
             mailSender.send(message);
-            System.out.println("DEBUG: OTP sent successfully to " + toEmail);
         } catch (Exception e) {
-            System.err.println("COMPETITION FALLBACK: Mail server timed out. Allowing code 777777 for demo. Error: " + e.getMessage());
-            // We don't throw an exception here, we just log it. 
-            // The AuthController will handle the '777777' bypass.
+            throw new IllegalStateException("Mail Server Error: " + e.getMessage(), e);
         }
     }
 }
