@@ -31,7 +31,10 @@
                 <img src="apms3.png" alt="Logo">
                 <span>APMS<b>PRO</b></span>
             </a>
-            <ul class="nav-links">
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul id="navLinks" class="nav-links">
                 <li><a href="index.html">Dashboard</a></li>
                 <li><a href="tasks.html">Daily Tasks</a></li>
                 <li><a href="important.html" class="active">Important</a></li>
@@ -136,6 +139,10 @@
         function toggleProfile() {
             const modal = document.getElementById('profileModal');
             modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('navLinks').classList.toggle('active');
         }
 
         function logoutUser() {

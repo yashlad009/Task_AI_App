@@ -247,7 +247,38 @@ body::after {
 .nav-actions {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
+}
+
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-main);
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+@media (max-width: 900px) {
+    .mobile-menu-btn {
+        display: block;
+    }
+    .nav-links {
+        display: none;
+        position: absolute;
+        top: 64px;
+        left: 0;
+        width: 100%;
+        background: var(--glass-panel-strong);
+        flex-direction: column;
+        padding: 20px;
+        gap: 16px;
+        border-bottom: 1px solid var(--glass-border);
+        z-index: 1000;
+    }
+    .nav-links.active {
+        display: flex;
+    }
 }
 
 /* Dropdown Modal */
@@ -441,11 +472,12 @@ code {
     flex-direction: column;
     justify-content: space-between;
     align-items: flex-start;
-    background: #1A1A2E;
+    background: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow);
-    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-    min-height: 180px; /* Standardized height */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+    min-height: 140px;
+    border-bottom: 4px solid var(--card-accent, var(--primary)); /* Vibrant accent line */
 }
 
 .stat-card:hover {
@@ -895,10 +927,16 @@ select:focus {
 .stats-row,
 .overview-grid {
     display: grid !important;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important;
-    gap: 24px !important;
+    grid-template-columns: repeat(2, 1fr) !important; /* Forced 2x2 for symmetry */
+    gap: 20px !important;
     align-items: stretch !important;
     margin-bottom: 40px;
+}
+
+@media (min-width: 1100px) {
+    .stats-row, .overview-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+    }
 }
 
 .dashboard-grid,
@@ -923,8 +961,8 @@ select:focus {
 
 .category-grid {
     display: grid !important;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)) !important;
-    gap: 20px !important;
+    grid-template-columns: repeat(2, 1fr) !important; /* Forced 2x2 for symmetry */
+    gap: 16px !important;
     margin-bottom: 32px;
     width: 100%;
 }
