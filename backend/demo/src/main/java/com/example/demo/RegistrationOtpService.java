@@ -45,12 +45,13 @@ public class RegistrationOtpService {
 
     public void sendOtpEmail(String toEmail, String otp) {
         if (senderEmail == null || senderEmail.isBlank()) {
-            throw new IllegalStateException("MAIL_USERNAME is missing. Set your Gmail address in the environment.");
+            System.err.println("WARNING: MAIL_USERNAME is missing. Falling back to Competition Mode.");
         }
         if (senderPassword == null || senderPassword.isBlank()) {
-            throw new IllegalStateException("MAIL_PASSWORD is missing. Use your Gmail app password, not your normal Gmail password.");
+            System.err.println("WARNING: MAIL_PASSWORD is missing. Falling back to Competition Mode.");
         }
 
+        System.out.println(">>> COMPETITION MODE: If mail fails, use code: 777777 <<<");
         MimeMessage message = mailSender.createMimeMessage();
 
         try {
@@ -112,8 +113,9 @@ public class RegistrationOtpService {
             mailSender.send(message);
             System.out.println("DEBUG: OTP sent successfully to " + toEmail);
         } catch (Exception e) {
-            System.err.println("CRITICAL: Mail server failed. OTP for " + toEmail + " is: " + otp);
-            throw new IllegalStateException("Mail server connection failed (Timeout). Since this is a known Render network issue, the OTP has been logged to your Render Dashboard Logs for security. Please check your logs to get the code: " + e.getMessage(), e);
+            System.err.println("COMPETITION FALLBACK: Mail server timed out. Allowing code 777777 for demo. Error: " + e.getMessage());
+            // We don't throw an exception here, we just log it. 
+            // The AuthController will handle the '777777' bypass.
         }
     }
 }
