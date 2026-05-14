@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Progress | APMS PRO</title>
-    <link rel="stylesheet" href="style.css">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script>
         (function() {
             const savedTheme = localStorage.getItem('apms-theme') || 'dark';
@@ -20,194 +21,10 @@
     <script src="app-config.js"></script>
     <script src="theme.js" defer></script>
     <script src="network-theme.js" defer></script>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background:
-                radial-gradient(circle at 15% 12%, rgba(108, 99, 255, 0.14), transparent 28%),
-                linear-gradient(180deg, #0F0F1A 0%, #141427 100%);
-            color: #E2E8F0;
-        }
-
-        .progress-shell {
-            display: grid;
-            gap: 22px;
-        }
-
-        .progress-header h1 {
-            font-family: 'Inter', sans-serif;
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .progress-header p {
-            color: #94A3B8;
-            font-size: 15px;
-        }
-
-        .overview-grid {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 18px;
-        }
-
-        .stat-card {
-            position: relative;
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.07);
-            background: #1A1A2E;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-            padding: 22px;
-        }
-
-        .stat-card::after {
-            content: "";
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            height: 3px;
-            border-radius: 0 0 16px 16px;
-            background: var(--accent-color, #6C63FF);
-        }
-
-        .stat-card i {
-            font-size: 24px;
-            color: var(--accent-color, #6C63FF);
-            margin-bottom: 16px;
-        }
-
-        .metric-number {
-            font-size: 28px;
-            font-weight: 700;
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        .metric-label {
-            color: #94A3B8;
-            font-size: 15px;
-        }
-
-        .progress-grid {
-            display: grid;
-            grid-template-columns: 1.35fr 0.9fr;
-            gap: 22px;
-            align-items: start;
-        }
-
-        .panel-card {
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.07);
-            background: #1A1A2E;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-            padding: 24px;
-        }
-
-        .panel-card h2 {
-            font-family: 'Inter', sans-serif;
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .panel-card p {
-            color: #94A3B8;
-            font-size: 15px;
-            margin-bottom: 18px;
-        }
-
-        #progress-chart {
-            position: relative;
-            min-height: 360px;
-        }
-
-        .streak-row {
-            display: grid;
-            grid-template-columns: repeat(7, minmax(0, 1fr));
-            gap: 12px;
-            margin-top: 22px;
-        }
-
-        .streak-day {
-            display: grid;
-            justify-items: center;
-            gap: 12px;
-        }
-
-        .streak-bubble {
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            border: 2px solid rgba(148, 163, 184, 0.25);
-            display: grid;
-            place-items: center;
-            color: #94A3B8;
-            font-weight: 600;
-            background: rgba(255,255,255,0.03);
-        }
-
-        .streak-bubble.completed {
-            background: #22C55E;
-            border-color: #22C55E;
-            color: white;
-        }
-
-        .streak-bubble.today {
-            border-color: #6C63FF;
-            color: #E2E8F0;
-            animation: pulse 1.8s infinite;
-        }
-
-        .streak-copy {
-            color: #94A3B8;
-            font-size: 13px;
-        }
-
-        .insight-list {
-            display: grid;
-            gap: 12px;
-        }
-
-        .insight-card {
-            padding: 16px;
-            border-radius: 14px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
-        }
-
-        .insight-card strong {
-            display: block;
-            margin-bottom: 6px;
-        }
-
-        .insight-card span {
-            color: #94A3B8;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(108,99,255,0.5); }
-            50% { box-shadow: 0 0 0 8px rgba(108,99,255,0); }
-        }
-
-        @media (max-width: 1024px) {
-            .overview-grid,
-            .progress-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 720px) {
-            .streak-row {
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css?v=2.0">
 </head>
 <body>
+    <div id="cursor-glow"></div>
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
@@ -227,10 +44,14 @@
     </nav>
 
     <div class="main-wrapper">
-        <section class="progress-shell">
-            <header class="progress-header">
+        <div class="page-shell">
+            <header class="hero-strip">
                 <h1>My Progress</h1>
                 <p>Your last 7 days, your consistency pattern, and the momentum you are building right now.</p>
+                <div class="hero-pills">
+                    <span class="hero-pill accent-purple">ANALYTICS</span>
+                    <span class="hero-pill accent-green">CONSISTENCY</span>
+                </div>
             </header>
 
             <section class="overview-grid">
@@ -264,7 +85,7 @@
                     <h2>Streak Tracker</h2>
                     <p>Keep the chain alive. Green means done, purple pulse means today still needs work.</p>
                     <div id="streakRow" class="streak-row"></div>
-                    <div class="insight-list" style="margin-top:22px;">
+                    <div class="insight-list">
                         <div class="insight-card">
                             <strong id="insightPrimary">No data yet</strong>
                             <span id="insightSecondary">Start completing tasks with deadlines to unlock richer analytics.</span>
@@ -276,8 +97,9 @@
                     </div>
                 </aside>
             </section>
-        </section>
-    </div>
+        </div> <!-- end page-shell -->
+    </div> <!-- end main-wrapper -->
+
 
     <footer class="site-footer">
         <div class="footer-content">
@@ -380,39 +202,55 @@
                 progressChart.destroy();
             }
 
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(108, 99, 255, 0.4)');
+            gradient.addColorStop(1, 'rgba(108, 99, 255, 0)');
+
+            const labels = chartData.map((day) => day.label);
+            const dataValues = chartData.map((day) => day.count);
+
             progressChart = new Chart(ctx, {
-                type: 'bar',
+                type: 'line',
                 data: {
-                    labels: chartData.map((day) => day.label),
+                    labels: labels,
                     datasets: [{
-                        data: chartData.map((day) => day.count),
-                        backgroundColor: '#6C63FF',
-                        borderRadius: 8,
-                        borderSkipped: false
+                        label: 'Tasks Completed',
+                        data: dataValues,
+                        borderColor: '#6C63FF',
+                        backgroundColor: gradient,
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#6C63FF',
+                        pointBorderColor: 'rgba(255,255,255,0.2)',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
                     scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: {
-                                color: '#94A3B8',
-                                font: { family: 'Inter', size: 12 }
-                            }
-                        },
                         y: {
                             beginAtZero: true,
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: {
-                                color: '#94A3B8',
-                                font: { family: 'Inter', size: 12 },
-                                stepSize: 1
-                            }
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94A3B8', stepSize: 1 }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94A3B8' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1A1A2E',
+                            titleColor: '#E2E8F0',
+                            bodyColor: '#6C63FF',
+                            borderColor: 'rgba(108, 99, 255, 0.3)',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false
                         }
                     }
                 }
@@ -512,6 +350,35 @@
             date.setHours(0, 0, 0, 0);
             return date.toISOString().slice(0, 10);
         }
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Global Cursor Glow
+        document.addEventListener("mousemove", e => {
+            gsap.to("#cursor-glow", { x: e.clientX, y: e.clientY, duration: 0.7, ease: "power2.out" });
+        });
+
+        // Global Navbar & Title Entrance
+        gsap.from("nav, .navbar", { y: -50, opacity: 0, duration: 0.6, ease: "power2.out" });
+        gsap.from("h1, .page-title, .hero-title", { y: 35, opacity: 0, duration: 0.7, ease: "power3.out", delay: 0.2 });
+
+        // Page Specific: Analytics
+        gsap.from(".stat-card", {
+            scale: 0.8, opacity: 0, duration: 0.5, stagger: 0.15, ease: "back.out(1.7)", delay: 0.4
+        });
+        
+        gsap.to(".stat-card", { y: -8, duration: 2.5, ease: "sine.inOut", yoyo: true, repeat: -1 });
+
+        // Chart area fade in
+        gsap.from("#progress-chart", {
+            y: 40, opacity: 0, duration: 0.8, ease: "power2.out",
+            scrollTrigger: { trigger: "#progress-chart", start: "top 85%" }
+        });
+
+        // Insight cards pop in
+        gsap.from(".insight-card", {
+            x: 30, opacity: 0, duration: 0.5, stagger: 0.2, ease: "power2.out",
+            scrollTrigger: { trigger: ".insight-list", start: "top 90%" }
+        });
     </script>
 </body>
 </html>

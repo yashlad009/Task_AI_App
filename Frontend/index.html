@@ -4,13 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | APMS PRO</title>
-    <link rel="stylesheet" href="style.css">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         (function() {
             const savedTheme = localStorage.getItem('apms-theme') || 'dark';
@@ -20,431 +22,10 @@
     <script src="app-config.js"></script>
     <script src="theme.js" defer></script>
     <script src="network-theme.js" defer></script>
-    <style>
-        :root {
-            --comp-primary: #6C63FF;
-            --comp-success: #22C55E;
-            --comp-warning: #F59E0B;
-            --comp-danger: #EF4444;
-            --comp-bg: #0F0F1A;
-            --comp-card: #1A1A2E;
-            --comp-text: #E2E8F0;
-            --comp-muted: #94A3B8;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background:
-                radial-gradient(circle at 12% 20%, rgba(108, 99, 255, 0.12), transparent 28%),
-                radial-gradient(circle at 88% 14%, rgba(34, 197, 94, 0.08), transparent 24%),
-                linear-gradient(180deg, #0f0f1a 0%, #131328 100%);
-            color: var(--comp-text);
-        }
-
-        .main-wrapper {
-            max-width: 1380px;
-        }
-
-        .dashboard-hero {
-            margin-bottom: 26px;
-        }
-
-        .dashboard-hero h1 {
-            font-family: 'Inter', sans-serif;
-            font-size: clamp(2rem, 4vw, 3.2rem);
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .dashboard-hero p {
-            color: var(--comp-muted);
-            font-size: 15px;
-        }
-
-        .stats-row {
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 18px;
-        }
-
-        .stat-card {
-            position: relative;
-            display: grid;
-            gap: 18px;
-            align-content: space-between;
-            min-height: 160px;
-            padding: 22px;
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.07);
-            background: #1A1A2E;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-        }
-
-        .stat-card::after {
-            content: "";
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            height: 3px;
-            border-radius: 0 0 16px 16px;
-            background: var(--card-accent, var(--comp-primary));
-        }
-
-        .stat-card-top {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-        }
-
-        .stat-card i {
-            font-size: 24px;
-            color: var(--card-accent, var(--comp-primary));
-        }
-
-        .metric-number {
-            display: block;
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--comp-text);
-            line-height: 1;
-        }
-
-        .metric-label {
-            margin-top: 8px;
-            color: var(--comp-muted);
-            font-size: 15px;
-            font-weight: 400;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1.5fr 1fr;
-            gap: 22px;
-            align-items: start;
-        }
-
-        .dashboard-card {
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.07);
-            background: #1A1A2E;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-            padding: 24px;
-        }
-
-        .dashboard-card h2,
-        .dashboard-card h3 {
-            font-family: 'Inter', sans-serif;
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin: 0 0 6px;
-        }
-
-        .dashboard-card p {
-            color: var(--comp-muted);
-            font-size: 15px;
-            margin: 0;
-        }
-
-        .task-feed {
-            margin-top: 18px;
-            display: grid;
-            gap: 12px;
-        }
-
-        .task-row {
-            display: grid;
-            grid-template-columns: auto 1fr auto auto;
-            gap: 14px;
-            align-items: center;
-            padding: 16px;
-            border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.06);
-            background: rgba(255,255,255,0.03);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .task-row::before {
-            content: "";
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background: var(--priority-color, var(--comp-primary));
-        }
-
-        .task-check {
-            width: 20px;
-            height: 20px;
-            accent-color: var(--comp-success);
-            cursor: pointer;
-        }
-
-        .task-title {
-            font-size: 15px;
-            font-weight: 600;
-        }
-
-        .task-row.completed .task-title {
-            text-decoration: line-through;
-            opacity: 0.58;
-        }
-
-        .task-subline {
-            margin-top: 4px;
-            color: var(--comp-muted);
-            font-size: 13px;
-        }
-
-        .status-pill,
-        .priority-pill {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 104px;
-            padding: 8px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 600;
-            border: 1px solid rgba(255,255,255,0.08);
-        }
-
-        .priority-pill {
-            min-width: 74px;
-            color: white;
-            background: var(--priority-color, var(--comp-primary));
-        }
-
-        .status-todo {
-            color: #cbd5e1;
-            background: rgba(148, 163, 184, 0.12);
-        }
-
-        .status-progress {
-            color: #fcd34d;
-            background: rgba(245, 158, 11, 0.12);
-        }
-
-        .status-done {
-            color: #86efac;
-            background: rgba(34, 197, 94, 0.12);
-        }
-
-        .task-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .action-btn {
-            width: 40px;
-            height: 40px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.04);
-            color: var(--comp-text);
-        }
-
-        .progress-card {
-            display: grid;
-            justify-items: center;
-            gap: 20px;
-            min-height: 440px;
-        }
-
-        .progress-ring {
-            position: relative;
-            width: 160px;
-            height: 160px;
-            display: grid;
-            place-items: center;
-        }
-
-        .progress-ring svg {
-            width: 160px;
-            height: 160px;
-            transform: rotate(-90deg);
-        }
-
-        .progress-ring circle {
-            fill: none;
-            stroke-width: 12;
-            stroke-linecap: round;
-        }
-
-        .progress-ring .track {
-            stroke: rgba(255,255,255,0.08);
-        }
-
-        .progress-ring .progress {
-            stroke: var(--comp-primary);
-            stroke-dasharray: 283;
-            stroke-dashoffset: 283;
-        }
-
-        .progress-center {
-            position: absolute;
-            display: grid;
-            justify-items: center;
-            gap: 4px;
-        }
-
-        .progress-center strong {
-            font-size: 22px;
-            font-weight: 700;
-        }
-
-        .progress-center span {
-            color: var(--comp-muted);
-            font-size: 13px;
-        }
-
-        .progress-summary {
-            width: 100%;
-            display: grid;
-            gap: 14px;
-        }
-
-        .summary-strip {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 12px;
-        }
-
-        .summary-chip,
-        .certificate-chip {
-            border-radius: 14px;
-            padding: 14px 16px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
-        }
-
-        .summary-chip small,
-        .certificate-chip small {
-            display: block;
-            color: var(--comp-muted);
-            font-size: 12px;
-            margin-bottom: 6px;
-        }
-
-        .summary-chip strong,
-        .certificate-chip strong {
-            font-size: 18px;
-        }
-
-        .achievement-list {
-            display: grid;
-            gap: 10px;
-        }
-
-        .achievement-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 14px 16px;
-            border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.06);
-            background: rgba(255,255,255,0.03);
-        }
-
-        .achievement-card.locked {
-            opacity: 0.6;
-        }
-
-        .achievement-copy strong {
-            display: block;
-            font-size: 15px;
-            margin-bottom: 4px;
-        }
-
-        .achievement-copy span {
-            color: var(--comp-muted);
-            font-size: 13px;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 34px 18px;
-            color: var(--comp-muted);
-            font-size: 15px;
-        }
-
-        .certificate-modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(7, 8, 18, 0.72);
-            backdrop-filter: blur(10px);
-            z-index: 1200;
-            padding: 18px;
-        }
-
-        .certificate-card {
-            max-width: 760px;
-            margin: 5vh auto 0;
-            border-radius: 18px;
-            padding: 30px;
-            background: #1A1A2E;
-            border: 1px solid rgba(255,255,255,0.08);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-            text-align: center;
-        }
-
-        .certificate-card h2 {
-            font-size: 2rem;
-            margin-bottom: 6px;
-        }
-
-        .certificate-card .certificate-name {
-            font-size: 28px;
-            font-weight: 700;
-            margin: 18px 0 8px;
-        }
-
-        .certificate-actions {
-            margin-top: 24px;
-            display: flex;
-            justify-content: center;
-            gap: 14px;
-            flex-wrap: wrap;
-        }
-
-        @media (max-width: 1100px) {
-            .stats-row {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 760px) {
-            .stats-row {
-                grid-template-columns: 1fr;
-            }
-
-            .task-row {
-                grid-template-columns: auto 1fr;
-            }
-
-            .task-actions,
-            .status-pill,
-            .priority-pill {
-                grid-column: 2;
-            }
-
-            .summary-strip {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css?v=2.0">
 </head>
 <body>
+    <div id="cursor-glow"></div>
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
@@ -471,10 +52,16 @@
     </nav>
 
     <div class="main-wrapper">
-        <section class="dashboard-hero">
-            <h1>Own today before it owns you.</h1>
-            <p>Track priorities, finish faster, and unlock progress you can actually see.</p>
-        </section>
+        <div class="page-shell">
+            <header class="hero-strip">
+                <h1>Own today before it owns you.</h1>
+                <p>Track priorities, finish faster, and unlock progress you can actually see.</p>
+                <div class="hero-pills">
+                    <span class="hero-pill accent-purple">FOCUS BEATS RUSH</span>
+                    <span class="hero-pill accent-green">BUILD WITH CALM</span>
+                    <span class="hero-pill accent-amber">FINISH WITH INTENT</span>
+                </div>
+            </header>
 
         <section class="stats-row">
             <article class="stat-card" style="--card-accent:#6C63FF;">
@@ -528,14 +115,11 @@
                     <p>Live completion ratio for your current task stack.</p>
                 </div>
 
-                <div class="progress-ring">
-                    <svg viewBox="0 0 120 120" aria-hidden="true">
-                        <circle class="track" cx="60" cy="60" r="45"></circle>
-                        <circle id="progress-circle" class="progress" cx="60" cy="60" r="45"></circle>
-                    </svg>
-                    <div class="progress-center">
-                        <strong id="progressPercent">0%</strong>
-                        <span>Tasks done</span>
+                <div class="progress-ring" style="position: relative; width: 140px; height: 140px; margin: 0 auto;">
+                    <canvas id="dashboardProgressChart"></canvas>
+                    <div class="progress-center" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                        <strong id="progressPercent" style="display: block; font-size: 1.5rem; color: var(--text);">0%</strong>
+                        <span style="font-size: 0.8rem; color: var(--muted);">Tasks done</span>
                     </div>
                 </div>
 
@@ -562,7 +146,9 @@
                 </div>
             </aside>
         </section>
-    </div>
+        </div> <!-- end page-shell -->
+    </div> <!-- end main-wrapper -->
+
 
     <div id="certificateModal" class="certificate-modal">
         <div class="certificate-card">
@@ -599,7 +185,7 @@
 
     <script>
         const API_URL = window.getApiBaseUrl();
-        const PROGRESS_CIRCLE_CIRCUMFERENCE = 283;
+        let dashboardChart = null;
         let currentUser = null;
         let currentCertificate = null;
         let achievements = [];
@@ -654,10 +240,44 @@
             document.getElementById('tokenBalance').textContent = gamification.tokens || 0;
             document.getElementById('completionRateText').textContent = `${completed} / ${total}`;
             document.getElementById('progressPercent').textContent = `${percent}%`;
-            document.getElementById('progress-circle').style.strokeDashoffset = PROGRESS_CIRCLE_CIRCUMFERENCE * (1 - (percent / 100));
+            
+            renderDashboardChart(percent);
+        }
+
+        function renderDashboardChart(percent) {
+            const ctx = document.getElementById('dashboardProgressChart').getContext('2d');
+            if (dashboardChart) {
+                dashboardChart.destroy();
+            }
+
+            dashboardChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [percent, 100 - percent],
+                        backgroundColor: ['#6C63FF', 'rgba(255, 255, 255, 0.05)'],
+                        borderWidth: 0,
+                        borderRadius: 10,
+                        cutout: '82%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    },
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
         }
 
         function renderTaskFeed(tasks) {
+
             const taskFeed = document.getElementById('taskFeed');
             if (!tasks.length) {
                 taskFeed.innerHTML = `<div class="empty-state">No tasks yet. Add one from Daily Planning to start building your streak.</div>`;
@@ -743,11 +363,47 @@
                 ease: "power3.out"
             });
 
-            gsap.from("#progress-circle", {
-                duration: 1.2,
-                strokeDashoffset: PROGRESS_CIRCLE_CIRCUMFERENCE,
+            const percent = Math.round(analytics.completionRate || 0);
+            
+            // Initialize or Update Chart.js Doughnut
+            const ctx = document.getElementById('dashboardProgressChart').getContext('2d');
+            if (dashboardChart) {
+                dashboardChart.data.datasets[0].data = [percent, 100 - percent];
+                dashboardChart.update();
+            } else {
+                dashboardChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        datasets: [{
+                            data: [0, 100],
+                            backgroundColor: ['#6C63FF', 'rgba(255, 255, 255, 0.05)'],
+                            borderWidth: 0,
+                            circumference: 360,
+                            rotation: 0,
+                            cutout: '85%'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { tooltip: { enabled: false }, legend: { display: false } },
+                        animation: { duration: 2000, easing: 'easeOutQuart' }
+                    }
+                });
+                // Trigger the actual value after a small delay for visual effect
+                setTimeout(() => {
+                    dashboardChart.data.datasets[0].data = [percent, 100 - percent];
+                    dashboardChart.update();
+                }, 100);
+            }
+
+            gsap.to({ val: 0 }, {
+                val: percent,
+                duration: 2,
                 ease: "power2.out",
-                delay: 0.4
+                onUpdate: function() {
+                    document.getElementById('progressPercent').textContent = Math.round(this.targets()[0].val) + '%';
+                }
             });
         }
 
@@ -916,6 +572,34 @@
                 }
             });
         });
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Global Cursor Glow
+        document.addEventListener("mousemove", e => {
+            gsap.to("#cursor-glow", { x: e.clientX, y: e.clientY, duration: 0.7, ease: "power2.out" });
+        });
+
+        // Global Navbar & Title Entrance
+        gsap.from("nav, .navbar", { y: -50, opacity: 0, duration: 0.6, ease: "power2.out" });
+        gsap.from("h1, .page-title, .hero-title", { y: 35, opacity: 0, duration: 0.7, ease: "power3.out", delay: 0.2 });
+
+        // Page Specific: Dashboard
+        document.querySelectorAll(".hero-pill").forEach((pill, i) => {
+            gsap.to(pill, { y: -6, duration: 1.8 + i * 0.3, ease: "sine.inOut", yoyo: true, repeat: -1, delay: i * 0.2 });
+        });
+
+        // Token number count up is handled in setMetricValue, but let's ensure it runs for all metrics
+        
+        // Progress bar animation
+        gsap.from(".progress", { width: "0%", duration: 1.2, ease: "power2.out", delay: 0.5 });
+
+        // Achievement cards pop in
+        gsap.from(".achievement-card", {
+            scale: 0.85, opacity: 0, duration: 0.5, stagger: 0.12, ease: "back.out(1.6)",
+            scrollTrigger: { trigger: "#achievementList", start: "top 85%" }
+        });
+
+        // Milestone progress bars (handled by progress-circle in dashboard, but we can add more if needed)
     </script>
 </body>
 </html>

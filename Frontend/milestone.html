@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Milestones | APMS PRO</title>
-    <link rel="stylesheet" href="style.css">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script>
         (function() {
             const savedTheme = localStorage.getItem('apms-theme') || 'dark';
@@ -20,224 +21,10 @@
     <script src="app-config.js"></script>
     <script src="theme.js" defer></script>
     <script src="network-theme.js" defer></script>
-    <style>
-        :root {
-            --primary: #6C63FF;
-            --success: #22C55E;
-            --warning: #F59E0B;
-            --danger: #EF4444;
-            --bg: #0F0F1A;
-            --card: #1A1A2E;
-            --text: #E2E8F0;
-            --muted: #94A3B8;
-        }
-
-        body {
-            font-family: "Inter", sans-serif;
-            color: var(--text);
-            background:
-                radial-gradient(circle at 16% 16%, rgba(108,99,255,0.14), transparent 28%),
-                radial-gradient(circle at 84% 18%, rgba(34,197,94,0.08), transparent 22%),
-                linear-gradient(180deg, #0F0F1A 0%, #141427 100%);
-        }
-
-        .milestone-shell {
-            display: grid;
-            gap: 22px;
-        }
-
-        .milestone-hero,
-        .milestone-card {
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.07);
-            background: #1A1A2E;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-        }
-
-        .milestone-hero {
-            padding: 28px;
-            background: linear-gradient(135deg, rgba(34,197,94,0.12), rgba(26,26,46,0.96));
-        }
-
-        .milestone-hero h1 {
-            margin: 0 0 10px;
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 700;
-            letter-spacing: -0.04em;
-        }
-
-        .milestone-hero p,
-        .milestone-card p {
-            margin: 0;
-            color: var(--muted);
-            font-size: 15px;
-            line-height: 1.7;
-        }
-
-        .milestone-grid {
-            display: grid;
-            grid-template-columns: 0.95fr 1.25fr;
-            gap: 22px;
-        }
-
-        .milestone-card {
-            padding: 24px;
-        }
-
-        .milestone-card h2 {
-            margin: 0 0 8px;
-            font-size: 1.35rem;
-            font-weight: 600;
-        }
-
-        .milestone-form {
-            display: grid;
-            gap: 14px;
-            margin-top: 20px;
-        }
-
-        .milestone-form input {
-            width: 100%;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.03);
-            color: var(--text);
-            padding: 14px 16px;
-            font: inherit;
-        }
-
-        .primary-btn,
-        .secondary-btn {
-            border: none;
-            border-radius: 10px;
-            padding: 10px 22px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s ease, transform 0.2s ease;
-        }
-
-        .primary-btn {
-            background: #6C63FF;
-            color: white;
-        }
-
-        .primary-btn:hover,
-        .secondary-btn:hover {
-            transform: scale(1.03);
-        }
-
-        .primary-btn:hover {
-            background: #5A52E0;
-        }
-
-        .secondary-btn {
-            background: rgba(255,255,255,0.05);
-            color: var(--text);
-            border: 1px solid rgba(255,255,255,0.08);
-        }
-
-        .milestone-list {
-            margin-top: 18px;
-            display: grid;
-            gap: 14px;
-        }
-
-        .milestone-item {
-            padding: 18px;
-            border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.06);
-            background: rgba(255,255,255,0.03);
-        }
-
-        .milestone-top {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 14px;
-            align-items: start;
-            margin-bottom: 14px;
-        }
-
-        .milestone-top h3 {
-            margin: 0 0 6px;
-            font-size: 15px;
-            font-weight: 600;
-        }
-
-        .milestone-top p {
-            font-size: 13px;
-        }
-
-        .milestone-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .milestone-actions input {
-            width: 78px;
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.03);
-            color: var(--text);
-            padding: 10px 12px;
-            font: inherit;
-        }
-
-        .delete-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: rgba(239,68,68,0.12);
-            color: #FCA5A5;
-            cursor: pointer;
-        }
-
-        .progress-track {
-            height: 12px;
-            border-radius: 999px;
-            background: rgba(255,255,255,0.08);
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #22C55E 0%, #6C63FF 100%);
-            border-radius: 999px;
-            transition: width 0.5s ease;
-        }
-
-        .progress-copy {
-            margin-top: 8px;
-            text-align: right;
-            color: var(--muted);
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .empty-state {
-            padding: 26px 16px;
-            text-align: center;
-            color: var(--muted);
-            border-radius: 14px;
-            border: 1px dashed rgba(255,255,255,0.08);
-        }
-
-        @media (max-width: 980px) {
-            .milestone-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .milestone-top {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css?v=2.0">
 </head>
 <body>
+    <div id="cursor-glow"></div>
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
@@ -257,11 +44,15 @@
     </nav>
 
     <div class="main-wrapper">
-        <section class="milestone-shell">
-            <header class="milestone-hero">
+        <div class="page-shell">
+            <section class="hero-strip">
                 <h1>Track long-term wins, not just today’s tasks.</h1>
                 <p>Use milestones to show visible project momentum during your PBL demo and celebrate every 100% completion moment.</p>
-            </header>
+                <div class="hero-pills" style="display: flex; gap: 10px; margin-top: 18px;">
+                    <span class="hero-pill" style="padding: 8px 16px; border-radius: 999px; background: rgba(108,99,255,0.15); border: 1px solid rgba(108,99,255,0.3); font-size: 12px; font-weight: 700; color: #6C63FF; letter-spacing: 0.05em;">MILESTONES</span>
+                    <span class="hero-pill" style="padding: 8px 16px; border-radius: 999px; background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); font-size: 12px; font-weight: 700; color: #22C55E; letter-spacing: 0.05em;">MOMENTUM</span>
+                </div>
+            </section>
 
             <section class="milestone-grid">
                 <article class="milestone-card">
@@ -280,8 +71,9 @@
                     <div id="milestone-list-area" class="milestone-list"></div>
                 </article>
             </section>
-        </section>
-    </div>
+        </div> <!-- end page-shell -->
+    </div> <!-- end main-wrapper -->
+
 
     <footer class="site-footer">
         <div class="footer-content">
@@ -481,6 +273,26 @@
         function escapeJs(value) {
             return String(value).replaceAll("'", "\\'");
         }
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Global Cursor Glow
+        document.addEventListener("mousemove", e => {
+            gsap.to("#cursor-glow", { x: e.clientX, y: e.clientY, duration: 0.7, ease: "power2.out" });
+        });
+
+        // Global Navbar & Title Entrance
+        gsap.from("nav, .navbar", { y: -50, opacity: 0, duration: 0.6, ease: "power2.out" });
+        gsap.from("h1, .page-title, .hero-title", { y: 35, opacity: 0, duration: 0.7, ease: "power3.out", delay: 0.2 });
+
+        // Page Specific: Milestones
+        gsap.to(".primary-btn", { y: -7, duration: 2.2, ease: "sine.inOut", yoyo: true, repeat: -1 });
+        gsap.from(".milestone-card", {
+            y: 40, opacity: 0, duration: 0.7, ease: "power3.out", stagger: 0.15, delay: 0.3
+        });
+
+        document.querySelectorAll(".milestone-card").forEach((card, i) => {
+            gsap.to(card, { y: -8, duration: 2.0 + i * 0.4, ease: "sine.inOut", yoyo: true, repeat: -1, delay: i * 0.2 });
+        });
     </script>
 </body>
 </html>

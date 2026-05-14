@@ -10,429 +10,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="app-config.js"></script>
     <script src="network-theme.js" defer></script>
-    <style>
-        :root {
-            --primary: #6C63FF;
-            --success: #22C55E;
-            --warning: #F59E0B;
-            --danger: #EF4444;
-            --bg: #0F0F1A;
-            --card: #1A1A2E;
-            --text: #E2E8F0;
-            --muted: #94A3B8;
-        }
-
-        * { box-sizing: border-box; }
-
-        body {
-            margin: 0;
-            min-height: 100vh;
-            font-family: "Inter", sans-serif;
-            color: var(--text);
-            background:
-                radial-gradient(circle at 16% 18%, rgba(108,99,255,0.18), transparent 22%),
-                radial-gradient(circle at 84% 22%, rgba(108,99,255,0.14), transparent 18%),
-                linear-gradient(180deg, #0F0F1A 0%, #141428 100%);
-        }
-
-        .navbar {
-            position: sticky;
-            top: 0;
-            z-index: 40;
-            padding: 18px 24px;
-            backdrop-filter: blur(18px);
-            background: rgba(15, 15, 26, 0.82);
-            border-bottom: 1px solid rgba(255,255,255,0.07);
-        }
-
-        .nav-container {
-            max-width: 1280px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-        }
-
-        .nav-logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 22px;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-        }
-
-        .nav-logo span {
-            color: var(--primary);
-        }
-
-        .nav-logo img {
-            height: 56px;
-        }
-
-        .nav-links {
-            list-style: none;
-            display: flex;
-            gap: 14px;
-            margin: 0;
-            padding: 0;
-            flex-wrap: wrap;
-        }
-
-        .nav-links a {
-            color: var(--muted);
-            text-decoration: none;
-            padding: 10px 14px;
-            border-radius: 999px;
-            transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            background: rgba(108,99,255,0.14);
-            color: var(--text);
-            transform: scale(1.03);
-        }
-
-        .nav-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .theme-toggle,
-        .user-avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.04);
-            color: var(--text);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        .user-avatar {
-            font-weight: 700;
-            background: linear-gradient(135deg, #6C63FF, #5148e0);
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            right: 20px;
-            top: 78px;
-            z-index: 50;
-        }
-
-        .modal-content {
-            width: 260px;
-            padding: 20px;
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.07);
-            background: #1A1A2E;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-        }
-
-        .btn-sm,
-        .primary-btn {
-            border: none;
-            border-radius: 10px;
-            padding: 10px 22px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s ease, transform 0.2s ease;
-        }
-
-        .btn-sm:hover,
-        .primary-btn:hover {
-            transform: scale(1.03);
-        }
-
-        .primary-btn {
-            background: #6C63FF;
-            color: white;
-        }
-
-        .primary-btn:hover {
-            background: #5A52E0;
-        }
-
-        .main-wrapper {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 32px 24px 52px;
-        }
-
-        .page-shell {
-            display: grid;
-            gap: 24px;
-        }
-
-        .hero-strip {
-            padding: 24px;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.07);
-            background: linear-gradient(135deg, rgba(108,99,255,0.12), rgba(26,26,46,0.96));
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-        }
-
-        .hero-strip h1 {
-            margin: 0 0 10px;
-            font-size: 34px;
-            font-weight: 700;
-            letter-spacing: -0.04em;
-        }
-
-        .hero-strip p {
-            margin: 0;
-            color: var(--muted);
-            line-height: 1.7;
-            max-width: 60ch;
-        }
-
-        .mentor-grid {
-            display: grid;
-            grid-template-columns: 0.92fr 1.28fr;
-            gap: 24px;
-            align-items: start;
-        }
-
-        .panel {
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.07);
-            background: #1A1A2E;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-        }
-
-        .context-panel {
-            padding: 24px;
-            position: sticky;
-            top: 96px;
-        }
-
-        .panel-label {
-            margin: 0 0 8px;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 0.18em;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
-
-        .context-panel h2,
-        .chat-panel h2 {
-            margin: 0 0 12px;
-            font-size: 28px;
-            font-weight: 700;
-            letter-spacing: -0.04em;
-        }
-
-        .context-panel p,
-        .chat-panel p {
-            margin: 0;
-            color: var(--muted);
-            line-height: 1.7;
-        }
-
-        .chip-stack {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 22px;
-        }
-
-        .task-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 12px;
-            border-radius: 999px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.03);
-            font-size: 13px;
-            color: var(--text);
-        }
-
-        .task-chip.high { border-color: rgba(239,68,68,0.42); }
-        .task-chip.medium { border-color: rgba(245,158,11,0.4); }
-        .task-chip.low { border-color: rgba(34,197,94,0.36); }
-
-        .task-chip .chip-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        .task-chip.high .chip-dot { background: var(--danger); }
-        .task-chip.medium .chip-dot { background: var(--warning); }
-        .task-chip.low .chip-dot { background: var(--success); }
-
-        .mentor-stats {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 12px;
-            margin-top: 22px;
-        }
-
-        .mini-stat {
-            padding: 14px;
-            border-radius: 14px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
-        }
-
-        .mini-stat strong {
-            display: block;
-            margin-bottom: 4px;
-            font-size: 22px;
-            font-weight: 700;
-        }
-
-        .mini-stat span {
-            color: var(--muted);
-            font-size: 13px;
-        }
-
-        .chat-panel {
-            padding: 24px;
-            display: grid;
-            gap: 18px;
-        }
-
-        .response-shell {
-            min-height: 360px;
-            display: grid;
-            gap: 14px;
-            align-content: start;
-            padding: 16px;
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.06);
-            background: rgba(255,255,255,0.02);
-            overflow: hidden;
-        }
-
-        .user-bubble {
-            justify-self: end;
-            max-width: min(100%, 640px);
-            padding: 14px 16px;
-            border-radius: 12px 12px 0 12px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.08);
-            line-height: 1.7;
-        }
-
-        #ai-response-box {
-            display: none;
-            max-width: min(100%, 700px);
-            padding: 16px;
-            background: rgba(108,99,255,0.1);
-            border-left: 3px solid #6C63FF;
-            border-radius: 0 12px 12px 12px;
-            line-height: 1.7;
-            font-size: 14px;
-            white-space: pre-wrap;
-        }
-
-        .composer {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) 220px;
-            gap: 12px;
-            align-items: stretch;
-        }
-
-        .composer textarea {
-            min-height: 110px;
-            height: 100%;
-            resize: vertical;
-            border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.03);
-            color: var(--text);
-            padding: 16px;
-            font: inherit;
-        }
-
-        .composer textarea::placeholder {
-            color: var(--muted);
-        }
-
-        .button-column {
-            display: grid;
-            gap: 10px;
-            align-content: stretch;
-        }
-
-        .button-column .primary-btn {
-            min-height: 48px;
-            width: 100%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .spinner {
-            width: 18px;
-            height: 18px;
-            border: 2px solid rgba(255,255,255,0.2);
-            border-top-color: white;
-            border-radius: 50%;
-            display: none;
-        }
-
-        .spinner.show {
-            display: inline-block;
-        }
-
-        .helper-note,
-        .empty-state {
-            color: var(--muted);
-            font-size: 14px;
-            line-height: 1.7;
-        }
-
-        @media (max-width: 1080px) {
-            .mentor-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .context-panel {
-                position: static;
-            }
-        }
-
-        @media (max-width: 860px) {
-            .navbar {
-                padding: 16px;
-            }
-
-            .nav-container {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .nav-links {
-                justify-content: center;
-            }
-
-            .main-wrapper {
-                padding: 24px 16px 40px;
-            }
-
-            .composer {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css?v=2.0">
 </head>
 <body>
+    <div id="cursor-glow"></div>
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
@@ -472,6 +56,11 @@
                 <p class="panel-label">AI Planning</p>
                 <h1>Talk to your workload, not a generic chatbot.</h1>
                 <p>APMS PRO now builds mentor guidance from your real pending tasks, deadlines, and priorities so the answer feels like a study coach instead of a random generator.</p>
+                <div class="hero-pills">
+                    <span class="hero-pill accent-purple">AI MENTOR</span>
+                    <span class="hero-pill accent-green">SMART PLANNING</span>
+                    <span class="hero-pill accent-amber">BUILD WITH CALM</span>
+                </div>
             </section>
 
             <section class="mentor-grid">
@@ -680,26 +269,16 @@
             shell.scrollTop = shell.scrollHeight;
         }
 
-        function typewriterReveal(text) {
-            const box = document.getElementById('ai-response-box');
-            box.style.display = 'block';
-            box.textContent = '';
-
-            gsap.from('#ai-response-box', {
-                duration: 0.5,
-                opacity: 0,
-                y: 20,
-                ease: 'back.out(1.4)'
-            });
-
-            let index = 0;
-            const interval = setInterval(() => {
-                box.textContent += text.charAt(index);
-                index += 1;
-                if (index >= text.length) {
-                    clearInterval(interval);
-                }
+        function typewriterReveal(element, text) {
+            element.style.display = 'block';
+            element.textContent = "";
+            let i = 0;
+            const timer = setInterval(() => {
+                element.textContent += text[i];
+                i++;
+                if (i >= text.length) clearInterval(timer);
             }, 18);
+            gsap.from(element, { opacity: 0, y: 15, duration: 0.4, ease: "power2.out" });
         }
 
         async function askAiMentor() {
@@ -738,13 +317,15 @@
                 const data = await response.json().catch(() => ({}));
                 const reply = data.response || data.error || 'AI Mentor could not produce a response right now.';
 
+                const box = document.getElementById('ai-response-box');
                 if (!response.ok) {
-                    typewriterReveal(reply);
+                    typewriterReveal(box, reply);
                 } else {
-                    typewriterReveal(reply);
+                    typewriterReveal(box, reply);
                 }
             } catch (error) {
-                typewriterReveal('The AI Mentor service could not be reached. Please try again in a moment.');
+                const box = document.getElementById('ai-response-box');
+                typewriterReveal(box, 'The AI Mentor service could not be reached. Please try again in a moment.');
             } finally {
                 stopSpinner();
                 input.disabled = false;
@@ -753,6 +334,35 @@
                 input.focus();
             }
         }
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Global Cursor Glow
+        document.addEventListener("mousemove", e => {
+            gsap.to("#cursor-glow", { x: e.clientX, y: e.clientY, duration: 0.7, ease: "power2.out" });
+        });
+
+        // Global Navbar & Title Entrance
+        gsap.from("nav, .navbar", { y: -50, opacity: 0, duration: 0.6, ease: "power2.out" });
+        
+        // Hero Typewriter
+        const heroH1 = document.querySelector(".hero-strip h1");
+        const heroText = heroH1.textContent;
+        heroH1.textContent = "";
+        let charIndex = 0;
+        const heroTimer = setInterval(() => {
+            heroH1.textContent += heroText[charIndex];
+            charIndex++;
+            if (charIndex >= heroText.length) clearInterval(heroTimer);
+        }, 40);
+
+        // Page Specific: AI Mentor
+        gsap.from(".chat-panel", { x: 50, opacity: 0, duration: 0.8, ease: "power3.out", delay: 0.4 });
+        gsap.to("#ask-ai-btn", { y: -6, duration: 1.5, ease: "sine.inOut", yoyo: true, repeat: -1 });
+
+        // Task chips micro-float
+        document.querySelectorAll(".task-chip").forEach((chip, i) => {
+            gsap.to(chip, { y: -4, duration: 1.5 + i * 0.2, ease: "sine.inOut", yoyo: true, repeat: -1, delay: i * 0.1 });
+        });
     </script>
 </body>
 </html>

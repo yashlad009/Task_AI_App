@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Team | APMS PRO</title>
-    <link rel="stylesheet" href="style.css">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script>
         (function() {
             const savedTheme = localStorage.getItem('apms-theme') || 'dark';
@@ -20,194 +21,10 @@
     <script src="app-config.js"></script>
     <script src="theme.js" defer></script>
     <script src="network-theme.js" defer></script>
-    <style>
-        :root {
-            --primary: #6C63FF;
-            --success: #22C55E;
-            --warning: #F59E0B;
-            --danger: #EF4444;
-            --bg: #0F0F1A;
-            --card: #1A1A2E;
-            --text: #E2E8F0;
-            --muted: #94A3B8;
-        }
-
-        body {
-            font-family: "Inter", sans-serif;
-            color: var(--text);
-            background:
-                radial-gradient(circle at 16% 16%, rgba(108,99,255,0.14), transparent 28%),
-                radial-gradient(circle at 84% 18%, rgba(245,158,11,0.08), transparent 22%),
-                linear-gradient(180deg, #0F0F1A 0%, #141427 100%);
-        }
-
-        .team-shell {
-            display: grid;
-            gap: 22px;
-        }
-
-        .team-hero,
-        .team-card {
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.07);
-            background: #1A1A2E;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-        }
-
-        .team-hero {
-            padding: 28px;
-            background: linear-gradient(135deg, rgba(108,99,255,0.14), rgba(26,26,46,0.96));
-        }
-
-        .team-hero h1 {
-            margin: 0 0 10px;
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 700;
-            letter-spacing: -0.04em;
-        }
-
-        .team-hero p,
-        .team-card p {
-            margin: 0;
-            color: var(--muted);
-            font-size: 15px;
-            line-height: 1.7;
-        }
-
-        .team-grid {
-            display: grid;
-            grid-template-columns: 0.9fr 1.3fr;
-            gap: 22px;
-        }
-
-        .team-card {
-            padding: 24px;
-        }
-
-        .team-card h2 {
-            margin: 0 0 8px;
-            font-size: 1.35rem;
-            font-weight: 600;
-        }
-
-        .profile-card {
-            margin-top: 18px;
-            padding: 18px;
-            border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.06);
-            background: rgba(255,255,255,0.03);
-        }
-
-        .profile-card strong {
-            display: block;
-            font-size: 15px;
-            font-weight: 600;
-            margin-bottom: 6px;
-        }
-
-        .profile-card span {
-            display: block;
-            color: var(--muted);
-            font-size: 13px;
-            margin-bottom: 12px;
-        }
-
-        .role-pill,
-        .status-pill {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .role-pill {
-            background: rgba(108,99,255,0.12);
-            color: #C4B5FD;
-        }
-
-        .status-pill {
-            background: rgba(34,197,94,0.12);
-            color: #86EFAC;
-            margin-left: 8px;
-        }
-
-        .support-stack {
-            margin-top: 18px;
-            display: grid;
-            gap: 14px;
-        }
-
-        textarea {
-            width: 100%;
-            min-height: 120px;
-            border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.03);
-            color: var(--text);
-            padding: 16px;
-            font: inherit;
-            resize: vertical;
-        }
-
-        textarea::placeholder {
-            color: var(--muted);
-        }
-
-        .primary-btn {
-            background: #6C63FF;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 10px 22px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s ease, transform 0.2s ease;
-        }
-
-        .primary-btn:hover {
-            background: #5A52E0;
-            transform: scale(1.03);
-        }
-
-        .conversation-list {
-            margin-top: 18px;
-            display: grid;
-            gap: 12px;
-        }
-
-        .msg-bubble {
-            padding: 16px;
-            border-radius: 14px;
-            border-left: 3px solid #6C63FF;
-            background: rgba(108,99,255,0.08);
-            line-height: 1.7;
-        }
-
-        .msg-bubble .pending {
-            color: var(--muted);
-            font-size: 12px;
-            margin-top: 10px;
-        }
-
-        .empty-state {
-            padding: 26px 16px;
-            text-align: center;
-            color: var(--muted);
-            border-radius: 14px;
-            border: 1px dashed rgba(255,255,255,0.08);
-        }
-
-        @media (max-width: 980px) {
-            .team-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css?v=2.0">
 </head>
 <body>
+    <div id="cursor-glow"></div>
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
@@ -227,10 +44,14 @@
     </nav>
 
     <div class="main-wrapper">
-        <section class="team-shell">
-            <header class="team-hero">
+        <div class="page-shell">
+            <header class="hero-strip">
                 <h1>Team and support flow that feels production ready.</h1>
                 <p>Show the current user role clearly and keep a clean message lane open to the admin for PBL demos and real support.</p>
+                <div class="hero-pills" style="display: flex; gap: 10px; margin-top: 18px;">
+                    <span class="hero-pill" style="padding: 8px 16px; border-radius: 999px; background: rgba(108,99,255,0.15); border: 1px solid rgba(108,99,255,0.3); font-size: 12px; font-weight: 700; color: #6C63FF; letter-spacing: 0.05em;">TEAM</span>
+                    <span class="hero-pill" style="padding: 8px 16px; border-radius: 999px; background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); font-size: 12px; font-weight: 700; color: #22C55E; letter-spacing: 0.05em;">COLLABORATION</span>
+                </div>
             </header>
 
             <section class="team-grid">
@@ -255,8 +76,9 @@
                     <div id="replyList" class="conversation-list"></div>
                 </article>
             </section>
-        </section>
-    </div>
+        </div> <!-- end page-shell -->
+    </div> <!-- end main-wrapper -->
+
 
     <footer class="site-footer">
         <div class="footer-content">
@@ -375,6 +197,24 @@
                 .replaceAll('"', '&quot;')
                 .replaceAll("'", '&#39;');
         }
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Global Cursor Glow
+        document.addEventListener("mousemove", e => {
+            gsap.to("#cursor-glow", { x: e.clientX, y: e.clientY, duration: 0.7, ease: "power2.out" });
+        });
+
+        // Global Navbar & Title Entrance
+        gsap.from("nav, .navbar", { y: -50, opacity: 0, duration: 0.6, ease: "power2.out" });
+        gsap.from("h1, .page-title, .hero-title", { y: 35, opacity: 0, duration: 0.7, ease: "power3.out", delay: 0.2 });
+
+        gsap.from(".team-card", {
+            y: 40, opacity: 0, duration: 0.7, ease: "power3.out", stagger: 0.15, delay: 0.3
+        });
+
+        document.querySelectorAll(".team-card").forEach((card, i) => {
+            gsap.to(card, { y: -8, duration: 2.2 + i * 0.4, ease: "sine.inOut", yoyo: true, repeat: -1, delay: i * 0.2 });
+        });
     </script>
 </body>
 </html>

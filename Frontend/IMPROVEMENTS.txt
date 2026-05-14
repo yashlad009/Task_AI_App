@@ -1,11 +1,350 @@
+ I am upgrading the UI/UX animations of APMS PRO — a student productivity web app. Frontend is vanilla HTML, CSS, JavaScript only (no React, no Vue). The project has 7 pages:
+
+dashboard.html | daily-planning.html | imp-tasks.html | milestones.html | analytics.html | team.html | ai-mentor.html
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EXISTING DESIGN (DO NOT CHANGE THESE)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Background: #0A0A18 (dark navy black) — all pages
+- Card backgrounds: #12121E or #1A1A2E
+- Navbar: fixed at top, glass effect, backdrop-filter blur(16px), border-bottom 1px solid rgba(108,99,255,0.15)
+- Accent color: #6C63FF (purple-blue)
+- Success/complete: #22C55E (green)
+- Pending/warning: #F59E0B (amber)
+- Delete/danger: #EF4444 (red)
+- Font: Inter (already loaded via Google Fonts)
+- Existing constellation/particle line background already present in some pages
+- Category cards on Daily Planning already have purple-to-blue gradients (Study, Health, Work, Personal)
+- Chart.js already used on Analytics page
+- Navbar links: Dashboard | Daily Planning | Imp Tasks | Milestones | Analytics | Team | AI Mentor
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LIBRARIES TO ADD (put in every page's )
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
-2.there are user portal and admin portal so we have to create the admin portal 
-3. the user portal and admin portal connects to profile in dashboard
-4.For analytics now for just we use javascript but it is not suitable for dynamic data so we have to use numpy and pandas with matplotlib.pyplot
-5.for role there should be for user see only and for admin can edit the analytics of all users 
-6.the scheduled plan web page is remaining that sends mail to user for scheduled plan
-7.I have planned that there is sceduled task page that as task planning but its priority is very high that takes date and it send email to that person 
-8. Rename the apms project name by task tracker 
-9. adding msg system to the admin which fetches all the users and its analytics
- 
+
+In each page's JS: gsap.registerPlugin(ScrollTrigger);
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GLOBAL ANIMATIONS (add to ALL 7 pages)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. CURSOR GLOW ORB
+Add 
+ just after  opens on every page.
+CSS:
+  position: fixed; pointer-events: none; z-index: 0;
+  width: 350px; height: 350px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(108,99,255,0.07) 0%, transparent 70%);
+  transform: translate(-50%, -50%); top: 0; left: 0;
+JS (GSAP):
+document.addEventListener("mousemove", e => {
+  gsap.to("#cursor-glow", { x: e.clientX, y: e.clientY, duration: 0.7, ease: "power2.out" });
+});
+
+2. NAVBAR ENTRANCE
+gsap.from("nav, .navbar", {
+  y: -50, opacity: 0, duration: 0.6, ease: "power2.out"
+});
+
+3. PAGE HEADLINE ENTRANCE
+Every page has one big h1 or hero heading. Animate it:
+gsap.from("h1, .page-title, .hero-title", {
+  y: 35, opacity: 0, duration: 0.7, ease: "power3.out", delay: 0.2
+});
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 1 — dashboard.html
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EXISTING COMPONENTS SEEN:
+- "Executive Overview" hero card with motivational quote and 3 pill badges (FOCUS BEATS RUSH | BUILD WITH CALM | FINISH WITH INTENT)
+- Token Balance card (shows 112, "Level 2", silver cert progress bar 112/200 = 12%)
+- Active Tasks table (columns: DESCRIPTION, STATUS, ACTIONS) — rows have colored category badges (HEALTH/STUDY), status pill (PENDING/COMPLETED), green tick + red delete buttons
+- Rewards Panel: Bronze/Silver/Gold/Elite achievement cards + Token Engine (Study+10, Work+12, Health+8, Entertainment+6, Personal+6)
+- Milestone Tracking: progress bars for each milestone (xyz 100%, Yash you did it 10%)
+
+ANIMATIONS TO ADD:
+
+A) Hero card 3 pill badges — antigravity float, each at different speed:
+document.querySelectorAll(".hero-pill, .mood-pill").forEach((pill, i) => {
+  gsap.to(pill, { y: -6, duration: 1.8 + i * 0.3, ease: "sine.inOut", yoyo: true, repeat: -1, delay: i * 0.2 });
+});
+
+B) Token Balance card — number count-up on load:
+gsap.from(".token-number", { textContent: 0, duration: 1.5, ease: "power1.out", snap: { textContent: 1 },
+  onUpdate: function() { this.targets()[0].textContent = Math.round(this.targets()[0].textContent); }
+});
+
+C) Progress bar (112/200) — animate width from 0% to 12% on load:
+gsap.from(".token-progress-bar", { width: "0%", duration: 1.2, ease: "power2.out", delay: 0.5 });
+
+D) Active Tasks table rows — slide in from left with stagger:
+gsap.from(".task-row, tbody tr", {
+  x: -40, opacity: 0, duration: 0.5, stagger: 0.1, ease: "power2.out",
+  scrollTrigger: { trigger: ".task-table, table", start: "top 85%" }
+});
+
+E) Achievement cards (Bronze/Silver/Gold/Elite) — pop in with scale:
+gsap.from(".achievement-card", {
+  scale: 0.85, opacity: 0, duration: 0.5, stagger: 0.12, ease: "back.out(1.6)",
+  scrollTrigger: { trigger: ".achievements", start: "top 85%" }
+});
+
+F) Milestone progress bars — animate from 0 to actual % on scroll:
+document.querySelectorAll(".milestone-bar").forEach(bar => {
+  const target = bar.dataset.progress || bar.style.width;
+  gsap.from(bar, { width: "0%", duration: 1.4, ease: "power2.out",
+    scrollTrigger: { trigger: bar, start: "top 90%" }
+  });
+});
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 2 — daily-planning.html
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EXISTING COMPONENTS SEEN:
+- Hero: "Plan the day before the day controls you."
+- Task Composer: 4 category selector cards (Study=purple, Health=green-blue, Work=blue, Personal=pink-red gradient)
+- Form: text input "Add Study task...", date picker, priority dropdown (Medium Priority), "Add Task" button
+- Today's Track: list of tasks with category label, due date, priority badge (Low=green, Medium=amber), delete button
+
+ANIMATIONS TO ADD:
+
+A) 4 category cards — ANTIGRAVITY FLOAT (continuous, each different speed):
+document.querySelectorAll(".category-card, .cat-card").forEach((card, i) => {
+  gsap.to(card, { y: -10, duration: 2.0 + i * 0.35, ease: "sine.inOut", yoyo: true, repeat: -1, delay: i * 0.25 });
+});
+
+B) Category card hover — lift higher + glow border:
+card.addEventListener("mouseenter", () => {
+  gsap.to(card, { y: -18, scale: 1.04, duration: 0.3, ease: "power2.out",
+    boxShadow: "0 0 0 2px rgba(108,99,255,0.5)" });
+});
+card.addEventListener("mouseleave", () => {
+  gsap.to(card, { y: -10, scale: 1, duration: 0.3, ease: "power2.out", boxShadow: "none" });
+});
+
+C) Task Composer card — slide in from left on load:
+gsap.from(".task-composer", { x: -50, opacity: 0, duration: 0.7, ease: "power3.out", delay: 0.3 });
+
+D) Today's Track card — slide in from right on load:
+gsap.from(".today-track", { x: 50, opacity: 0, duration: 0.7, ease: "power3.out", delay: 0.3 });
+
+E) Each task row in Today's Track — stagger in from right when added or on load:
+gsap.from(".track-task-row", {
+  x: 30, opacity: 0, duration: 0.4, stagger: 0.1, ease: "power2.out"
+});
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 3 — imp-tasks.html
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EXISTING COMPONENTS SEEN:
+- Hero: "⭐ Important Tasks" + subtitle "Schedule high-priority events. We'll email you 30 minutes before they start."
+- Schedule New Alert card: task name input + datetime picker + "Set Reminder" gradient button (cyan-to-pink)
+- Scheduled Reminders card: table showing TASK & NOTIFICATION TIME | STATUS, with "IMPORTANTBT" badge + "✓ Notified" status
+
+ANIMATIONS TO ADD:
+
+A) "⭐ Important Tasks" heading — bounce entrance:
+gsap.from(".page-title", { y: -30, opacity: 0, duration: 0.8, ease: "bounce.out", delay: 0.3 });
+
+B) "Set Reminder" button — ANTIGRAVITY FLOAT continuously:
+gsap.to(".set-reminder-btn, button[type='submit']", {
+  y: -6, duration: 2.0, ease: "sine.inOut", yoyo: true, repeat: -1
+});
+
+C) Schedule card — float with subtle rotation:
+gsap.to(".schedule-card", {
+  y: -5, rotation: 0.3, duration: 2.5, ease: "sine.inOut", yoyo: true, repeat: -1
+});
+
+D) Reminder table rows — slide in from bottom on scroll:
+gsap.from(".reminder-row, tbody tr", {
+  y: 20, opacity: 0, duration: 0.4, stagger: 0.1, ease: "power2.out",
+  scrollTrigger: { trigger: ".reminders-table", start: "top 85%" }
+});
+
+E) "✓ Notified" status badge — pulse green glow on load:
+gsap.to(".notified-badge, .status-notified", {
+  boxShadow: "0 0 12px rgba(34,197,94,0.4)", duration: 1.2, ease: "sine.inOut", yoyo: true, repeat: -1
+});
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 4 — milestones.html
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EXISTING COMPONENTS SEEN:
+- Hero: "Track long-term wins, not just today's tasks."
+- Create New Milestone card (left): Milestone name input + Initial progress % input + gradient "Add Milestone" button (cyan-to-pink)
+- Milestone Tracking card (right): xyz milestone (100%, green progress bar, "Completed and ready to celebrate.") + "Yash you did it" (10%, short green bar)
+- Update button (teal) and Delete button (purple) per milestone row
+
+ANIMATIONS TO ADD:
+
+A) "Add Milestone" button — ANTIGRAVITY FLOAT:
+gsap.to(".add-milestone-btn", {
+  y: -7, duration: 2.2, ease: "sine.inOut", yoyo: true, repeat: -1
+});
+
+B) Create Milestone card — slide in from left:
+gsap.from(".create-milestone-card", {
+  x: -60, opacity: 0, duration: 0.7, ease: "power3.out", delay: 0.3
+});
+
+C) Milestone Tracking card — slide in from right:
+gsap.from(".milestone-tracking-card", {
+  x: 60, opacity: 0, duration: 0.7, ease: "power3.out", delay: 0.3
+});
+
+D) Progress bars — animate from 0 to actual % with GSAP on scroll:
+document.querySelectorAll(".milestone-progress-bar").forEach(bar => {
+  const finalWidth = bar.style.width;
+  bar.style.width = "0%";
+  gsap.to(bar, {
+    width: finalWidth, duration: 1.5, ease: "power2.out",
+    scrollTrigger: { trigger: bar, start: "top 90%" }
+  });
+});
+
+E) 100% completed milestone row — add a celebration pulse:
+gsap.to(".milestone-complete, [data-progress='100']", {
+  boxShadow: "0 0 20px rgba(34,197,94,0.25)", duration: 1.5, ease: "sine.inOut", yoyo: true, repeat: -1
+});
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 5 — analytics.html
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EXISTING COMPONENTS SEEN:
+- Hero: "Performance Analytics"
+- 3 metric cards in a row: Efficiency 25% (purple icon) | Pending 3 (blue icon) | Milestones 2 (green icon)
+- Tab buttons: "Task Analysis" (cyan-to-pink gradient) | "Milestone Analysis" (cyan-to-pink gradient)
+- Task Productivity chart (Chart.js bar chart): 3 bars — Total Tasks (4, purple), Completed (1, green), Efficiency % (25%, cyan)
+
+ANIMATIONS TO ADD:
+
+A) 3 metric cards — stagger pop-in on load:
+gsap.from(".metric-card", {
+  scale: 0.8, opacity: 0, duration: 0.5, stagger: 0.15, ease: "back.out(1.7)", delay: 0.2
+});
+
+B) Metric numbers — count up:
+document.querySelectorAll(".metric-value").forEach(el => {
+  const end = parseInt(el.textContent);
+  gsap.from(el, {
+    textContent: 0, duration: 1.5, ease: "power1.out", snap: { textContent: 1 },
+    onUpdate() { el.textContent = Math.round(parseFloat(el.textContent)); }
+  });
+});
+
+C) Metric cards — ANTIGRAVITY FLOAT (each different speed):
+document.querySelectorAll(".metric-card").forEach((card, i) => {
+  gsap.to(card, { y: -8, duration: 2.2 + i * 0.4, ease: "sine.inOut", yoyo: true, repeat: -1, delay: i * 0.3 });
+});
+
+D) Tab buttons — slide in from top:
+gsap.from(".tab-btn", {
+  y: -20, opacity: 0, duration: 0.4, stagger: 0.15, ease: "power2.out", delay: 0.4
+});
+
+E) Chart area — fade + scale in:
+gsap.from(".chart-container, canvas", {
+  scale: 0.92, opacity: 0, duration: 0.8, ease: "power3.out", delay: 0.6
+});
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 6 — team.html
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EXISTING COMPONENTS SEEN:
+- Hero: "Role Management" + subtitle "System permissions and administrative coordination."
+- Role table: columns USER | ROLE | STATUS — row shows "ylad492" | USER | Active (green dot)
+- Message to Admin card: headphone icon, textarea "Type your query here...", "Send to Admin" gradient button, Conversation History section (empty)
+
+ANIMATIONS TO ADD:
+
+A) Role table — slide in from left:
+gsap.from(".role-table, .roles-card", {
+  x: -50, opacity: 0, duration: 0.6, ease: "power3.out", delay: 0.3
+});
+
+B) Table rows — stagger in:
+gsap.from(".role-table tbody tr", {
+  x: -30, opacity: 0, duration: 0.4, stagger: 0.1, ease: "power2.out", delay: 0.5
+});
+
+C) "Active" status dot — pulse green continuously:
+gsap.to(".status-active, .active-dot", {
+  boxShadow: "0 0 10px rgba(34,197,94,0.6)", duration: 1.0, ease: "sine.inOut", yoyo: true, repeat: -1
+});
+
+D) Message to Admin card — slide in from right:
+gsap.from(".message-admin-card", {
+  x: 50, opacity: 0, duration: 0.6, ease: "power3.out", delay: 0.3
+});
+
+E) "Send to Admin" button — ANTIGRAVITY FLOAT:
+gsap.to(".send-admin-btn", {
+  y: -6, duration: 2.0, ease: "sine.inOut", yoyo: true, repeat: -1
+});
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 7 — ai-mentor.html
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EXISTING COMPONENTS SEEN:
+- Full-page constellation/star background (already exists — keep it)
+- Hero: "Talk to your workload, not a generic chatbot." + subtitle about Gemini
+- Pending Task Radar card (left): chips showing pending tasks (Untitled x2, due dates), count "3 Pending tasks, 0 High priority"
+- Focused Plan console (right): prompt suggestion "Try: Give me a 3-point plan for today...", text area input, "Ask AI" button (purple gradient), "Response arrives with a typewriter reveal once Gemini returns."
+
+ANIMATIONS TO ADD:
+
+A) Hero headline — typewriter effect (character by character):
+const heading = document.querySelector(".ai-hero-title, h1");
+const text = heading.textContent;
+heading.textContent = "";
+let i = 0;
+gsap.to({}, {
+  duration: text.length * 0.04,
+  onUpdate() { heading.textContent = text.slice(0, Math.round(i++ * text.length / (text.length / 0.04) * 25)); },
+  ease: "none"
+});
+
+B) Task Radar chips — float in with stagger:
+gsap.from(".task-chip, .radar-chip", {
+  y: 20, opacity: 0, duration: 0.4, stagger: 0.1, ease: "back.out(1.5)", delay: 0.5
+});
+
+C) Task Radar chips — continuous micro-float:
+document.querySelectorAll(".task-chip").forEach((chip, i) => {
+  gsap.to(chip, { y: -4, duration: 1.5 + i * 0.2, ease: "sine.inOut", yoyo: true, repeat: -1, delay: i * 0.15 });
+});
+
+D) Focused Plan console — slide in from right:
+gsap.from(".mentor-console", {
+  x: 60, opacity: 0, duration: 0.7, ease: "power3.out", delay: 0.4
+});
+
+E) "Ask AI" button — ANTIGRAVITY FLOAT + pulse glow:
+gsap.to(".ask-ai-btn", {
+  y: -7, duration: 2.0, ease: "sine.inOut", yoyo: true, repeat: -1
+});
+gsap.to(".ask-ai-btn", {
+  boxShadow: "0 0 20px rgba(108,99,255,0.45)", duration: 1.4, ease: "sine.inOut", yoyo: true, repeat: -1
+});
+
+F) AI response box — typewriter reveal after Gemini returns (add this inside your existing fetch callback):
+function typewriterReveal(element, text) {
+  element.textContent = "";
+  let i = 0;
+  const timer = setInterval(() => {
+    element.textContent += text[i];
+    i++;
+    if (i >= text.length) clearInterval(timer);
+  }, 18);
+  gsap.from(element, { opacity: 0, y: 15, duration: 0.4, ease: "power2.out" });
+}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FINAL RULES (apply everywhere)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. DO NOT change any existing HTML structure, form actions, API calls, Supabase queries, or element IDs
+2. DO NOT change any existing colors, fonts, or card backgrounds — only ADD animation
+3. All GSAP code goes in a 

@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Important Tasks | APMS PRO</title>
-    <link rel="stylesheet" href="style.css">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script>
         (function() {
             const savedTheme = localStorage.getItem('apms-theme') || 'dark';
@@ -20,198 +21,10 @@
     <script src="app-config.js"></script>
     <script src="theme.js" defer></script>
     <script src="network-theme.js" defer></script>
-    <style>
-        :root {
-            --primary: #6C63FF;
-            --success: #22C55E;
-            --warning: #F59E0B;
-            --danger: #EF4444;
-            --bg: #0F0F1A;
-            --card: #1A1A2E;
-            --text: #E2E8F0;
-            --muted: #94A3B8;
-        }
-
-        body {
-            font-family: "Inter", sans-serif;
-            color: var(--text);
-            background:
-                radial-gradient(circle at 14% 16%, rgba(108, 99, 255, 0.15), transparent 28%),
-                radial-gradient(circle at 86% 18%, rgba(239, 68, 68, 0.08), transparent 22%),
-                linear-gradient(180deg, #0F0F1A 0%, #141427 100%);
-        }
-
-        .important-shell {
-            display: grid;
-            gap: 22px;
-        }
-
-        .important-hero,
-        .important-card {
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.07);
-            background: #1A1A2E;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-        }
-
-        .important-hero {
-            padding: 28px;
-            background: linear-gradient(135deg, rgba(239,68,68,0.12), rgba(26,26,46,0.96));
-        }
-
-        .important-hero h1 {
-            margin: 0 0 10px;
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 700;
-            letter-spacing: -0.04em;
-        }
-
-        .important-hero p,
-        .important-card p {
-            margin: 0;
-            color: var(--muted);
-            font-size: 15px;
-            line-height: 1.7;
-        }
-
-        .important-grid {
-            display: grid;
-            grid-template-columns: 0.95fr 1.25fr;
-            gap: 22px;
-            align-items: start;
-        }
-
-        .important-card {
-            padding: 24px;
-        }
-
-        .important-card h2 {
-            margin: 0 0 8px;
-            font-size: 1.35rem;
-            font-weight: 600;
-        }
-
-        .important-form {
-            display: grid;
-            gap: 14px;
-            margin-top: 20px;
-        }
-
-        .important-form input {
-            width: 100%;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.03);
-            color: var(--text);
-            padding: 14px 16px;
-            font: inherit;
-        }
-
-        .important-form input::placeholder {
-            color: var(--muted);
-        }
-
-        .primary-btn {
-            background: #6C63FF;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 10px 22px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s ease, transform 0.2s ease;
-        }
-
-        .primary-btn:hover {
-            background: #5A52E0;
-            transform: scale(1.03);
-        }
-
-        .reminder-stack {
-            margin-top: 18px;
-            display: grid;
-            gap: 12px;
-        }
-
-        .reminder-row {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 16px;
-            align-items: center;
-            padding: 16px 18px;
-            border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.06);
-            background: rgba(255,255,255,0.03);
-        }
-
-        .important-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            border-radius: 999px;
-            background: rgba(239,68,68,0.14);
-            color: #FCA5A5;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .reminder-row h3 {
-            margin: 0 0 8px;
-            font-size: 15px;
-            font-weight: 600;
-        }
-
-        .reminder-meta {
-            color: var(--muted);
-            font-size: 13px;
-        }
-
-        .status-pill {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 120px;
-            padding: 10px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 600;
-            border: 1px solid rgba(255,255,255,0.08);
-        }
-
-        .status-active {
-            background: rgba(34,197,94,0.12);
-            color: #86EFAC;
-        }
-
-        .status-processed {
-            background: rgba(148,163,184,0.12);
-            color: #CBD5E1;
-        }
-
-        .empty-state {
-            padding: 26px 16px;
-            text-align: center;
-            color: var(--muted);
-            border-radius: 14px;
-            border: 1px dashed rgba(255,255,255,0.08);
-        }
-
-        @media (max-width: 960px) {
-            .important-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .reminder-row {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css?v=2.0">
 </head>
 <body>
+    <div id="cursor-glow"></div>
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
@@ -231,10 +44,14 @@
     </nav>
 
     <div class="main-wrapper">
-        <section class="important-shell">
-            <header class="important-hero">
+        <div class="page-shell">
+            <header class="hero-strip">
                 <h1>Important task alerts that feel competition ready.</h1>
                 <p>Schedule high-priority tasks with exact timing and APMS PRO will trigger reminder emails 30 minutes before the event.</p>
+                <div class="hero-pills" style="display: flex; gap: 10px; margin-top: 18px;">
+                    <span class="hero-pill" style="padding: 8px 16px; border-radius: 999px; background: rgba(108,99,255,0.15); border: 1px solid rgba(108,99,255,0.3); font-size: 12px; font-weight: 700; color: #6C63FF; letter-spacing: 0.05em;">PRIORITY</span>
+                    <span class="hero-pill" style="padding: 8px 16px; border-radius: 999px; background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); font-size: 12px; font-weight: 700; color: #EF4444; letter-spacing: 0.05em;">URGENT</span>
+                </div>
             </header>
 
             <section class="important-grid">
@@ -254,8 +71,9 @@
                     <div id="important-task-list" class="reminder-stack"></div>
                 </article>
             </section>
-        </section>
-    </div>
+        </div> <!-- end page-shell -->
+    </div> <!-- end main-wrapper -->
+
 
     <footer class="site-footer">
         <div class="footer-content">
@@ -388,6 +206,34 @@
                 .replaceAll('"', '&quot;')
                 .replaceAll("'", '&#39;');
         }
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Global Cursor Glow
+        document.addEventListener("mousemove", e => {
+            gsap.to("#cursor-glow", { x: e.clientX, y: e.clientY, duration: 0.7, ease: "power2.out" });
+        });
+
+        // Global Navbar & Title Entrance
+        gsap.from("nav, .navbar", { y: -50, opacity: 0, duration: 0.6, ease: "power2.out" });
+        gsap.from("h1, .page-title, .hero-title, .hero-strip h1", { y: 35, opacity: 0, duration: 0.7, ease: "power3.out", delay: 0.2 });
+
+        // Page Specific: Important Tasks
+        gsap.from(".important-card", {
+            y: 40, opacity: 0, duration: 0.7, ease: "power3.out", stagger: 0.15, delay: 0.3
+        });
+
+        document.querySelectorAll(".important-card").forEach((card, i) => {
+            gsap.to(card, { y: -8, duration: 2.2 + i * 0.4, ease: "sine.inOut", yoyo: true, repeat: -1, delay: i * 0.2 });
+        });
+
+        // Reminder rows stagger
+        gsap.from(".reminder-row", {
+            y: 20, opacity: 0, duration: 0.4, stagger: 0.1, ease: "power2.out",
+            scrollTrigger: { trigger: ".reminder-stack", start: "top 85%" }
+        });
+
+        // Pulse for status badges
+        gsap.to(".status-active", { boxShadow: "0 0 12px rgba(34,197,94,0.4)", duration: 1.2, ease: "sine.inOut", yoyo: true, repeat: -1 });
     </script>
 </body>
 </html>

@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Planning | APMS PRO</title>
-    <link rel="stylesheet" href="style.css">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script>
         (function() {
             const savedTheme = localStorage.getItem('apms-theme') || 'dark';
@@ -20,261 +21,10 @@
     <script src="app-config.js"></script>
     <script src="theme.js" defer></script>
     <script src="network-theme.js" defer></script>
-    <style>
-        :root {
-            --primary: #6C63FF;
-            --success: #22C55E;
-            --warning: #F59E0B;
-            --danger: #EF4444;
-            --bg: #0F0F1A;
-            --card: #1A1A2E;
-            --text: #E2E8F0;
-            --muted: #94A3B8;
-        }
-
-        body {
-            font-family: "Inter", sans-serif;
-            color: var(--text);
-            background:
-                radial-gradient(circle at 12% 18%, rgba(108, 99, 255, 0.14), transparent 28%),
-                radial-gradient(circle at 88% 12%, rgba(34, 197, 94, 0.08), transparent 20%),
-                linear-gradient(180deg, #0F0F1A 0%, #141427 100%);
-        }
-
-        .planner-shell {
-            display: grid;
-            gap: 22px;
-        }
-
-        .planner-hero {
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.07);
-            background: linear-gradient(135deg, rgba(108,99,255,0.14), rgba(26,26,46,0.96));
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-            padding: 28px;
-        }
-
-        .planner-hero h1 {
-            margin: 0 0 10px;
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 700;
-            letter-spacing: -0.04em;
-        }
-
-        .planner-hero p {
-            margin: 0;
-            color: var(--muted);
-            font-size: 15px;
-            line-height: 1.7;
-            max-width: 64ch;
-        }
-
-        .planner-grid {
-            display: grid;
-            grid-template-columns: 1fr 1.2fr;
-            gap: 22px;
-            align-items: start;
-        }
-
-        .planner-card {
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.07);
-            background: #1A1A2E;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-            padding: 24px;
-        }
-
-        .planner-card h2 {
-            margin: 0 0 8px;
-            font-size: 1.35rem;
-            font-weight: 600;
-        }
-
-        .planner-card p {
-            margin: 0;
-            color: var(--muted);
-            font-size: 15px;
-            line-height: 1.7;
-        }
-
-        .category-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 14px;
-            margin-top: 20px;
-        }
-
-        .cat-card {
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.07);
-            background: rgba(255,255,255,0.03);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-            padding: 18px;
-            cursor: pointer;
-            transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
-        }
-
-        .cat-card:hover,
-        .cat-card.active {
-            background: rgba(108,99,255,0.12);
-            border-color: rgba(108,99,255,0.32);
-            transform: scale(1.03);
-        }
-
-        .cat-card i {
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
-
-        .cat-card strong {
-            display: block;
-            margin-bottom: 4px;
-            font-size: 15px;
-            font-weight: 600;
-        }
-
-        .cat-card span {
-            color: var(--muted);
-            font-size: 13px;
-        }
-
-        .planner-form {
-            display: grid;
-            gap: 14px;
-            margin-top: 22px;
-        }
-
-        .planner-form input,
-        .planner-form select {
-            width: 100%;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.03);
-            color: var(--text);
-            padding: 14px 16px;
-            font: inherit;
-        }
-
-        .planner-form input::placeholder {
-            color: var(--muted);
-        }
-
-        .planner-form button {
-            justify-self: start;
-        }
-
-        .primary-btn {
-            background: #6C63FF;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 10px 22px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s ease, transform 0.2s ease;
-        }
-
-        .primary-btn:hover {
-            background: #5A52E0;
-            transform: scale(1.03);
-        }
-
-        .task-stack {
-            margin-top: 18px;
-            display: grid;
-            gap: 12px;
-        }
-
-        .task-row {
-            position: relative;
-            display: grid;
-            grid-template-columns: 1fr auto auto;
-            gap: 12px;
-            align-items: center;
-            padding: 16px 18px;
-            border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.06);
-            background: rgba(255,255,255,0.03);
-            overflow: hidden;
-        }
-
-        .task-row::before {
-            content: "";
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background: var(--priority-color, var(--primary));
-        }
-
-        .task-main strong {
-            display: block;
-            font-size: 15px;
-            font-weight: 600;
-            margin-bottom: 6px;
-        }
-
-        .task-meta {
-            color: var(--muted);
-            font-size: 13px;
-        }
-
-        .task-pill {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px 12px;
-            min-width: 86px;
-            border-radius: 999px;
-            color: white;
-            font-size: 12px;
-            font-weight: 600;
-            background: var(--priority-color, var(--primary));
-        }
-
-        .task-delete {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.04);
-            color: var(--text);
-            cursor: pointer;
-            transition: background 0.2s ease, transform 0.2s ease;
-        }
-
-        .task-delete:hover {
-            background: rgba(239,68,68,0.16);
-            transform: scale(1.03);
-        }
-
-        .empty-state {
-            padding: 26px 16px;
-            text-align: center;
-            color: var(--muted);
-            border-radius: 14px;
-            border: 1px dashed rgba(255,255,255,0.08);
-        }
-
-        @media (max-width: 980px) {
-            .planner-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .category-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .task-row {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css?v=2.0">
 </head>
 <body>
+    <div id="cursor-glow"></div>
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
@@ -294,10 +44,14 @@
     </nav>
 
     <div class="main-wrapper">
-        <section class="planner-shell">
-            <header class="planner-hero">
+        <div class="page-shell">
+            <header class="hero-strip">
                 <h1>Plan the day before the day controls you.</h1>
                 <p>Pick a category, assign a deadline, choose a priority, and keep the rest of APMS PRO fed with cleaner task data for analytics, reminders, and AI Mentor guidance.</p>
+                <div class="hero-pills">
+                    <span class="hero-pill accent-purple">DAILY PLAN</span>
+                    <span class="hero-pill accent-green">FOCUS MODE</span>
+                </div>
             </header>
 
             <section class="planner-grid">
@@ -307,22 +61,22 @@
 
                     <div class="category-grid">
                         <button class="cat-card active" type="button" onclick="selectCategory(this, 'Study')">
-                            <i class="fas fa-book" style="color:#6C63FF;"></i>
+                            <i class="fas fa-book color-purple"></i>
                             <strong>Study</strong>
                             <span>Assignments, revision, practicals</span>
                         </button>
                         <button class="cat-card" type="button" onclick="selectCategory(this, 'Health')">
-                            <i class="fas fa-heart-pulse" style="color:#22C55E;"></i>
+                            <i class="fas fa-heart-pulse color-green"></i>
                             <strong>Health</strong>
                             <span>Sleep, exercise, well-being</span>
                         </button>
                         <button class="cat-card" type="button" onclick="selectCategory(this, 'Work')">
-                            <i class="fas fa-briefcase" style="color:#F59E0B;"></i>
+                            <i class="fas fa-briefcase color-amber"></i>
                             <strong>Work</strong>
                             <span>Project tasks and coordination</span>
                         </button>
                         <button class="cat-card" type="button" onclick="selectCategory(this, 'Personal')">
-                            <i class="fas fa-house" style="color:#EF4444;"></i>
+                            <i class="fas fa-house color-red"></i>
                             <strong>Personal</strong>
                             <span>Life admin and personal plans</span>
                         </button>
@@ -346,8 +100,9 @@
                     <div id="planning-list" class="task-stack"></div>
                 </article>
             </section>
-        </section>
-    </div>
+        </div> <!-- end page-shell -->
+    </div> <!-- end main-wrapper -->
+
 
     <footer class="site-footer">
         <div class="footer-content">
@@ -529,6 +284,31 @@
                 .replaceAll('"', "&quot;")
                 .replaceAll("'", "&#39;");
         }
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Global Cursor Glow
+        document.addEventListener("mousemove", e => {
+            gsap.to("#cursor-glow", { x: e.clientX, y: e.clientY, duration: 0.7, ease: "power2.out" });
+        });
+
+        // Global Navbar & Title Entrance
+        gsap.from("nav, .navbar", { y: -50, opacity: 0, duration: 0.6, ease: "power2.out" });
+        gsap.from("h1, .page-title, .hero-title", { y: 35, opacity: 0, duration: 0.7, ease: "power3.out", delay: 0.2 });
+
+        // Page Specific: Daily Planning
+        document.querySelectorAll(".cat-card").forEach((card, i) => {
+            gsap.to(card, { y: -10, duration: 2.0 + i * 0.35, ease: "sine.inOut", yoyo: true, repeat: -1, delay: i * 0.25 });
+            
+            card.addEventListener("mouseenter", () => {
+                gsap.to(card, { y: -18, scale: 1.04, duration: 0.3, ease: "power2.out", boxShadow: "0 0 20px rgba(108,99,255,0.3)" });
+            });
+            card.addEventListener("mouseleave", () => {
+                gsap.to(card, { y: -10, scale: 1, duration: 0.3, ease: "power2.out", boxShadow: "none" });
+            });
+        });
+
+        gsap.from(".planner-card:first-child", { x: -50, opacity: 0, duration: 0.7, ease: "power3.out", delay: 0.3 });
+        gsap.from(".planner-card:last-child", { x: 50, opacity: 0, duration: 0.7, ease: "power3.out", delay: 0.3 });
     </script>
 </body>
 </html>
