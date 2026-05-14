@@ -545,21 +545,35 @@
 
         function calculateStreak(completedTasks) {
             if (!completedTasks.length) return 0;
-            const completedDays = [...new Set(completedTasks
-                .map((task) => task.completedAt)
-                .filter(Boolean)
-            )].sort().reverse();
-            if (!completedDays.length) return 0;
+
+            const daysSet = new Set();
+            completedTasks.forEach(t => {
+                if (t.completedAt) {
+                    try {
+                        daysSet.add(new Date(t.completedAt).toISOString().split('T')[0]);
+                    } catch(e) {}
+                }
+            });
+
+            const sortedDays = Array.from(daysSet).sort().reverse();
+            if (!sortedDays.length) return 0;
 
             let streak = 0;
             let cursor = startOfToday();
-            for (const day of completedDays) {
-                const completedDate = new Date(day);
-                completedDate.setHours(0, 0, 0, 0);
-                if (completedDate.getTime() === cursor.getTime()) {
-                    streak += 1;
+            const todayStr = cursor.toISOString().split('T')[0];
+
+            if (!daysSet.has(todayStr)) {
+                cursor.setDate(cursor.getDate() - 1);
+            }
+
+            for (const dayStr of sortedDays) {
+                const dayDate = new Date(dayStr);
+                dayDate.setHours(0, 0, 0, 0);
+
+                if (dayDate.getTime() === cursor.getTime()) {
+                    streak++;
                     cursor.setDate(cursor.getDate() - 1);
-                } else if (completedDate.getTime() < cursor.getTime()) {
+                } else if (dayDate.getTime() < cursor.getTime()) {
                     break;
                 }
             }
