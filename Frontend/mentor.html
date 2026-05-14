@@ -34,7 +34,7 @@
             </ul>
             <div class="nav-actions">
                 <button id="themeToggle" class="theme-toggle" type="button"><i class="fas fa-moon"></i></button>
-                <div id="nav-initials" class="user-avatar" onclick="toggleProfile()">U</div>
+                <div id="navInitials" class="user-avatar" onclick="toggleProfile()">U</div>
             </div>
         </div>
     </nav>
@@ -141,7 +141,7 @@
 
         function setupUserProfile(user) {
             const initial = user.email ? user.email.charAt(0).toUpperCase() : 'U';
-            document.getElementById('nav-initials').innerText = initial;
+            document.getElementById('navInitials').innerText = initial;
             document.getElementById('user-initials-large').innerText = initial;
             document.getElementById('display-email').innerText = user.email || 'Unknown User';
             document.getElementById('display-role').innerText = user.role || 'User';

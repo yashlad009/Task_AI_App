@@ -20,237 +20,36 @@
     <script src="app-config.js"></script>
     <script src="theme.js" defer></script>
     <script src="network-theme.js" defer></script>
-    <style>
-        :root {
-            --primary: #6C63FF;
-            --success: #22C55E;
-            --warning: #F59E0B;
-            --danger: #EF4444;
-            --bg: #0F0F1A;
-            --card: #1A1A2E;
-            --text: #E2E8F0;
-            --muted: #94A3B8;
-        }
-
-        body {
-            font-family: "Inter", sans-serif;
-            color: var(--text);
-            background:
-                radial-gradient(circle at 16% 16%, rgba(108,99,255,0.16), transparent 28%),
-                radial-gradient(circle at 84% 16%, rgba(34,197,94,0.08), transparent 22%),
-                linear-gradient(180deg, #0F0F1A 0%, #141427 100%);
-        }
-
-        .admin-shell {
-            display: grid;
-            gap: 22px;
-        }
-
-        .admin-hero,
-        .admin-card,
-        .data-panel {
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.07);
-            background: #1A1A2E;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-        }
-
-        .admin-hero {
-            padding: 28px;
-            background: linear-gradient(135deg, rgba(108,99,255,0.14), rgba(26,26,46,0.96));
-        }
-
-        .admin-hero h1 {
-            margin: 0 0 10px;
-            font-size: clamp(2rem, 4vw, 3rem);
-            font-weight: 700;
-            letter-spacing: -0.04em;
-        }
-
-        .admin-hero p,
-        .data-panel p {
-            margin: 0;
-            color: var(--muted);
-            font-size: 15px;
-            line-height: 1.7;
-        }
-
-        .stats-row {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 18px;
-        }
-
-        .admin-card {
-            position: relative;
-            padding: 22px;
-            cursor: pointer;
-            transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-        }
-
-        .admin-card:hover,
-        .admin-card.active {
-            transform: scale(1.02);
-            border-color: rgba(108,99,255,0.3);
-            background: rgba(108,99,255,0.08);
-        }
-
-        .admin-card::after {
-            content: "";
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            height: 3px;
-            border-radius: 0 0 16px 16px;
-            background: var(--accent-color, #6C63FF);
-        }
-
-        .admin-card i {
-            font-size: 24px;
-            color: var(--accent-color, #6C63FF);
-            margin-bottom: 14px;
-        }
-
-        .metric-number {
-            display: block;
-            font-size: 28px;
-            font-weight: 700;
-            line-height: 1;
-            margin-bottom: 8px;
-        }
-
-        .metric-label {
-            color: var(--muted);
-            font-size: 15px;
-        }
-
-        .data-panel {
-            display: none;
-            padding: 24px;
-        }
-
-        .data-panel.active {
-            display: block;
-        }
-
-        .data-panel h2 {
-            margin: 0 0 8px;
-            font-size: 1.35rem;
-            font-weight: 600;
-        }
-
-        .admin-table-wrap,
-        .query-stack {
-            margin-top: 18px;
-        }
-
-        .admin-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .admin-table th,
-        .admin-table td {
-            padding: 14px 12px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            font-size: 14px;
-        }
-
-        .admin-table th {
-            color: var(--muted);
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-        }
-
-        .user-tag {
-            display: inline-flex;
-            align-items: center;
-            padding: 7px 10px;
-            border-radius: 999px;
-            background: rgba(108,99,255,0.12);
-            color: #C4B5FD;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .query-card {
-            padding: 18px;
-            border-radius: 14px;
-            border-left: 3px solid #6C63FF;
-            background: rgba(108,99,255,0.08);
-            margin-bottom: 12px;
-        }
-
-        .query-card textarea {
-            width: 100%;
-            min-height: 100px;
-            margin-top: 12px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: rgba(255,255,255,0.03);
-            color: var(--text);
-            padding: 14px 16px;
-            font: inherit;
-            resize: vertical;
-        }
-
-        .primary-btn,
-        .logout-btn {
-            border: none;
-            border-radius: 10px;
-            padding: 10px 22px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s ease, transform 0.2s ease;
-        }
-
-        .primary-btn {
-            background: #6C63FF;
-            color: white;
-        }
-
-        .logout-btn {
-            background: rgba(239,68,68,0.12);
-            color: #FCA5A5;
-        }
-
-        .primary-btn:hover,
-        .logout-btn:hover {
-            transform: scale(1.03);
-        }
-
-        .empty-state {
-            padding: 26px 16px;
-            text-align: center;
-            color: var(--muted);
-            border-radius: 14px;
-            border: 1px dashed rgba(255,255,255,0.08);
-        }
-
-        @media (max-width: 960px) {
-            .stats-row {
-                grid-template-columns: 1fr;
-            }
-
-            .admin-table-wrap {
-                overflow-x: auto;
-            }
-        }
-    </style>
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-logo"><i class="fas fa-user-shield"></i> APMS<span>PRO</span> ADMIN</div>
+            <a href="admin.html" class="nav-logo">
+                <img src="apms3.png" alt="Logo">
+                <span>APMS<b>PRO</b> ADMIN</span>
+            </a>
             <ul class="nav-links">
-                <li><a href="admin.html" id="nav-dash" class="active">Admin Dashboard</a></li>
-                <li><a href="#" id="nav-queries" onclick="showPanel('queries')">User Queries</a></li>
-                <li><a href="#" onclick="logoutAdmin()" class="logout-btn">Logout</a></li>
+                <li><a href="admin.html" id="nav-dash" class="active">Dashboard</a></li>
+                <li><a href="#" id="nav-queries" onclick="showPanel('queries')">Queries</a></li>
+                <li><a href="index.html">Exit Admin</a></li>
             </ul>
+            <div class="nav-actions">
+                <button id="themeToggle" class="theme-toggle" type="button"><i class="fas fa-moon"></i></button>
+                <div id="navInitials" class="user-avatar" onclick="toggleProfile()">A</div>
+            </div>
         </div>
     </nav>
+
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <div style="text-align:center;">
+                <div id="user-initials-large" class="user-avatar" style="margin:0 auto 12px; width:48px; height:48px;">A</div>
+                <p id="display-email" style="font-weight:700; margin:0 0 4px; font-size:13px; overflow:hidden; text-overflow:ellipsis;">Admin</p>
+                <p id="display-role" style="margin:0 0 16px; color:#94A3B8; font-size:10px; text-transform:uppercase;">Administrator</p>
+                <button class="btn-sm" onclick="logoutAdmin()" style="width:100%; background:#EF4444; color:white; border:none; padding:8px; border-radius:8px;">Logout</button>
+            </div>
+        </div>
+    </div>
 
     <div class="main-wrapper">
         <section class="admin-shell">
@@ -343,9 +142,8 @@
 
         window.onload = async function() {
             const admin = window.requireAdminSession();
-            if (!admin) {
-                return;
-            }
+            if (!admin) return;
+            setupUserProfile(admin);
 
             await loadAllData();
             showPanel('users');
@@ -358,6 +156,19 @@
                 ease: "power3.out"
             });
         };
+
+        function setupUserProfile(user) {
+            const initial = (user.email || 'A').charAt(0).toUpperCase();
+            document.getElementById('navInitials').textContent = initial;
+            document.getElementById('user-initials-large').textContent = initial;
+            document.getElementById('display-email').textContent = user.email || 'Admin';
+            document.getElementById('display-role').textContent = 'Administrator';
+        }
+
+        function toggleProfile() {
+            const modal = document.getElementById('profileModal');
+            modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+        }
 
         async function loadAllData() {
             try {

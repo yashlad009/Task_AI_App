@@ -237,17 +237,18 @@ body::after {
 /* Dropdown Modal */
 .modal {
     display: none;
-    position: absolute;
-    top: 70px;
+    position: fixed;
+    top: 64px;
     right: 24px;
-    width: 240px;
+    width: 260px;
     background: var(--glass-panel-strong);
     border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-    z-index: 1001;
+    border-top: none;
+    border-radius: 0 0 16px 16px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    z-index: 1100;
     overflow: hidden;
-    animation: slideIn 0.3s ease-out;
+    animation: slideIn 0.25s ease-out;
 }
 
 @keyframes slideIn {
@@ -565,6 +566,42 @@ select:focus {
     font-weight: 500;
 }
 
+.cat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    cursor: pointer;
+    gap: 12px;
+}
+
+.cat-card i {
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+
+.cat-card strong {
+    display: block;
+    font-size: 14px;
+    color: var(--text-main);
+}
+
+.cat-card span {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.4;
+}
+
+.cat-card.active {
+    background: rgba(108, 99, 255, 0.1);
+    border-color: var(--sky-blue);
+    box-shadow: 0 0 15px rgba(108, 99, 255, 0.2);
+}
+
 .task-table tr,
 .admin-table tr,
 .milestone,
@@ -826,14 +863,19 @@ select:focus {
 .milestone-grid,
 .team-grid,
 .progress-grid,
-.category-grid,
 .achievement-list,
-/* --- AI MENTOR CHAT CSS --- */
 .mentor-grid {
     display: grid !important;
-    grid-template-columns: 280px 1fr !important;
-    gap: 24px !important;
+    grid-template-columns: 300px 1fr !important;
+    gap: 32px !important;
     align-items: start;
+}
+
+.category-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+    gap: 16px !important;
+    margin-bottom: 24px;
 }
 
 @media (max-width: 850px) {
@@ -1152,6 +1194,14 @@ select:focus {
     font-weight: 600;
     color: var(--muted);
     text-transform: uppercase;
+}
+
+.task-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 900px;
+    margin: 0 auto;
 }
 
 /* --- UTILITIES --- */

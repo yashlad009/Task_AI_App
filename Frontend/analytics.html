@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +14,7 @@
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script>
-        (function() {
+        (function () {
             const savedTheme = localStorage.getItem('apms-theme') || 'dark';
             document.documentElement.setAttribute('data-theme', savedTheme);
         })();
@@ -23,12 +24,14 @@
     <script src="network-theme.js" defer></script>
     <link rel="stylesheet" href="style.css?v=2.0">
 </head>
+
 <body>
     <div id="cursor-glow"></div>
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <img src="apms3.png" alt="APMS PRO Logo" style="height: 72px; margin-right: 10px; vertical-align: middle;">
+                <img src="apms3.png" alt="APMS PRO Logo"
+                    style="height: 72px; margin-right: 10px; vertical-align: middle;">
                 Task<span>Tracker</span>
             </div>
             <ul class="nav-links">
@@ -88,7 +91,8 @@
                     <div class="insight-list">
                         <div class="insight-card">
                             <strong id="insightPrimary">No data yet</strong>
-                            <span id="insightSecondary">Start completing tasks with deadlines to unlock richer analytics.</span>
+                            <span id="insightSecondary">Start completing tasks with deadlines to unlock richer
+                                analytics.</span>
                         </div>
                         <div class="insight-card">
                             <strong>Milestone Snapshot</strong>
@@ -111,7 +115,8 @@
                 <a href="https://github.com/yashlad009" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
                     <i class="fab fa-github"></i>
                 </a>
-                <a href="https://www.linkedin.com/in/yash-lad-4bb46632a" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                <a href="https://www.linkedin.com/in/yash-lad-4bb46632a" target="_blank" rel="noopener noreferrer"
+                    aria-label="LinkedIn">
                     <i class="fab fa-linkedin-in"></i>
                 </a>
             </div>
@@ -123,7 +128,7 @@
         const API_URL = window.getApiBaseUrl();
         let progressChart = null;
 
-        window.onload = async function() {
+        window.onload = async function () {
             const user = window.requireUserSession();
             if (!user) return;
             await loadProgress(user.id || user._id);
@@ -365,7 +370,7 @@
         gsap.from(".stat-card", {
             scale: 0.8, opacity: 0, duration: 0.5, stagger: 0.15, ease: "back.out(1.7)", delay: 0.4
         });
-        
+
         gsap.to(".stat-card", { y: -8, duration: 2.5, ease: "sine.inOut", yoyo: true, repeat: -1 });
 
         // Chart area fade in
@@ -381,4 +386,5 @@
         });
     </script>
 </body>
+
 </html>
