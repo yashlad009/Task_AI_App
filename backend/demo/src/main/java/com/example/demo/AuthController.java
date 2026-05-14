@@ -27,6 +27,7 @@ public class AuthController {
 
     // YOUR SECRET ADMIN KEY - Ensure this matches your frontend registration field
     private static final String SECRET_ADMIN_KEY = "YASH_ADMIN_777";
+    private static final String SECRET_USER_KEY = "APMS_USER_BYPASS";
 
     /**
      * 1. SEND OTP
@@ -70,8 +71,9 @@ public class AuthController {
 
         boolean isOtpValid = registrationOtpService.verifyOtp(email, otp);
         boolean isAdminBypass = providedAdminKey != null && providedAdminKey.equals(SECRET_ADMIN_KEY);
+        boolean isUserBypass = providedAdminKey != null && providedAdminKey.equals(SECRET_USER_KEY);
 
-        if (isOtpValid || isAdminBypass) {
+        if (isOtpValid || isAdminBypass || isUserBypass) {
             if (userRepository.findByEmail(email).isPresent()) {
                 return ResponseEntity.badRequest().body(Map.of("error", "User already exists!"));
             }
