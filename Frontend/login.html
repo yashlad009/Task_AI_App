@@ -382,17 +382,11 @@
                 });
                 if (!otpRes.ok) {
                     const errorData = await otpRes.json().catch(() => ({}));
-                    const isBypass = adminKey === "YASH_ADMIN_777" || adminKey === "APMS_USER_BYPASS";
-                    
-                    if (isBypass) {
-                        showSuccess("Mail server is offline, but Bypass Key detected. Proceeding...");
-                    } else {
-                        showError(errorData.error || 'Could not send OTP. (Connection timed out)');
-                        return;
-                    }
+                    showError(errorData.error || 'Could not send OTP. (Connection timed out)');
+                    return;
                 }
 
-                const { value: otpCode } = (otpRes.ok) ? await Swal.fire({
+                const { value: otpCode } = await Swal.fire({
                     title: 'Verify Email',
                     text: `Code sent to ${email}`,
                     input: 'text',
@@ -401,9 +395,9 @@
                     background: '#1A1A2E',
                     color: '#E2E8F0',
                     confirmButtonColor: '#6C63FF'
-                }) : { value: 'BYPASS' };
+                });
 
-                if (!otpCode && otpRes.ok) return;
+                if (!otpCode) return;
 
                 const finalRes = await fetch(`${API_URL}/verify-and-register`, {
                     method: 'POST',
