@@ -259,9 +259,7 @@
 
             document.getElementById('tokenBalance').textContent = gamification.tokens || 0;
             document.getElementById('completionRateText').textContent = `${completed} / ${total}`;
-            document.getElementById('progressPercent').textContent = `${percent}%`;
-            
-            renderDashboardChart(percent);
+            // Progress will be animated by animateDashboard
         }
 
         function renderDashboardChart(percent) {
@@ -383,7 +381,7 @@
                 ease: "power3.out"
             });
 
-            const percent = Math.round(analytics.completionRate || 0);
+            const percent = Math.round(analytics.efficiency || analytics.completionRate || 0);
             
             // Initialize or Update Chart.js Doughnut
             const ctx = document.getElementById('dashboardProgressChart').getContext('2d');

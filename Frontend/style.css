@@ -859,7 +859,6 @@ select:focus {
 
 .dashboard-grid,
 .planner-grid,
-.important-grid,
 .milestone-grid,
 .team-grid,
 .progress-grid,
@@ -867,6 +866,13 @@ select:focus {
 .mentor-grid {
     display: grid !important;
     grid-template-columns: 300px 1fr !important;
+    gap: 32px !important;
+    align-items: start;
+}
+
+.important-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1.5fr !important;
     gap: 32px !important;
     align-items: start;
 }
@@ -1213,6 +1219,73 @@ select:focus {
     gap: 12px;
     max-width: 900px;
     margin: 0 auto;
+}
+
+.important-card {
+    padding: 28px;
+    border-radius: 20px;
+}
+
+.important-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.reminder-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.reminder-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.reminder-row:hover {
+    transform: translateX(6px);
+    border-color: rgba(108, 99, 255, 0.3);
+}
+
+.important-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--danger);
+    background: rgba(239, 68, 68, 0.1);
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+}
+
+.reminder-meta {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 4px;
+}
+
+.status-active {
+    background: rgba(34, 197, 94, 0.1);
+    color: var(--success);
+    border-color: rgba(34, 197, 94, 0.2);
+}
+
+.status-processed {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-dim);
+    opacity: 0.7;
 }
 
 /* --- UTILITIES --- */
