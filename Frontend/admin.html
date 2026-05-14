@@ -28,7 +28,10 @@
                 <img src="apms3.png" alt="Logo">
                 <span>APMS<b>PRO</b> ADMIN</span>
             </a>
-            <ul class="nav-links">
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul id="navLinks" class="nav-links">
                 <li><a href="admin.html" id="nav-dash" class="active">Dashboard</a></li>
                 <li><a href="#" id="nav-queries" onclick="showPanel('queries')">Queries</a></li>
                 <li><a href="index.html">Exit Admin</a></li>
@@ -302,6 +305,10 @@
                 body: JSON.stringify({ reply })
             });
             renderQueries();
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('navLinks').classList.toggle('active');
         }
 
         function logoutAdmin() {

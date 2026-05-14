@@ -14,6 +14,10 @@
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script>
+        function toggleMobileMenu() {
+            document.getElementById('navLinks').classList.toggle('active');
+        }
+
         (function () {
             const savedTheme = localStorage.getItem('apms-theme') || 'dark';
             document.documentElement.setAttribute('data-theme', savedTheme);
@@ -29,20 +33,26 @@
     <div id="cursor-glow"></div>
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-logo">
-                <img src="apms3.png" alt="APMS PRO Logo"
-                    style="height: 72px; margin-right: 10px; vertical-align: middle;">
-                Task<span>Tracker</span>
-            </div>
-            <ul class="nav-links">
+            <a href="index.html" class="nav-logo">
+                <img src="apms3.png" alt="Logo">
+                <span>APMS<b>PRO</b></span>
+            </a>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul id="navLinks" class="nav-links">
                 <li><a href="index.html">Dashboard</a></li>
-                <li><a href="tasks.html">Daily Planning</a></li>
-                <li><a href="important.html">Imp Tasks</a></li>
+                <li><a href="tasks.html">Daily Tasks</a></li>
+                <li><a href="important.html">Important</a></li>
                 <li><a href="milestone.html">Milestones</a></li>
                 <li><a href="analytics.html">Analytics</a></li>
                 <li><a href="roles.html" class="active">Team</a></li>
                 <li><a href="mentor.html">AI Mentor</a></li>
             </ul>
+            <div class="nav-actions">
+                <button id="themeToggle" class="theme-toggle" type="button"><i class="fas fa-moon"></i></button>
+                <div id="navInitials" class="user-avatar" onclick="toggleProfile()">U</div>
+            </div>
         </div>
     </nav>
 
