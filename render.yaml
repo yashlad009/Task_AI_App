@@ -18,7 +18,7 @@ services:
       - key: MAIL_HOST
         value: smtp.gmail.com
       - key: MAIL_PORT
-        value: "465"
+        value: "587"
       - key: MAIL_USERNAME
         sync: false
       - key: MAIL_PASSWORD
