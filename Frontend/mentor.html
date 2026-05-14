@@ -19,21 +19,21 @@
     <div id="cursor-glow"></div>
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-logo">
-                <img src="apms3.png" alt="APMS PRO Logo">
-                Task<span>Tracker</span>
-            </div>
+            <a href="index.html" class="nav-logo">
+                <img src="apms3.png" alt="Logo">
+                <span>APMS<b>PRO</b></span>
+            </a>
             <ul class="nav-links">
                 <li><a href="index.html">Dashboard</a></li>
-                <li><a href="tasks.html">Daily Planning</a></li>
-                <li><a href="important.html">Imp Tasks</a></li>
+                <li><a href="tasks.html">Daily</a></li>
+                <li><a href="important.html">Important</a></li>
                 <li><a href="milestone.html">Milestones</a></li>
                 <li><a href="analytics.html">Analytics</a></li>
                 <li><a href="roles.html">Team</a></li>
                 <li><a href="mentor.html" class="active">AI Mentor</a></li>
             </ul>
             <div class="nav-actions">
-                <button id="themeToggle" class="theme-toggle" type="button" aria-label="Theme"><i class="fas fa-moon"></i></button>
+                <button id="themeToggle" class="theme-toggle" type="button"><i class="fas fa-moon"></i></button>
                 <div id="nav-initials" class="user-avatar" onclick="toggleProfile()">U</div>
             </div>
         </div>
@@ -42,10 +42,10 @@
     <div id="profileModal" class="modal">
         <div class="modal-content">
             <div style="text-align:center;">
-                <div id="user-initials-large" class="user-avatar" style="margin:0 auto 12px; width:64px; height:64px;">U</div>
-                <p id="display-email" style="font-weight:700; margin:0 0 6px; overflow:hidden; text-overflow:ellipsis;">User Email</p>
-                <p id="display-role" style="margin:0 0 16px; color:#94A3B8; font-size:12px; text-transform:uppercase; letter-spacing:0.14em;">User</p>
-                <button class="btn-sm" onclick="logoutUser()" style="width:100%; background:#EF4444; color:white;">Logout Session</button>
+                <div id="user-initials-large" class="user-avatar" style="margin:0 auto 12px; width:48px; height:48px;">U</div>
+                <p id="display-email" style="font-weight:700; margin:0 0 4px; font-size:13px; overflow:hidden; text-overflow:ellipsis;">Email</p>
+                <p id="display-role" style="margin:0 0 16px; color:#94A3B8; font-size:10px; text-transform:uppercase;">User</p>
+                <button class="btn-sm" onclick="logoutUser()" style="width:100%; background:#EF4444; color:white; border:none; padding:8px; border-radius:8px;">Logout</button>
             </div>
         </div>
     </div>

@@ -137,84 +137,63 @@ body::after {
 .navbar {
     position: sticky;
     top: 0;
-    z-index: 1000;
-    margin: 0;
+    height: 64px;
     background: var(--navbar-bg);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    border: 1px solid var(--glass-border);
-    border-radius: 0;
-    box-shadow: var(--glass-shadow);
-    overflow: hidden;
-    position: sticky;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--glass-border);
     z-index: 1000;
-}
-
-.navbar::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(120deg, rgba(255, 255, 255, 0.18), transparent 26%, transparent 68%, rgba(255, 255, 255, 0.08));
-    pointer-events: none;
+    display: flex;
+    align-items: center;
 }
 
 .nav-container {
-    max-width: 1280px;
+    width: 100%;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 0.8rem 1.5rem;
+    padding: 0 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 24px;
 }
 
 .nav-logo {
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-size: 22px;
+    gap: 12px;
+    font-size: 1.1rem;
     font-weight: 700;
+    text-decoration: none;
     color: var(--text-main);
 }
 
-.nav-logo span {
-    opacity: 0.9;
+.nav-logo img {
+    height: 32px;
+    width: auto;
+    filter: drop-shadow(0 0 8px var(--neon-glow));
 }
 
-/* Removed from here to consolidate in the layout section below */
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    list-style: none;
+}
 
 .nav-links a {
     text-decoration: none;
     color: var(--text-dim);
+    font-size: 0.85rem;
     font-weight: 600;
-    font-size: 0.95rem;
-    padding: 10px 16px;
-    border-radius: 999px;
-    transition: transform 0.28s ease, background 0.28s ease, color 0.28s ease, box-shadow 0.28s ease;
-    position: relative;
+    padding: 8px 14px;
+    border-radius: 8px;
+    transition: all 0.25s ease;
 }
 
 .nav-links a:hover,
 .nav-links a.active {
     color: var(--text-main);
-    background: rgba(108, 99, 255, 0.14);
-    box-shadow: none;
-    transform: scale(1.03);
-}
-
-.nav-links li:last-child a {
-    background: rgba(108, 99, 255, 0.18);
-    border: 1px solid rgba(108, 99, 255, 0.3);
-    color: var(--text-main);
-    padding: 10px 20px;
-    box-shadow: 0 4px 12px rgba(108, 99, 255, 0.1);
-}
-
-.nav-links li:last-child a:hover {
-    background: rgba(108, 99, 255, 0.25);
-    border-color: rgba(108, 99, 255, 0.5);
-    transform: scale(1.05) translateY(-1px);
-    box-shadow: 0 6px 18px rgba(108, 99, 255, 0.2);
+    background: rgba(108, 99, 255, 0.1);
 }
 
 .nav-actions {
@@ -224,49 +203,60 @@ body::after {
 }
 
 .theme-toggle {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 76px;
-    height: 42px;
-    padding: 6px 8px;
-    border-radius: 999px;
-    border: 1px solid var(--glass-border);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.05));
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 10px 26px rgba(0, 0, 0, 0.12);
-    color: var(--text-main);
+    background: none;
+    border: none;
+    color: var(--text-dim);
     cursor: pointer;
-    overflow: hidden;
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    font-size: 1.1rem;
+    transition: color 0.3s ease;
 }
 
 .theme-toggle:hover {
-    transform: scale(1.05);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16), 0 0 20px var(--neon-glow);
+    color: var(--sky-blue);
 }
 
-.theme-toggle::before {
-    content: "";
-    position: absolute;
-    top: 4px;
-    left: 4px;
-    width: 32px;
-    height: 32px;
+.user-avatar {
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background: var(--accent-gradient);
-    box-shadow: 0 0 18px rgba(255, 255, 255, 0.25);
-    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease;
 }
 
-html[data-theme="light"] .theme-toggle::before {
-    transform: translateX(36px);
+.user-avatar:hover {
+    transform: scale(1.1);
 }
 
-.theme-toggle i {
-    z-index: 1;
-    font-size: 0.9rem;
-    opacity: 0.88;
+/* Dropdown Modal */
+.modal {
+    display: none;
+    position: absolute;
+    top: 70px;
+    right: 24px;
+    width: 240px;
+    background: var(--glass-panel-strong);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    z-index: 1001;
+    overflow: hidden;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-content {
+    padding: 20px;
 }
 
 .main-wrapper {
@@ -705,8 +695,7 @@ select:focus {
 
 @media (max-width: 980px) {
     .nav-container {
-        flex-direction: column;
-        align-items: stretch;
+        padding: 0 16px;
     }
 
     .nav-links {
@@ -805,13 +794,11 @@ select:focus {
 .main-wrapper,
 .page-shell,
 .auth-page {
-    max-width: 850px !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    width: 100% !important;
-    padding-left: 20px !important;
-    padding-right: 20px !important;
-    box-sizing: border-box !important;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 0 24px;
+    box-sizing: border-box;
 }
 
 .nav-links {
@@ -823,8 +810,7 @@ select:focus {
 }
 
 .nav-links a {
-    font-size: 13px !important; /* Smaller font to fit 7 items */
-    white-space: nowrap !important;
+    white-space: nowrap;
 }
 
 .stats-row,
@@ -1057,8 +1043,34 @@ select:focus {
 
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 1fr !important;
+    grid-template-columns: 1.6fr 1fr;
     gap: 24px;
+    align-items: start;
+}
+
+@media (max-width: 980px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.dashboard-card {
+    background: var(--glass-panel);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: var(--glass-shadow);
+}
+
+.dashboard-card h2 {
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+}
+
+.dashboard-card p {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    margin-bottom: 20px;
 }
 
 .task-row {
