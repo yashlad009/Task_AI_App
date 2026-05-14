@@ -1331,19 +1331,20 @@ select:focus {
         position: fixed !important;
         top: 0 !important;
         right: 0 !important;
-        width: 320px !important;
+        width: 100% !important; /* FULL WIDTH FOR ABSOLUTE SOLIDITY */
+        max-width: 320px !important;
         height: 100vh !important;
-        background: #0a0a14 !important; /* ULTRA SOLID BLACK */
-        background-color: #0a0a14 !important;
+        background-color: #0b0b14 !important; /* ABSOLUTELY 100% OPAQUE */
+        background: #0b0b14 !important;
         opacity: 1 !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
         flex-direction: column !important;
-        padding: 120px 40px !important;
+        padding: 100px 24px !important;
         gap: 10px !important;
         border-left: 1px solid rgba(255,255,255,0.1) !important;
-        z-index: 99999 !important;
-        box-shadow: -30px 0 100px rgba(0,0,0,1) !important;
+        z-index: 999999 !important; /* HIGHEST POSSIBLE */
+        box-shadow: -20px 0 60px rgba(0,0,0,1) !important;
         margin: 0 !important;
         list-style: none !important;
         visibility: visible !important;
