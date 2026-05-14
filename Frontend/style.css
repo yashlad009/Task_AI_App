@@ -262,22 +262,30 @@ body::after {
 @media (max-width: 900px) {
     .mobile-menu-btn {
         display: block;
+        z-index: 1001;
     }
     .nav-links {
         display: none;
-        position: absolute;
-        top: 64px;
-        left: 0;
-        width: 100%;
-        background: var(--glass-panel-strong);
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 70%;
+        height: 100vh;
+        background: rgba(13, 13, 25, 0.98); /* Solid dark background */
+        backdrop-filter: blur(10px);
         flex-direction: column;
-        padding: 20px;
-        gap: 16px;
-        border-bottom: 1px solid var(--glass-border);
+        padding: 80px 40px;
+        gap: 24px;
+        border-left: 1px solid rgba(255,255,255,0.1);
         z-index: 1000;
+        box-shadow: -10px 0 30px rgba(0,0,0,0.5);
     }
     .nav-links.active {
         display: flex;
+    }
+    .nav-links li a {
+        font-size: 1.2rem;
+        color: #fff !important; /* High contrast */
     }
 }
 
@@ -927,16 +935,10 @@ select:focus {
 .stats-row,
 .overview-grid {
     display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important; /* Forced 2x2 for symmetry */
+    grid-template-columns: repeat(2, 1fr) !important; /* Strictly 2x2 for symmetry */
     gap: 20px !important;
     align-items: stretch !important;
     margin-bottom: 40px;
-}
-
-@media (min-width: 1100px) {
-    .stats-row, .overview-grid {
-        grid-template-columns: repeat(4, 1fr) !important;
-    }
 }
 
 .dashboard-grid,
