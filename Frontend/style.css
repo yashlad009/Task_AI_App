@@ -259,41 +259,6 @@ body::after {
     cursor: pointer;
 }
 
-@media (max-width: 900px) {
-    .mobile-menu-btn {
-        display: block;
-        z-index: 1001;
-    }
-    .nav-links {
-        display: none;
-        position: fixed;
-        top: 0;
-        right: 0;
-        width: 280px;
-        height: 100vh;
-        background: #0d0d19 !important; /* Solid dark background, no transparency */
-        flex-direction: column;
-        padding: 100px 30px;
-        gap: 20px;
-        border-left: 1px solid var(--glass-border);
-        z-index: 1000;
-        box-shadow: -20px 0 50px rgba(0,0,0,0.8);
-    }
-    .nav-links.active {
-        display: flex;
-    }
-    .nav-links li {
-        width: 100%;
-    }
-    .nav-links li a {
-        font-size: 1.1rem;
-        color: #fff !important; /* Pure white for readability */
-        display: block;
-        padding: 12px;
-        border-radius: 8px;
-        background: rgba(255,255,255,0.05);
-    }
-}
 
 /* Dropdown Modal */
 .modal {
@@ -855,7 +820,7 @@ select:focus {
     }
 
     .stats-row {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr) !important;
     }
 }
 
@@ -1354,3 +1319,47 @@ select:focus {
 .color-red { color: var(--danger); }
 
 
+
+/* --- MOBILE NAVIGATION OVERRIDE (MUST BE LAST) --- */
+@media (max-width: 900px) {
+    .mobile-menu-btn {
+        display: block !important;
+        z-index: 2001;
+    }
+    .nav-links {
+        display: none !important;
+        position: fixed !important;
+        top: 0 !important;
+        right: 0 !important;
+        width: 280px !important;
+        height: 100vh !important;
+        background: #0b0b14 !important; /* ULTRA SOLID BLACK-BLUE */
+        flex-direction: column !important;
+        padding: 100px 30px !important;
+        gap: 15px !important;
+        border-left: 1px solid rgba(255,255,255,0.15) !important;
+        z-index: 2000 !important;
+        box-shadow: -20px 0 60px rgba(0,0,0,0.9) !important;
+    }
+    .nav-links.active {
+        display: flex !important;
+    }
+    .nav-links li {
+        width: 100% !important;
+        margin: 0 !important;
+    }
+    .nav-links li a {
+        font-size: 1.15rem !important;
+        color: #ffffff !important;
+        display: block !important;
+        padding: 14px 20px !important;
+        border-radius: 10px !important;
+        background: rgba(255,255,255,0.06) !important;
+        border: 1px solid rgba(255,255,255,0.03) !important;
+        text-align: left !important;
+    }
+    .nav-links li a:hover {
+        background: rgba(255,255,255,0.12) !important;
+        color: var(--primary) !important;
+    }
+}
