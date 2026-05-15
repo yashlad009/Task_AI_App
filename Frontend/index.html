@@ -22,7 +22,7 @@
     <script src="app-config.js"></script>
     <script src="theme.js" defer></script>
     <script src="network-theme.js" defer></script>
-    <link rel="stylesheet" href="style.css?v=11.0">
+    <link rel="stylesheet" href="style.css?v=12.0">
 </head>
 <body>
     <div id="cursor-glow"></div>
@@ -112,6 +112,34 @@
             <article class="dashboard-card">
                 <h2>Task Command Center</h2>
                 <p>Your highest-impact tasks, sorted for today.</p>
+
+                <div class="filter-bar" id="filterBar">
+                    <div class="filter-group">
+                        <span class="filter-label">Status</span>
+                        <div class="filter-pills" id="statusFilters">
+                            <button class="filter-pill active" data-filter="all" onclick="setStatusFilter('all')">All</button>
+                            <button class="filter-pill" data-filter="pending" onclick="setStatusFilter('pending')">Pending</button>
+                            <button class="filter-pill" data-filter="done" onclick="setStatusFilter('done')">Done</button>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <span class="filter-label">Priority</span>
+                        <div class="filter-pills" id="priorityFilters">
+                            <button class="filter-pill active" data-filter="all" onclick="setPriorityFilter('all')">All</button>
+                            <button class="filter-pill high" data-filter="High" onclick="setPriorityFilter('High')">High</button>
+                            <button class="filter-pill medium" data-filter="Medium" onclick="setPriorityFilter('Medium')">Medium</button>
+                            <button class="filter-pill low" data-filter="Low" onclick="setPriorityFilter('Low')">Low</button>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <span class="filter-label">Sort</span>
+                        <div class="filter-pills" id="sortFilters">
+                            <button class="filter-pill active" data-sort="priority" onclick="setSortMode('priority')">Priority</button>
+                            <button class="filter-pill" data-sort="date" onclick="setSortMode('date')">Date</button>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="taskFeed" class="task-feed"></div>
             </article>
 
@@ -195,6 +223,10 @@
         let currentUser = null;
         let currentCertificate = null;
         let achievements = [];
+        let allTasks = [];
+        let activeStatusFilter = 'all';
+        let activePriorityFilter = 'all';
+        let activeSortMode = 'priority';
 
         window.onload = async function () {
             const user = window.requireUserSession();
@@ -302,22 +334,83 @@
         }
 
         function renderTaskFeed(tasks) {
+            allTasks = tasks;
+            applyFiltersAndRender();
+        }
 
+        function setStatusFilter(filter) {
+            activeStatusFilter = filter;
+            document.querySelectorAll('#statusFilters .filter-pill').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === filter);
+            });
+            applyFiltersAndRender();
+        }
+
+        function setPriorityFilter(filter) {
+            activePriorityFilter = filter;
+            document.querySelectorAll('#priorityFilters .filter-pill').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === filter);
+            });
+            applyFiltersAndRender();
+        }
+
+        function setSortMode(mode) {
+            activeSortMode = mode;
+            document.querySelectorAll('#sortFilters .filter-pill').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.sort === mode);
+            });
+            applyFiltersAndRender();
+        }
+
+        function applyFiltersAndRender() {
             const taskFeed = document.getElementById('taskFeed');
-            if (!tasks.length) {
+            if (!allTasks.length) {
                 taskFeed.innerHTML = `<div class="empty-state">No tasks yet. Add one from Daily Planning to start building your streak.</div>`;
                 return;
             }
 
-            const sortedTasks = [...tasks].sort((a, b) => {
-                const priorityRank = { High: 0, Medium: 1, Low: 2 };
-                const aPriority = priorityRank[a.priority || 'Medium'] ?? 1;
-                const bPriority = priorityRank[b.priority || 'Medium'] ?? 1;
-                if (aPriority !== bPriority) return aPriority - bPriority;
-                return (a.dueDate || '9999-12-31').localeCompare(b.dueDate || '9999-12-31');
+            // Filter by status
+            let filtered = [...allTasks];
+            if (activeStatusFilter === 'pending') {
+                filtered = filtered.filter(t => !isCompleted(t));
+            } else if (activeStatusFilter === 'done') {
+                filtered = filtered.filter(t => isCompleted(t));
+            }
+
+            // Filter by priority
+            if (activePriorityFilter !== 'all') {
+                filtered = filtered.filter(t => (t.priority || 'Medium') === activePriorityFilter);
+            }
+
+            // Sort: pending first always, then by chosen mode
+            filtered.sort((a, b) => {
+                const aCompleted = isCompleted(a) ? 1 : 0;
+                const bCompleted = isCompleted(b) ? 1 : 0;
+                if (aCompleted !== bCompleted) return aCompleted - bCompleted;
+
+                if (activeSortMode === 'date') {
+                    return (a.dueDate || '9999-12-31').localeCompare(b.dueDate || '9999-12-31');
+                } else {
+                    const priorityRank = { High: 0, Medium: 1, Low: 2 };
+                    const aPriority = priorityRank[a.priority || 'Medium'] ?? 1;
+                    const bPriority = priorityRank[b.priority || 'Medium'] ?? 1;
+                    if (aPriority !== bPriority) return aPriority - bPriority;
+                    return (a.dueDate || '9999-12-31').localeCompare(b.dueDate || '9999-12-31');
+                }
             });
 
-            taskFeed.innerHTML = sortedTasks.map((task) => {
+            if (!filtered.length) {
+                taskFeed.innerHTML = `<div class="empty-state">No tasks match the current filters.</div>`;
+                return;
+            }
+
+            // Count summary
+            const pendingCount = filtered.filter(t => !isCompleted(t)).length;
+            const doneCount = filtered.filter(t => isCompleted(t)).length;
+
+            taskFeed.innerHTML = `
+                <div class="filter-summary">Showing ${filtered.length} task${filtered.length !== 1 ? 's' : ''} — <strong>${pendingCount} pending</strong>, <strong>${doneCount} done</strong></div>
+            ` + filtered.map((task) => {
                 const completed = isCompleted(task);
                 const priority = task.priority || 'Medium';
                 const priorityColor = priority === 'High' ? '#EF4444' : priority === 'Low' ? '#22C55E' : '#F59E0B';

@@ -13,7 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <script src="app-config.js"></script>
     <script src="network-theme.js" defer></script>
-    <link rel="stylesheet" href="style.css?v=11.0">
+    <link rel="stylesheet" href="style.css?v=12.0">
 </head>
 <body>
     <div id="cursor-glow"></div>
@@ -92,11 +92,11 @@
                     </div>
 
                     <div id="response-shell" class="response-shell">
-                        <div class="ai-bubble">Identity confirmed. I am Antigravity. Ask me for a 3-point plan, prioritization, or a rescue strategy for your backlog.</div>
+                        <div class="ai-bubble">Hey! I'm <strong>TaskAI</strong> — your personal study coach. Ask me for a 3-point plan, prioritization, or a rescue strategy for your backlog.</div>
                     </div>
 
                     <div class="composer">
-                        <textarea id="mentor-input" placeholder="Ask Antigravity anything..."></textarea>
+                        <textarea id="mentor-input" placeholder="Ask TaskAI anything..."></textarea>
                         <div class="button-column">
                             <button id="ask-ai-btn" class="primary-btn" type="button" onclick="askAiMentor()">
                                 <span id="ask-ai-label">Ask AI</span>
@@ -285,7 +285,7 @@
                 });
 
                 const data = await response.json().catch(() => ({}));
-                const reply = data.response || data.error || 'Antigravity is busy.';
+                const reply = data.response || data.error || 'TaskAI is busy. Try again shortly.';
                 
                 const bubble = appendBubble("", true);
                 typewriterReveal(bubble, reply);

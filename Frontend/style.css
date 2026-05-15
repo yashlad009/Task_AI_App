@@ -1152,6 +1152,154 @@ select:focus {
     margin-bottom: 20px;
 }
 
+/* --- FILTER BAR --- */
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+}
+
+.filter-pills {
+    display: flex;
+    gap: 4px;
+}
+
+.filter-pill {
+    padding: 6px 14px !important;
+    border-radius: 999px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid var(--glass-border) !important;
+    color: var(--text-dim) !important;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    min-width: auto !important;
+    width: auto !important;
+    height: auto !important;
+}
+
+.filter-pill:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: var(--text-main) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.filter-pill.active {
+    background: rgba(108, 99, 255, 0.2) !important;
+    border-color: rgba(108, 99, 255, 0.4) !important;
+    color: #6C63FF !important;
+}
+
+.filter-pill.high.active {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+    color: #EF4444 !important;
+}
+
+.filter-pill.medium.active {
+    background: rgba(245, 158, 11, 0.15) !important;
+    border-color: rgba(245, 158, 11, 0.3) !important;
+    color: #F59E0B !important;
+}
+
+.filter-pill.low.active {
+    background: rgba(34, 197, 94, 0.15) !important;
+    border-color: rgba(34, 197, 94, 0.3) !important;
+    color: #22C55E !important;
+}
+
+.filter-summary {
+    font-size: 12px;
+    color: var(--text-dim);
+    padding: 8px 0 12px;
+    border-bottom: 1px solid var(--glass-border);
+    margin-bottom: 12px;
+}
+
+.filter-summary strong {
+    color: var(--text-main);
+}
+
+.task-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.status-done {
+    background: rgba(34, 197, 94, 0.12);
+    color: #22C55E;
+    border-color: rgba(34, 197, 94, 0.25);
+}
+
+.status-progress {
+    background: rgba(108, 99, 255, 0.12);
+    color: #6C63FF;
+    border-color: rgba(108, 99, 255, 0.25);
+}
+
+.status-todo {
+    background: rgba(245, 158, 11, 0.12);
+    color: #F59E0B;
+    border-color: rgba(245, 158, 11, 0.25);
+}
+
+.task-row.completed {
+    opacity: 0.55;
+}
+
+.task-row.completed .task-title {
+    text-decoration: line-through;
+}
+
+.task-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-main);
+}
+
+.task-subline {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 2px;
+}
+
+.task-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.task-check {
+    width: 20px;
+    height: 20px;
+    accent-color: #6C63FF;
+    cursor: pointer;
+}
+
 /* Achievement section centered */
 .progress-summary {
     margin-top: 24px;
