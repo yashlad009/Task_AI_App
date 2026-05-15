@@ -1245,9 +1245,30 @@ select:focus {
     margin: 0 auto;
 }
 
-.important-card {
+.important-card,
+.milestone-card {
     padding: 28px;
     border-radius: 20px;
+    background: var(--glass-panel);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+}
+
+.important-card h2,
+.important-card h3,
+.important-card p,
+.milestone-card h2,
+.milestone-card h3,
+.milestone-card p {
+    opacity: 1 !important;
+    color: var(--text-main);
+}
+
+.important-card > p,
+.milestone-card > p {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    margin-bottom: 12px;
 }
 
 .important-form {
@@ -1269,15 +1290,24 @@ select:focus {
     justify-content: space-between;
     align-items: center;
     padding: 20px;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.06);
     border: 1px solid var(--glass-border);
     border-radius: 16px;
     transition: transform 0.3s ease, border-color 0.3s ease;
+    opacity: 1 !important;
+}
+
+.reminder-row h3 {
+    color: var(--text-main) !important;
+    opacity: 1 !important;
+    font-size: 1rem;
+    font-weight: 600;
 }
 
 .reminder-row:hover {
     transform: translateX(6px);
     border-color: rgba(108, 99, 255, 0.3);
+    background: rgba(255, 255, 255, 0.09);
 }
 
 .important-badge {
@@ -1292,12 +1322,130 @@ select:focus {
     border-radius: 999px;
     margin-bottom: 8px;
     letter-spacing: 0.05em;
+    opacity: 1 !important;
 }
 
 .reminder-meta {
     font-size: 13px;
     color: var(--text-dim);
     margin-top: 4px;
+    opacity: 1 !important;
+}
+
+/* Milestone items full opacity */
+.milestone-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.milestone-item {
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    opacity: 1 !important;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.milestone-item:hover {
+    transform: translateX(6px);
+    border-color: rgba(108, 99, 255, 0.3);
+    background: rgba(255, 255, 255, 0.09);
+}
+
+.milestone-item h3 {
+    color: var(--text-main) !important;
+    opacity: 1 !important;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.milestone-item p {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    opacity: 1 !important;
+}
+
+.milestone-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.milestone-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.milestone-actions input {
+    width: 80px !important;
+    padding: 8px 10px !important;
+    font-size: 14px;
+}
+
+.milestone-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 24px;
+}
+
+.secondary-btn {
+    background: rgba(108, 99, 255, 0.15) !important;
+    color: #6C63FF !important;
+    border: 1px solid rgba(108, 99, 255, 0.3) !important;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.secondary-btn:hover {
+    background: rgba(108, 99, 255, 0.25) !important;
+}
+
+.delete-btn {
+    background: rgba(239, 68, 68, 0.1) !important;
+    color: #EF4444 !important;
+    border: 1px solid rgba(239, 68, 68, 0.2) !important;
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.delete-btn:hover {
+    background: rgba(239, 68, 68, 0.2) !important;
+}
+
+.progress-track {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--accent-gradient);
+    border-radius: 999px;
+    box-shadow: 0 0 12px var(--neon-glow);
+    transition: width 0.8s ease;
+}
+
+.progress-copy {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .status-active {

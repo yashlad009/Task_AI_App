@@ -22,7 +22,7 @@
     <script src="app-config.js"></script>
     <script src="theme.js" defer></script>
     <script src="network-theme.js" defer></script>
-    <link rel="stylesheet" href="style.css?v=9.0">
+    <link rel="stylesheet" href="style.css?v=10.0">
 </head>
 <body>
     <div id="cursor-glow"></div>
@@ -30,7 +30,7 @@
         <div class="nav-container">
             <a href="index.html" class="nav-logo">
                 <img src="apms3.png" alt="Logo">
-                <span>APMS<b>PRO</b></span>
+                <span>Task <b>Tracker</b></span>
             </a>
             <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
                 <i class="fas fa-bars"></i>
@@ -253,7 +253,7 @@
         function renderMetrics(tasks, analytics) {
             const completedTasks = tasks.filter((task) => isCompleted(task));
             const overdueTasks = tasks.filter((task) => !isCompleted(task) && task.dueDate && new Date(task.dueDate) < startOfToday());
-            const streak = calculateStreak(completedTasks);
+            const streak = calculateStreakFromTasks(tasks);
             const total = tasks.length;
             const completed = completedTasks.length;
             const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
@@ -543,37 +543,44 @@
             return (task.status || '').toLowerCase() === 'completed';
         }
 
-        function calculateStreak(completedTasks) {
+        function calculateStreakFromTasks(tasks) {
+            const completedTasks = tasks.filter(t => isCompleted(t));
             if (!completedTasks.length) return 0;
 
+            // Build a set of days when tasks were completed
+            // Use completedAt, updatedAt, or dueDate as fallback timestamps
             const daysSet = new Set();
             completedTasks.forEach(t => {
-                if (t.completedAt) {
+                const dateStr = t.completedAt || t.updatedAt || t.dueDate;
+                if (dateStr) {
                     try {
-                        daysSet.add(new Date(t.completedAt).toISOString().split('T')[0]);
+                        const d = new Date(dateStr);
+                        d.setHours(0, 0, 0, 0);
+                        daysSet.add(d.toISOString().split('T')[0]);
                     } catch(e) {}
                 }
             });
 
-            const sortedDays = Array.from(daysSet).sort().reverse();
-            if (!sortedDays.length) return 0;
+            if (!daysSet.size) return 0;
 
+            // Count consecutive days backward from today
             let streak = 0;
-            let cursor = startOfToday();
-            const todayStr = cursor.toISOString().split('T')[0];
+            const today = startOfToday();
+            const todayStr = today.toISOString().split('T')[0];
+            let cursor = new Date(today);
 
+            // If today has no completions, start checking from yesterday
             if (!daysSet.has(todayStr)) {
                 cursor.setDate(cursor.getDate() - 1);
             }
 
-            for (const dayStr of sortedDays) {
-                const dayDate = new Date(dayStr);
-                dayDate.setHours(0, 0, 0, 0);
-
-                if (dayDate.getTime() === cursor.getTime()) {
+            // Check up to 365 days back
+            for (let i = 0; i < 365; i++) {
+                const cursorStr = cursor.toISOString().split('T')[0];
+                if (daysSet.has(cursorStr)) {
                     streak++;
                     cursor.setDate(cursor.getDate() - 1);
-                } else if (dayDate.getTime() < cursor.getTime()) {
+                } else {
                     break;
                 }
             }
