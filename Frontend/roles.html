@@ -26,7 +26,7 @@
     <script src="app-config.js"></script>
     <script src="theme.js" defer></script>
     <script src="network-theme.js" defer></script>
-    <link rel="stylesheet" href="style.css?v=10.0">
+    <link rel="stylesheet" href="style.css?v=11.0">
 </head>
 
 <body>
@@ -229,10 +229,6 @@
 
         gsap.from(".team-card", {
             y: 40, opacity: 0, duration: 0.7, ease: "power3.out", stagger: 0.15, delay: 0.3
-        });
-
-        document.querySelectorAll(".team-card").forEach((card, i) => {
-            gsap.to(card, { y: -8, duration: 2.2 + i * 0.4, ease: "sine.inOut", yoyo: true, repeat: -1, delay: i * 0.2 });
         });
     </script>
 </body>
