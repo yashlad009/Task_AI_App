@@ -38,8 +38,23 @@ async function sendTaskCreatedNotification(taskText: string, category: string) {
       body: `"${taskText}" — You'll earn +${tokens} tokens on completion!`,
       sound: 'default',
     },
-    trigger: null, // immediate
+    trigger: null,
   });
+}
+
+// Schedule a deadline notification at the exact due date+time
+async function scheduleDueNotification(taskText: string, dueDateTime: Date): Promise<string | null> {
+  const now = new Date();
+  if (dueDateTime <= now) return null;
+  const id = await Notifications.scheduleNotificationAsync({
+    content: {
+      title: '⏰ Task Deadline!',
+      body: `"${taskText}" is due right now! Complete it to earn tokens.`,
+      sound: 'default',
+    },
+    trigger: { date: dueDateTime },
+  });
+  return id;
 }
 
 export default function TasksScreen() {
@@ -55,10 +70,12 @@ export default function TasksScreen() {
   const [category, setCategory] = useState('Study');
   const [priority, setPriority] = useState('Medium');
   const [dueDate, setDueDate] = useState<Date | null>(null);
+  const [dueTime, setDueTime] = useState<Date | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // Date picker state
+  // Picker states
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
   const fetchTasks = useCallback(async () => {
     if (!user) return;
@@ -71,7 +88,27 @@ export default function TasksScreen() {
 
   useEffect(() => { fetchTasks(); }, [fetchTasks]);
 
-  const formatDate = (d: Date) => d.toISOString().split('T')[0]; // YYYY-MM-DD
+  const formatDateOnly = (d: Date) => d.toISOString().split('T')[0];
+  const formatTimeDisplay = (d: Date) => d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+  const formatDateDisplay = (d: Date) => d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+
+  // Combine date + time into one Date object
+  const getCombinedDateTime = (): Date | null => {
+    if (!dueDate) return null;
+    const combined = new Date(dueDate);
+    if (dueTime) {
+      combined.setHours(dueTime.getHours(), dueTime.getMinutes(), 0, 0);
+    } else {
+      combined.setHours(23, 59, 0, 0); // default end of day
+    }
+    return combined;
+  };
+
+  const resetForm = () => {
+    setText(''); setDueDate(null); setDueTime(null);
+    setCategory('Study'); setPriority('Medium');
+    setShowDatePicker(false); setShowTimePicker(false);
+  };
 
   const addTask = async () => {
     if (!text.trim()) { Alert.alert('Error', 'Task description is required.'); return; }
@@ -79,12 +116,24 @@ export default function TasksScreen() {
     try {
       await axios.post(ENDPOINTS.addTask, {
         text: text.trim(), category, priority,
-        dueDate: dueDate ? formatDate(dueDate) : null,
+        dueDate: dueDate ? formatDateOnly(dueDate) : null,
         userId: user!.id,
       });
-      // Send immediate notification
+
+      // Immediate creation notification
       await sendTaskCreatedNotification(text.trim(), category);
-      setText(''); setDueDate(null); setCategory('Study'); setPriority('Medium');
+
+      // Schedule deadline notification if date+time set
+      const combined = getCombinedDateTime();
+      if (combined && combined > new Date()) {
+        await scheduleDueNotification(text.trim(), combined);
+        Alert.alert(
+          '✅ Task Added!',
+          `Deadline reminder set for ${formatDateDisplay(combined)} at ${formatTimeDisplay(combined)}`
+        );
+      }
+
+      resetForm();
       setModalVisible(false);
       fetchTasks();
     } catch (e) { Alert.alert('Error', 'Failed to add task.'); }
@@ -95,7 +144,6 @@ export default function TasksScreen() {
     try {
       const res = await axios.put(ENDPOINTS.completeTask(id));
       const tokensAwarded = res.data?.tokensAwarded ?? 0;
-      // Notify tokens earned
       if (tokensAwarded > 0) {
         await Notifications.scheduleNotificationAsync({
           content: {
@@ -207,14 +255,13 @@ export default function TasksScreen() {
               ))}
             </View>
 
-            <Text style={styles.label}>Due Date</Text>
-            <TouchableOpacity style={styles.dateBtn} onPress={() => setShowDatePicker(true)}>
+            {/* Date Picker */}
+            <Text style={styles.label}>Due Date <Text style={styles.optional}>(optional)</Text></Text>
+            <TouchableOpacity style={styles.pickerBtn} onPress={() => { setShowTimePicker(false); setShowDatePicker(true); }}>
               <Ionicons name="calendar-outline" size={18} color="#6C63FF" />
-              <Text style={styles.dateBtnText}>
-                {dueDate ? formatDate(dueDate) : 'Pick a date (optional)'}
-              </Text>
+              <Text style={styles.pickerText}>{dueDate ? formatDateDisplay(dueDate) : 'Pick a date'}</Text>
               {dueDate && (
-                <TouchableOpacity onPress={() => setDueDate(null)}>
+                <TouchableOpacity onPress={() => { setDueDate(null); setDueTime(null); }}>
                   <Ionicons name="close-circle" size={18} color="#EF4444" />
                 </TouchableOpacity>
               )}
@@ -226,16 +273,53 @@ export default function TasksScreen() {
                 mode="date"
                 display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                 minimumDate={new Date()}
-                onChange={(event, selectedDate) => {
-                  setShowDatePicker(Platform.OS === 'ios');
-                  if (selectedDate) setDueDate(selectedDate);
+                onChange={(event, date) => {
                   if (Platform.OS === 'android') setShowDatePicker(false);
+                  if (date) setDueDate(date);
                 }}
               />
             )}
 
+            {/* Time Picker — only show if date is selected */}
+            {dueDate && (
+              <>
+                <Text style={styles.label}>Due Time <Text style={styles.optional}>(optional — get notified at deadline)</Text></Text>
+                <TouchableOpacity style={styles.pickerBtn} onPress={() => { setShowDatePicker(false); setShowTimePicker(true); }}>
+                  <Ionicons name="time-outline" size={18} color="#F59E0B" />
+                  <Text style={styles.pickerText}>{dueTime ? formatTimeDisplay(dueTime) : 'Pick a time'}</Text>
+                  {dueTime && (
+                    <TouchableOpacity onPress={() => setDueTime(null)}>
+                      <Ionicons name="close-circle" size={18} color="#EF4444" />
+                    </TouchableOpacity>
+                  )}
+                </TouchableOpacity>
+
+                {showTimePicker && (
+                  <DateTimePicker
+                    value={dueTime ?? new Date()}
+                    mode="time"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={(event, time) => {
+                      if (Platform.OS === 'android') setShowTimePicker(false);
+                      if (time) setDueTime(time);
+                    }}
+                  />
+                )}
+              </>
+            )}
+
+            {/* Summary box when both date and time are set */}
+            {dueDate && dueTime && (
+              <View style={styles.summaryBox}>
+                <Ionicons name="notifications-outline" size={16} color="#6C63FF" />
+                <Text style={styles.summaryText}>
+                  You'll be notified at {formatDateDisplay(dueDate)}, {formatTimeDisplay(dueTime)}
+                </Text>
+              </View>
+            )}
+
             <View style={styles.modalBtns}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={() => { setModalVisible(false); setShowDatePicker(false); }}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => { resetForm(); setModalVisible(false); }}>
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.saveBtn} onPress={addTask} disabled={saving}>
@@ -272,17 +356,20 @@ const styles = StyleSheet.create({
   doneBtn: { padding: 4 }, delBtn: { padding: 4 },
   empty: { textAlign: 'center', color: '#475569', marginTop: 60, fontSize: 15 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
-  modalCard: { backgroundColor: '#1A1A2E', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, maxHeight: '90%' },
+  modalCard: { backgroundColor: '#1A1A2E', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, maxHeight: '92%' },
   modalTitle: { fontSize: 20, fontWeight: '700', color: '#E2E8F0', marginBottom: 16 },
   input: { backgroundColor: '#0F0F1A', borderRadius: 12, padding: 14, color: '#E2E8F0', fontSize: 15, marginBottom: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
   label: { fontSize: 13, color: '#94A3B8', marginBottom: 8, fontWeight: '600' },
+  optional: { color: '#475569', fontWeight: '400', fontSize: 12 },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 14 },
   chip: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, backgroundColor: '#0F0F1A', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
   chipActive: { backgroundColor: '#6C63FF' },
   chipText: { fontSize: 13, color: '#94A3B8', fontWeight: '600' },
-  dateBtn: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#0F0F1A', borderRadius: 12, padding: 14, marginBottom: 14, borderWidth: 1, borderColor: 'rgba(108,99,255,0.3)' },
-  dateBtnText: { flex: 1, color: '#E2E8F0', fontSize: 15 },
-  modalBtns: { flexDirection: 'row', gap: 12, marginTop: 8, marginBottom: 24 },
+  pickerBtn: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#0F0F1A', borderRadius: 12, padding: 14, marginBottom: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  pickerText: { flex: 1, color: '#E2E8F0', fontSize: 15 },
+  summaryBox: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(108,99,255,0.1)', borderRadius: 10, padding: 12, marginBottom: 14 },
+  summaryText: { flex: 1, fontSize: 13, color: '#6C63FF', fontWeight: '600' },
+  modalBtns: { flexDirection: 'row', gap: 12, marginTop: 4, marginBottom: 24 },
   cancelBtn: { flex: 1, padding: 14, borderRadius: 12, backgroundColor: '#0F0F1A', alignItems: 'center' },
   cancelText: { color: '#94A3B8', fontWeight: '600' },
   saveBtn: { flex: 1, padding: 14, borderRadius: 12, backgroundColor: '#6C63FF', alignItems: 'center' },

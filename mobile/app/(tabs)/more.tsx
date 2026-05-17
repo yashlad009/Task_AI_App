@@ -95,6 +95,12 @@ export default function MoreScreen() {
         <Ionicons name="log-out-outline" size={20} color="#EF4444" />
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
+
+      {/* Credits */}
+      <View style={styles.credits}>
+        <Text style={styles.creditsText}>Created by Yash Lad ❤️</Text>
+        <Text style={styles.creditsVersion}>Task Tracker v1.0</Text>
+      </View>
     </ScrollView>
   );
 }
@@ -120,4 +126,7 @@ const styles = StyleSheet.create({
   btnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
   logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: 'rgba(239,68,68,0.1)', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: 'rgba(239,68,68,0.2)' },
   logoutText: { color: '#EF4444', fontWeight: '700', fontSize: 16 },
+  credits: { alignItems: 'center', marginTop: 28, marginBottom: 8 },
+  creditsText: { fontSize: 15, color: '#6C63FF', fontWeight: '700' },
+  creditsVersion: { fontSize: 12, color: '#475569', marginTop: 4 },
 });
