@@ -254,12 +254,41 @@
         }
     </style>
     <link rel="stylesheet" href="style.css?v=2.0">
+    <link rel="stylesheet" href="animations.css">
 </head>
 <body>
     <div id="cursor-glow"></div>
     <main class="auth-page">
         <section class="hero-panel">
             <div class="hero-content">
+                <!-- Robot Mascot -->
+                <div class="apms-robot-wrap" id="robotWrap" style="margin-bottom:28px;">
+                    <svg class="apms-robot-svg" width="110" height="148" viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <line x1="60" y1="10" x2="60" y2="28" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                        <circle cx="60" cy="8" r="4" fill="#6C63FF"/>
+                        <rect x="22" y="28" width="76" height="58" rx="14" fill="#1A1A2E" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+                        <g><circle cx="42" cy="52" r="10" fill="rgba(108,99,255,0.15)"/><circle cx="42" cy="52" r="6" fill="#6C63FF"/><circle cx="45" cy="49" r="2" fill="white"/></g>
+                        <g><circle cx="78" cy="52" r="10" fill="rgba(108,99,255,0.15)"/><circle cx="78" cy="52" r="6" fill="#6C63FF"/><circle cx="81" cy="49" r="2" fill="white"/></g>
+                        <path d="M46 68 Q60 78 74 68" stroke="#6C63FF" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                        <rect x="28" y="92" width="64" height="52" rx="10" fill="#1A1A2E" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+                        <rect x="38" y="102" width="44" height="26" rx="6" fill="rgba(108,99,255,0.12)"/>
+                        <rect x="42" y="108" width="12" height="4" rx="2" fill="#6C63FF"/>
+                        <rect x="58" y="108" width="18" height="4" rx="2" fill="rgba(108,99,255,0.4)"/>
+                        <rect x="42" y="116" width="24" height="4" rx="2" fill="rgba(108,99,255,0.3)"/>
+                        <rect x="8" y="93" width="18" height="38" rx="8" fill="#1A1A2E" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+                        <g class="apms-robot-arm-right">
+                            <rect x="94" y="93" width="18" height="38" rx="8" fill="#1A1A2E" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+                        </g>
+                        <rect x="36" y="148" width="20" height="14" rx="6" fill="#1A1A2E" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+                        <rect x="64" y="148" width="20" height="14" rx="6" fill="#1A1A2E" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+                    </svg>
+                    <div class="apms-speech-bubble">
+                        <div id="robotBubble">
+                            <div class="apms-typing-indicator"><span></span><span></span><span></span></div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="hero-logo">
                     <img src="apms3.png" alt="APMS PRO logo">
                     <span>APMS PRO</span>
@@ -267,11 +296,11 @@
                 <h1>Stop losing track. Start owning your day.</h1>
                 <p>APMS PRO is the AI-powered task workspace built for engineering students - smarter reminders, real progress, zero chaos.</p>
                 <div class="feature-pills">
-                    <span class="feature-pill"><i class="fas fa-robot"></i> AI Mentor</span>
-                    <span class="feature-pill"><i class="fas fa-bell"></i> Smart Reminders</span>
-                    <span class="feature-pill"><i class="fas fa-chart-column"></i> Progress Analytics</span>
+                    <span class="feature-pill apms-slide-up apms-stagger-1"><i class="fas fa-robot"></i> AI Mentor</span>
+                    <span class="feature-pill apms-slide-up apms-stagger-2"><i class="fas fa-bell"></i> Smart Reminders</span>
+                    <span class="feature-pill apms-slide-up apms-stagger-3"><i class="fas fa-chart-column"></i> Progress Analytics</span>
                 </div>
-                <button type="button" class="primary-btn" onclick="setActivePanel('register')">Get started free <span>&rarr;</span></button>
+                <button type="button" class="primary-btn apms-hover-lift" onclick="setActivePanel('register')">Get started free <span>&rarr;</span></button>
             </div>
         </section>
 
@@ -470,6 +499,38 @@
                 ease: "power3.out",
                 delay: 0.2
             });
+
+            // Robot greeting typewriter
+            const greetings = [
+                "Hey there! 👋 Welcome to APMS PRO.",
+                "Track tasks, build streaks, and let AI guide your study plan.",
+                "Ready to own your day? Let's get started! 🚀"
+            ];
+            let msgIdx = 0;
+            let typingTimer, msgTimer;
+
+            function typeMessage(msg) {
+                const el = document.getElementById('robotBubble');
+                el.innerHTML = '';
+                let i = 0;
+                const span = document.createElement('span');
+                el.appendChild(span);
+                const t = setInterval(() => {
+                    span.textContent += msg[i++];
+                    if (i >= msg.length) {
+                        clearInterval(t);
+                        msgIdx++;
+                        if (msgIdx < greetings.length) {
+                            msgTimer = setTimeout(() => {
+                                el.innerHTML = '<div class="apms-typing-indicator"><span></span><span></span><span></span></div>';
+                                typingTimer = setTimeout(() => typeMessage(greetings[msgIdx]), 1100);
+                            }, 2200);
+                        }
+                    }
+                }, 38);
+            }
+
+            setTimeout(() => typeMessage(greetings[0]), 1000);
         });
     </script>
 </body>

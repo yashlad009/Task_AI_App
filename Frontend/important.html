@@ -22,6 +22,7 @@
     <script src="theme.js" defer></script>
     <script src="network-theme.js" defer></script>
     <link rel="stylesheet" href="style.css?v=12.0">
+    <link rel="stylesheet" href="animations.css">
 </head>
 <body>
     <div id="cursor-glow"></div>
@@ -73,7 +74,7 @@
             </header>
 
             <section class="important-grid">
-                <article class="important-card">
+                <article class="important-card apms-hover-glow">
                     <h2>Schedule New Alert</h2>
                     <p>Use this for exams, meetings, submissions, and other non-negotiable moments.</p>
                     <div class="important-form">
@@ -83,7 +84,7 @@
                     </div>
                 </article>
 
-                <article class="important-card">
+                <article class="important-card apms-hover-glow">
                     <h2>Scheduled Reminders</h2>
                     <p>Live reminder queue with active and already-processed alerts.</p>
                     <div id="important-task-list" class="reminder-stack"></div>
@@ -221,7 +222,7 @@
                     const statusClass = task.processed ? 'status-processed' : 'status-active';
                     const statusText = task.processed ? 'Notified' : 'Active Alert';
                     return `
-                        <div class="reminder-row">
+                        <div class="reminder-row apms-notif-item apms-hover-lift">
                             <div>
                                 <div class="important-badge"><i class="fas fa-bolt"></i> IMPORTANT</div>
                                 <h3>${escapeHtml(task.taskName || 'Untitled reminder')}</h3>
@@ -231,6 +232,13 @@
                         </div>
                     `;
                 }).join('');
+
+                // Stagger the drop-in animation
+                requestAnimationFrame(() => {
+                    document.querySelectorAll('.reminder-row.apms-notif-item').forEach((el, i) => {
+                        setTimeout(() => el.classList.add('apms-show'), i * 120);
+                    });
+                });
             } catch (error) {
                 container.innerHTML = `<div class="empty-state">Reminder sync failed. Please try again.</div>`;
             }

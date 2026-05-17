@@ -23,6 +23,7 @@
     <script src="theme.js" defer></script>
     <script src="network-theme.js" defer></script>
     <link rel="stylesheet" href="style.css?v=12.0">
+    <link rel="stylesheet" href="animations.css">
 </head>
 <body>
     <div id="cursor-glow"></div>
@@ -70,46 +71,46 @@
             </header>
 
         <section class="stats-row">
-            <article class="stat-card" style="--card-accent:#6C63FF;">
+            <article class="stat-card apms-hover-glow apms-stat-enter apms-stagger-1" style="--card-accent:#6C63FF;">
                 <div class="stat-card-top">
                     <i class="fas fa-clipboard-list"></i>
                 </div>
                 <div>
-                    <span id="metricTotalTasks" class="metric-number">0</span>
+                    <span id="metricTotalTasks" class="metric-number apms-stat-value">0</span>
                     <p class="metric-label">Total Tasks</p>
                 </div>
             </article>
-            <article class="stat-card" style="--card-accent:#22C55E;">
+            <article class="stat-card apms-hover-glow apms-stat-enter apms-stagger-2" style="--card-accent:#22C55E;">
                 <div class="stat-card-top">
                     <i class="fas fa-circle-check"></i>
                 </div>
                 <div>
-                    <span id="metricCompleted" class="metric-number">0</span>
+                    <span id="metricCompleted" class="metric-number apms-stat-value">0</span>
                     <p class="metric-label">Completed</p>
                 </div>
             </article>
-            <article class="stat-card" style="--card-accent:#EF4444;">
+            <article class="stat-card apms-hover-glow apms-stat-enter apms-stagger-3" style="--card-accent:#EF4444;">
                 <div class="stat-card-top">
                     <i class="fas fa-triangle-exclamation"></i>
                 </div>
                 <div>
-                    <span id="metricOverdue" class="metric-number">0</span>
+                    <span id="metricOverdue" class="metric-number apms-stat-value">0</span>
                     <p class="metric-label">Overdue</p>
                 </div>
             </article>
-            <article class="stat-card" style="--card-accent:#F59E0B;">
+            <article class="stat-card apms-hover-glow apms-stat-enter apms-stagger-4" style="--card-accent:#F59E0B;">
                 <div class="stat-card-top">
-                    <i class="fas fa-fire"></i>
+                    <i class="fas fa-fire apms-flame" id="streakFlame"></i>
                 </div>
                 <div>
-                    <span id="metricStreak" class="metric-number">0</span>
+                    <span id="metricStreak" class="metric-number apms-stat-value apms-streak-number" style="color:#F59E0B;">0</span>
                     <p class="metric-label">Current Streak</p>
                 </div>
             </article>
         </section>
 
         <section class="dashboard-grid">
-            <article class="dashboard-card">
+            <article class="dashboard-card apms-hover-glow">
                 <h2>Task Command Center</h2>
                 <p>Your highest-impact tasks, sorted for today.</p>
 
@@ -143,7 +144,7 @@
                 <div id="taskFeed" class="task-feed"></div>
             </article>
 
-            <aside class="dashboard-card progress-card">
+            <aside class="dashboard-card progress-card apms-hover-glow">
                 <div>
                     <h2>Progress Pulse</h2>
                     <p>Live completion ratio for your current task stack.</p>
@@ -419,7 +420,7 @@
                 const dueDateText = task.dueDate ? formatDate(task.dueDate) : 'No deadline';
 
                 return `
-                    <div class="task-row ${completed ? 'completed' : ''}" data-task-id="${task.id}" style="--priority-color:${priorityColor};">
+                    <div class="task-row ${completed ? 'completed' : ''} apms-hover-lift" data-task-id="${task.id}" style="--priority-color:${priorityColor};">
                         <input class="task-check" type="checkbox" ${completed ? 'checked' : ''} onchange="toggleTaskCompletion('${task.id}', this)">
                         <div>
                             <div class="task-title">${escapeHtml(task.text || 'Untitled Task')}</div>
@@ -539,6 +540,8 @@
         async function toggleTaskCompletion(taskId, checkbox) {
             if (checkbox.checked) {
                 const row = checkbox.closest('.task-row');
+                // Flash green on complete
+                row.classList.add('apms-task-complete-flash');
                 gsap.to(row, { duration: 0.28, scale: 0.98, opacity: 0.7, ease: "power2.out" });
                 try {
                     const response = await fetch(`${API_URL}/tasks/${taskId}/complete`, { method: 'PUT' });
@@ -548,6 +551,8 @@
                         currentUser = payload.user;
                         localStorage.setItem('user_session', JSON.stringify(payload.user));
                     }
+                    // XP Toast
+                    showXpToast(10);
                     await loadDashboard();
                     if (payload.newlyUnlocked && payload.newlyUnlocked.length > 0) {
                         openCertificate(payload.newlyUnlocked[payload.newlyUnlocked.length - 1].key);
@@ -559,6 +564,17 @@
             } else {
                 checkbox.checked = true;
             }
+        }
+
+        function showXpToast(xp) {
+            const toast = document.createElement('div');
+            toast.className = 'apms-xp-toast';
+            toast.innerHTML = `<i class="fas fa-star"></i> +${xp} XP`;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('apms-toast-out');
+                setTimeout(() => toast.remove(), 350);
+            }, 2200);
         }
 
         async function deleteTask(taskId) {
@@ -718,9 +734,20 @@
             gsap.to("#cursor-glow", { x: e.clientX, y: e.clientY, duration: 0.7, ease: "power2.out" });
         });
 
-        // Global Navbar & Title Entrance
+        // Navbar entrance
         gsap.from("nav, .navbar", { y: -50, opacity: 0, duration: 0.6, ease: "power2.out" });
-        gsap.from("h1, .page-title, .hero-title", { y: 35, opacity: 0, duration: 0.7, ease: "power3.out", delay: 0.2 });
+        gsap.from("h1, .hero-strip h1", { y: 35, opacity: 0, duration: 0.7, ease: "power3.out", delay: 0.2 });
+
+        // Dashboard cards
+        gsap.from(".dashboard-card", {
+            y: 30, opacity: 0, duration: 0.6, stagger: 0.14, ease: "power3.out", delay: 0.5
+        });
+
+        // Achievement cards scroll reveal
+        gsap.from(".achievement-card", {
+            y: 20, opacity: 0, duration: 0.5, stagger: 0.1, ease: "power2.out",
+            scrollTrigger: { trigger: ".achievement-list", start: "top 88%" }
+        });
 
         // Page Specific: Dashboard
 

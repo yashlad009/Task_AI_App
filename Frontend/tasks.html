@@ -22,6 +22,7 @@
     <script src="theme.js" defer></script>
     <script src="network-theme.js" defer></script>
     <link rel="stylesheet" href="style.css?v=12.0">
+    <link rel="stylesheet" href="animations.css">
 </head>
 <body>
     <div id="cursor-glow"></div>
@@ -223,7 +224,7 @@
                     const title = escapeHtml(task.text || task.description || "Untitled task");
 
                     return `
-                        <div class="task-row" style="--priority-color:${priorityColor};">
+                        <div class="task-row apms-hover-lift" style="--priority-color:${priorityColor};">
                             <div class="task-main">
                                 <strong>${title}</strong>
                                 <div class="task-meta">${escapeHtml(category)} • ${escapeHtml(formattedDue)}</div>
@@ -353,6 +354,48 @@
         gsap.from(".planner-card", { 
             y: 30, opacity: 0, duration: 0.7, stagger: 0.15, ease: "power3.out", delay: 0.5 
         });
+
+        // XP Toast helper
+        function showXpToast(xp = 10) {
+            const toast = document.createElement('div');
+            toast.className = 'apms-xp-toast';
+            toast.innerHTML = `<i class="fas fa-star"></i> +${xp} XP`;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('apms-toast-out');
+                setTimeout(() => toast.remove(), 350);
+            }, 2200);
+        }
+
+        // Notification drop-in helper
+        function showNotifToast(icon, title, sub) {
+            const notif = document.createElement('div');
+            notif.style.cssText = `
+                position:fixed; top:80px; right:24px; z-index:9998;
+                background:var(--glass-panel,#1A1A2E);
+                border:1px solid rgba(255,255,255,0.1);
+                border-radius:14px; padding:12px 16px;
+                display:flex; align-items:flex-start; gap:10px;
+                max-width:300px; font-size:13px;
+                box-shadow:0 12px 32px rgba(0,0,0,0.3);
+            `;
+            notif.classList.add('apms-notif-item');
+            notif.innerHTML = `
+                <div style="font-size:20px;line-height:1;">${icon}</div>
+                <div>
+                    <div style="font-weight:600;color:var(--text-main,#E2E8F0);">${title}</div>
+                    <div style="color:var(--text-dim,#94A3B8);font-size:12px;margin-top:2px;">${sub}</div>
+                </div>
+            `;
+            document.body.appendChild(notif);
+            requestAnimationFrame(() => notif.classList.add('apms-show'));
+            setTimeout(() => {
+                notif.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                notif.style.opacity = '0';
+                notif.style.transform = 'translateY(-10px)';
+                setTimeout(() => notif.remove(), 350);
+            }, 3500);
+        }
     </script>
 </body>
 </html>

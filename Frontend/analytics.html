@@ -27,6 +27,7 @@
     <script src="theme.js" defer></script>
     <script src="network-theme.js" defer></script>
     <link rel="stylesheet" href="style.css?v=12.0">
+    <link rel="stylesheet" href="animations.css">
 </head>
 
 <body>
@@ -68,25 +69,25 @@
             </header>
 
             <section class="overview-grid">
-                <article class="stat-card" style="--accent-color:#6C63FF;">
+                <article class="stat-card apms-hover-glow apms-stat-enter apms-stagger-1" style="--accent-color:#6C63FF;">
                     <i class="fas fa-calendar-week"></i>
-                    <span id="weeklyComplete" class="metric-number">0</span>
+                    <span id="weeklyComplete" class="metric-number apms-stat-value">0</span>
                     <div class="metric-label">Tasks finished this week</div>
                 </article>
-                <article class="stat-card" style="--accent-color:#22C55E;">
+                <article class="stat-card apms-hover-glow apms-stat-enter apms-stagger-2" style="--accent-color:#22C55E;">
                     <i class="fas fa-chart-line"></i>
-                    <span id="weeklyEfficiency" class="metric-number">0</span>
+                    <span id="weeklyEfficiency" class="metric-number apms-stat-value">0</span>
                     <div class="metric-label">Weekly completion rate</div>
                 </article>
-                <article class="stat-card" style="--accent-color:#F59E0B;">
-                    <i class="fas fa-fire"></i>
-                    <span id="weeklyStreak" class="metric-number">0</span>
+                <article class="stat-card apms-hover-glow apms-stat-enter apms-stagger-3" style="--accent-color:#F59E0B;">
+                    <i class="fas fa-fire apms-flame"></i>
+                    <span id="weeklyStreak" class="metric-number apms-stat-value apms-streak-number" style="color:#F59E0B;">0</span>
                     <div class="metric-label">Current consistency streak</div>
                 </article>
             </section>
 
             <section class="progress-grid">
-                <article class="panel-card">
+                <article class="panel-card apms-hover-glow">
                     <h2>Completion Rhythm</h2>
                     <p>Tasks completed per day over the last seven days.</p>
                     <div id="progress-chart">
@@ -94,10 +95,22 @@
                     </div>
                 </article>
 
-                <aside class="panel-card">
+                <aside class="panel-card apms-hover-glow">
                     <h2>Streak Tracker</h2>
-                    <p>Keep the chain alive. Green means done, purple pulse means today still needs work.</p>
+                    <p>Keep the chain alive. Green means done, orange pulse means today still needs work.</p>
                     <div id="streakRow" class="streak-row"></div>
+
+                    <!-- XP Progress Bar -->
+                    <div style="margin:20px 0 16px;">
+                        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-dim);margin-bottom:6px;">
+                            <span id="xpLevelLabel">Level Progress</span>
+                            <span id="xpValueLabel">—</span>
+                        </div>
+                        <div class="apms-xp-bar-track">
+                            <div class="apms-xp-bar-fill" id="xpBarFill" style="--xp-w:0%;width:0%;"></div>
+                        </div>
+                    </div>
+
                     <div class="insight-list">
                         <div class="insight-card">
                             <strong id="insightPrimary">No data yet</strong>
@@ -209,6 +222,21 @@
 
             document.getElementById('weeklyEfficiency').dataset.suffix = '%';
             document.getElementById('weeklyStreak').dataset.suffix = ' days';
+
+            // Animate XP bar based on efficiency
+            const xpBar = document.getElementById('xpBarFill');
+            const xpLabel = document.getElementById('xpValueLabel');
+            if (xpBar) {
+                const xpPercent = Math.min(efficiency, 100);
+                xpBar.style.setProperty('--xp-w', xpPercent + '%');
+                xpBar.style.width = xpPercent + '%';
+                if (xpLabel) xpLabel.textContent = `${xpPercent}% efficiency`;
+            }
+            const levelLabel = document.getElementById('xpLevelLabel');
+            if (levelLabel) {
+                const level = streak >= 7 ? 'Focused Engineer' : streak >= 3 ? 'Momentum Builder' : 'Getting Started';
+                levelLabel.textContent = `🔥 ${level}`;
+            }
         }
 
         function renderChart(chartData) {
@@ -274,16 +302,22 @@
 
         function renderStreakRow(chartData) {
             const row = document.getElementById('streakRow');
-            row.innerHTML = chartData.map((day) => {
-                const stateClass = day.count > 0 ? 'completed' : (day.isToday ? 'today' : '');
-                const icon = day.count > 0 ? '<i class="fas fa-check"></i>' : day.label.charAt(0);
+            row.innerHTML = chartData.map((day, i) => {
+                const stateClass = day.count > 0 ? 'done' : (day.isToday ? 'today' : '');
+                const icon = day.count > 0 ? '<i class="fas fa-check" style="font-size:11px;"></i>' : day.label.charAt(0);
                 return `
-                    <div class="streak-day">
-                        <div class="streak-bubble ${stateClass}">${icon}</div>
+                    <div class="streak-day apms-slide-up" style="animation-delay:${0.05 + i * 0.07}s;">
+                        <div class="streak-bubble ${stateClass} apms-day-dot ${stateClass}">${icon}</div>
                         <span class="streak-copy">${day.label}</span>
                     </div>
                 `;
             }).join('');
+
+            // Flame icon for streak count
+            const streakEl = document.getElementById('weeklyStreak');
+            if (streakEl && parseInt(streakEl.textContent) > 0) {
+                streakEl.closest('.stat-card').querySelector('i').className = 'fas fa-fire apms-flame';
+            }
         }
 
         function renderInsights(chartData, milestones) {

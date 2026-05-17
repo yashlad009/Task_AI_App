@@ -22,6 +22,7 @@
     <script src="theme.js" defer></script>
     <script src="network-theme.js" defer></script>
     <link rel="stylesheet" href="style.css?v=12.0">
+    <link rel="stylesheet" href="animations.css">
 </head>
 <body>
     <div id="cursor-glow"></div>
@@ -73,7 +74,7 @@
             </section>
 
             <section class="milestone-grid">
-                <article class="milestone-card">
+                <article class="milestone-card apms-hover-glow">
                     <h2>Create New Milestone</h2>
                     <p>Add a milestone name and starting percentage to keep your broader goals visible.</p>
                     <div class="milestone-form">
@@ -83,7 +84,7 @@
                     </div>
                 </article>
 
-                <article class="milestone-card">
+                <article class="milestone-card apms-hover-glow">
                     <h2>Milestone Tracking</h2>
                     <p>Update progress, remove finished lines, and keep your showcase storyline crisp.</p>
                     <div id="milestone-list-area" class="milestone-list"></div>
@@ -207,27 +208,30 @@
                     return;
                 }
 
-                container.innerHTML = milestones.map((milestone) => `
-                    <div class="milestone-item">
+                container.innerHTML = milestones.map((milestone) => {
+                    const pct = Math.min(100, Math.max(0, milestone.progress || 0));
+                    const isComplete = pct >= 100;
+                    return `
+                    <div class="milestone-item apms-hover-glow">
                         <div class="milestone-top">
                             <div>
-                                <h3>${escapeHtml(milestone.name || 'Untitled milestone')}</h3>
-                                <p>${milestone.progress >= 100 ? 'Completed and ready to celebrate.' : 'Keep pushing this milestone forward.'}</p>
+                                <h3>${escapeHtml(milestone.name || 'Untitled milestone')}${isComplete ? ' <span class="apms-badge" style="font-size:11px;padding:4px 10px;">🏆 Complete</span>' : ''}</h3>
+                                <p>${isComplete ? 'Completed and ready to celebrate.' : 'Keep pushing this milestone forward.'}</p>
                             </div>
                             <div class="milestone-actions">
-                                <input type="number" id="input-${milestone.id}" value="${milestone.progress}" min="0" max="100">
+                                <input type="number" id="input-${milestone.id}" value="${pct}" min="0" max="100">
                                 <button type="button" class="secondary-btn" onclick="updateProgress('${milestone.id}', '${escapeJs(milestone.name || '')}')">Update</button>
                                 <button type="button" class="delete-btn" onclick="deleteMilestone('${milestone.id}')">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
                         </div>
-                        <div class="progress-track">
-                            <div class="progress-fill" style="width:${milestone.progress}%;"></div>
+                        <div class="apms-milestone-bar">
+                            <div class="apms-milestone-fill" style="--fill-w:${pct}%; width:${pct}%;"></div>
                         </div>
-                        <div class="progress-copy">${milestone.progress}% COMPLETE</div>
+                        <div class="progress-copy">${pct}% COMPLETE</div>
                     </div>
-                `).join('');
+                `}).join('');
             } catch (error) {
                 container.innerHTML = `<div class="empty-state">Connection error while fetching milestones.</div>`;
             }
@@ -289,14 +293,31 @@
         }
 
         function triggerCongrats(name) {
+            // Confetti burst
+            spawnConfetti();
             Swal.fire({
-                title: 'Milestone Complete',
+                title: '🏆 Milestone Complete!',
                 text: `${name} has reached 100% completion.`,
                 icon: 'success',
                 background: '#1A1A2E',
                 color: '#E2E8F0',
                 confirmButtonColor: '#6C63FF'
             });
+        }
+
+        function spawnConfetti() {
+            const wrap = document.createElement('div');
+            wrap.className = 'apms-confetti-wrap';
+            wrap.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100px;pointer-events:none;z-index:9999;overflow:hidden;';
+            const colors = ['#FFD700','#FF6B6B','#6C63FF','#22C55E','#F59E0B','#A855F7'];
+            for (let i = 0; i < 24; i++) {
+                const p = document.createElement('div');
+                p.className = 'apms-confetti-piece';
+                p.style.cssText = `left:${5 + Math.random()*90}%;background:${colors[i % colors.length]};animation-delay:${Math.random()*0.8}s;animation-duration:${1.4 + Math.random()*0.8}s;width:${6+Math.random()*6}px;height:${6+Math.random()*6}px;border-radius:${Math.random()>0.5?'50%':'2px'};`;
+                wrap.appendChild(p);
+            }
+            document.body.appendChild(wrap);
+            setTimeout(() => wrap.remove(), 3000);
         }
 
         function escapeHtml(value) {

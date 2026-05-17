@@ -14,6 +14,7 @@
     <script src="app-config.js"></script>
     <script src="network-theme.js" defer></script>
     <link rel="stylesheet" href="style.css?v=12.0">
+    <link rel="stylesheet" href="animations.css">
 </head>
 <body>
     <div id="cursor-glow"></div>
@@ -69,23 +70,47 @@
             <section class="mentor-grid">
                 <aside class="context-panel panel">
                     <p class="panel-label">Live Context</p>
+                    <!-- Mini robot mascot -->
+                    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;padding:14px;background:rgba(108,99,255,0.06);border:1px solid rgba(108,99,255,0.15);border-radius:14px;">
+                        <svg class="apms-robot-svg" width="52" height="68" viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="flex-shrink:0;">
+                            <line x1="60" y1="10" x2="60" y2="28" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                            <circle cx="60" cy="8" r="4" fill="#6C63FF"/>
+                            <rect x="22" y="28" width="76" height="58" rx="14" fill="#1A1A2E" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+                            <circle cx="42" cy="52" r="10" fill="rgba(108,99,255,0.15)"/><circle cx="42" cy="52" r="6" fill="#6C63FF"/><circle cx="45" cy="49" r="2" fill="white"/>
+                            <circle cx="78" cy="52" r="10" fill="rgba(108,99,255,0.15)"/><circle cx="78" cy="52" r="6" fill="#6C63FF"/><circle cx="81" cy="49" r="2" fill="white"/>
+                            <path d="M46 68 Q60 78 74 68" stroke="#6C63FF" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                            <rect x="28" y="92" width="64" height="52" rx="10" fill="#1A1A2E" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+                            <rect x="38" y="102" width="44" height="26" rx="6" fill="rgba(108,99,255,0.12)"/>
+                            <rect x="8" y="93" width="18" height="38" rx="8" fill="#1A1A2E" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+                            <g class="apms-robot-arm-right"><rect x="94" y="93" width="18" height="38" rx="8" fill="#1A1A2E" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/></g>
+                            <rect x="36" y="148" width="20" height="14" rx="6" fill="#1A1A2E" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+                            <rect x="64" y="148" width="20" height="14" rx="6" fill="#1A1A2E" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+                        </svg>
+                        <div>
+                            <div style="font-weight:600;font-size:13px;color:var(--text-main);">TaskAI</div>
+                            <div style="font-size:12px;color:#22C55E;display:flex;align-items:center;gap:5px;">
+                                <span style="width:7px;height:7px;border-radius:50%;background:#22C55E;display:inline-block;box-shadow:0 0 8px rgba(34,197,94,0.7);"></span>
+                                Online — reading your tasks
+                            </div>
+                        </div>
+                    </div>
                     <h2>Pending Task Radar</h2>
                     <p style="font-size: 13px; margin-bottom: 16px;">Real-time data feeding your mentor advice.</p>
                     <div id="task-chip-stack" class="chip-stack"></div>
                     <div id="empty-chip-state" class="empty-state" style="display:none; margin-top:18px;">No pending tasks found.</div>
                     <div class="mentor-stats">
                         <div class="mini-stat">
-                            <strong id="pending-count">0</strong>
+                            <strong id="pending-count" class="apms-stat-value">0</strong>
                             <span>Pending</span>
                         </div>
                         <div class="mini-stat">
-                            <strong id="urgent-count">0</strong>
+                            <strong id="urgent-count" class="apms-stat-value">0</strong>
                             <span>High Priority</span>
                         </div>
                     </div>
                 </aside>
 
-                <section class="chat-panel panel">
+                <section class="chat-panel panel apms-hover-glow">
                     <div class="chat-header">
                         <p class="panel-label">Mentor Console</p>
                         <h2>Daily Strategy</h2>
@@ -277,6 +302,15 @@
             label.textContent = 'Thinking';
             startSpinner();
 
+            // Show animated typing indicator while waiting
+            const shell = document.getElementById('response-shell');
+            const typingBubble = document.createElement('div');
+            typingBubble.className = 'ai-bubble apms-slide-up';
+            typingBubble.id = 'ai-typing-bubble';
+            typingBubble.innerHTML = '<div class="apms-typing-indicator"><span></span><span></span><span></span></div>';
+            shell.appendChild(typingBubble);
+            shell.scrollTop = shell.scrollHeight;
+
             try {
                 const response = await fetch(`${API_URL}/api/ai/chat/${userId}`, {
                     method: 'POST',
@@ -286,10 +320,16 @@
 
                 const data = await response.json().catch(() => ({}));
                 const reply = data.response || data.error || 'TaskAI is busy. Try again shortly.';
-                
+
+                // Remove typing indicator
+                const tb = document.getElementById('ai-typing-bubble');
+                if (tb) tb.remove();
+
                 const bubble = appendBubble("", true);
                 typewriterReveal(bubble, reply);
             } catch (error) {
+                const tb = document.getElementById('ai-typing-bubble');
+                if (tb) tb.remove();
                 appendBubble('Service unavailable.', true);
             } finally {
                 stopSpinner();

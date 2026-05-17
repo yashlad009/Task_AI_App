@@ -27,6 +27,7 @@
     <script src="theme.js" defer></script>
     <script src="network-theme.js" defer></script>
     <link rel="stylesheet" href="style.css?v=12.0">
+    <link rel="stylesheet" href="animations.css">
 </head>
 
 <body>
@@ -71,19 +72,19 @@
             </header>
 
             <section class="team-grid">
-                <article class="team-card">
+                <article class="team-card apms-hover-glow">
                     <h2>Role Snapshot</h2>
                     <p>Live view of the signed-in user and their current system access level.</p>
-                    <div class="profile-card">
+                    <div class="profile-card apms-slide-up">
                         <strong id="userNameDisplay">User</strong>
                         <span id="userEmailDisplay">user@example.com</span>
                         <span class="role-pill" id="userRoleDisplay">Loading...</span>
                         <span class="status-pill"><i class="fas fa-circle"
-                                style="font-size:8px; margin-right:8px;"></i>Active</span>
+                                style="font-size:8px; margin-right:8px; color:#22C55E;"></i>Active</span>
                     </div>
                 </article>
 
-                <article class="team-card">
+                <article class="team-card apms-hover-glow">
                     <h2>Message to Admin</h2>
                     <p>Send a support query, feature request, or issue update and review the full conversation history
                         below.</p>
@@ -195,14 +196,21 @@
                     return;
                 }
 
-                list.innerHTML = data.reverse().map((query) => `
-                    <div class="msg-bubble">
+                list.innerHTML = data.reverse().map((query, i) => `
+                    <div class="msg-bubble apms-notif-item" style="transition-delay:${i * 0.1}s;">
                         <div><strong>You:</strong> ${escapeHtml(query.message || '')}</div>
                         ${query.adminReply
                         ? `<div style="margin-top:12px; color:#C4B5FD;"><strong>Admin:</strong> ${escapeHtml(query.adminReply)}</div>`
                         : `<div class="pending">Pending admin review</div>`}
                     </div>
                 `).join('');
+
+                // Stagger drop-in
+                requestAnimationFrame(() => {
+                    list.querySelectorAll('.msg-bubble.apms-notif-item').forEach((el, i) => {
+                        setTimeout(() => el.classList.add('apms-show'), i * 100);
+                    });
+                });
             } catch (error) {
                 document.getElementById('replyList').innerHTML = `<div class="empty-state">Could not load conversation history.</div>`;
             }
@@ -223,12 +231,17 @@
             gsap.to("#cursor-glow", { x: e.clientX, y: e.clientY, duration: 0.7, ease: "power2.out" });
         });
 
-        // Global Navbar & Title Entrance
         gsap.from("nav, .navbar", { y: -50, opacity: 0, duration: 0.6, ease: "power2.out" });
         gsap.from("h1, .page-title, .hero-title", { y: 35, opacity: 0, duration: 0.7, ease: "power3.out", delay: 0.2 });
 
         gsap.from(".team-card", {
             y: 40, opacity: 0, duration: 0.7, ease: "power3.out", stagger: 0.15, delay: 0.3
+        });
+
+        // Message bubbles scroll reveal
+        gsap.from(".msg-bubble", {
+            x: -20, opacity: 0, duration: 0.4, stagger: 0.1, ease: "power2.out",
+            scrollTrigger: { trigger: ".conversation-list", start: "top 90%" }
         });
     </script>
 </body>
