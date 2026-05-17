@@ -1,10 +1,8 @@
-import { useEffect } from 'react';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider, useAuth } from '../src/context/AuthContext';
-import { registerForPushNotifications } from '../src/utils/notifications';
-import * as Notifications from 'expo-notifications';
+import { useEffect } from 'react';
+import { useRouter, useSegments } from 'expo-router';
 
 function RootLayoutNav() {
   const { user, isLoading } = useAuth();
@@ -25,14 +23,6 @@ function RootLayoutNav() {
     }
   }, [user, isLoading]);
 
-  useEffect(() => {
-    registerForPushNotifications();
-    const sub = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log('Notification tapped:', response);
-    });
-    return () => sub.remove();
-  }, []);
-
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(auth)" />
@@ -44,11 +34,9 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <AuthProvider>
-        <StatusBar style="light" />
-        <RootLayoutNav />
-      </AuthProvider>
-    </GestureHandlerRootView>
+    <AuthProvider>
+      <StatusBar style="light" />
+      <RootLayoutNav />
+    </AuthProvider>
   );
 }
