@@ -9,6 +9,12 @@ WORKDIR /app/backend/demo
 RUN mvn -q -DskipTests dependency:go-offline
 RUN mvn -q clean package -DskipTests -DskipFrontendCopy=false
 
+# Verify frontend HTML and CSS made it into the JAR - fails build if missing
+RUN jar tf target/demo-0.0.1-SNAPSHOT.jar | grep "BOOT-INF/classes/static/index.html" && \
+    jar tf target/demo-0.0.1-SNAPSHOT.jar | grep "BOOT-INF/classes/static/style.css" && \
+    echo "=== Frontend verified in JAR ===" || \
+    (echo "=== ERROR: Frontend missing from JAR ===" && exit 1)
+
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 
