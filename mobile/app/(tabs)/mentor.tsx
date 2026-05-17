@@ -17,7 +17,7 @@ interface Message {
 export default function MentorScreen() {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
-    { id: '0', role: 'ai', text: "Hey! I'm Antigravity, your AI mentor. Ask me anything about your tasks, productivity, or how to stay on track. 🚀" }
+    { id: '0', role: 'ai', text: "Hey! I'm Task AI, your AI mentor. Ask me anything about your tasks, productivity, or how to stay on track. 🚀" }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -66,7 +66,7 @@ export default function MentorScreen() {
             <Ionicons name="sparkles" size={20} color="#6C63FF" />
           </View>
           <View>
-            <Text style={styles.title}>Antigravity</Text>
+            <Text style={styles.title}>Task AI</Text>
             <Text style={styles.subtitle}>AI Productivity Mentor</Text>
           </View>
         </View>
@@ -84,7 +84,7 @@ export default function MentorScreen() {
       {loading && (
         <View style={styles.typingIndicator}>
           <ActivityIndicator size="small" color="#6C63FF" />
-          <Text style={styles.typingText}>Antigravity is thinking...</Text>
+          <Text style={styles.typingText}>Task AI is thinking...</Text>
         </View>
       )}
 

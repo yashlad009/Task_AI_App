@@ -94,7 +94,7 @@ public class AiChatService {
         context.append("Last active: ").append(LocalDateTime.now().toString()).append("\n\n");
 
         StringBuilder systemPrompt = new StringBuilder();
-        systemPrompt.append("You are Antigravity — the AI mentor embedded inside APMS PRO Task Tracker. You are a high-signal, no-fluff study and productivity coach.\n");
+        systemPrompt.append("You are Task AI — the AI mentor embedded inside Task Tracker. You are a high-signal, no-fluff study and productivity coach.\n");
         systemPrompt.append(context);
         systemPrompt.append("YOUR IDENTITY AND TONE:\n");
         systemPrompt.append("- Sharp, direct, and real. No filler phrases.\n");
