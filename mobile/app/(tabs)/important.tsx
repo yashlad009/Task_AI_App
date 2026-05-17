@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  TextInput, Modal, Alert, RefreshControl, ActivityIndicator, Platform
+  TextInput, Modal, Alert, RefreshControl, ActivityIndicator, Platform, ScrollView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios';
 import { useAuth } from '../../src/context/AuthContext';
 import { ENDPOINTS } from '../../src/config/api';
@@ -24,9 +25,9 @@ export default function ImportantScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [taskName, setTaskName] = useState('');
-  // Date/time inputs
-  const [dateStr, setDateStr] = useState('');   // YYYY-MM-DD
-  const [timeStr, setTimeStr] = useState('');   // HH:MM (24h)
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const fetchTasks = useCallback(async () => {
@@ -40,35 +41,32 @@ export default function ImportantScreen() {
 
   useEffect(() => { fetchTasks(); }, [fetchTasks]);
 
-  const addTask = async () => {
-    if (!taskName.trim() || !dateStr.trim() || !timeStr.trim()) {
-      Alert.alert('Error', 'Task name, date and time are required.');
-      return;
-    }
-    // Validate format
-    const isoString = `${dateStr}T${timeStr}:00`;
-    const eventDate = new Date(isoString);
-    if (isNaN(eventDate.getTime())) {
-      Alert.alert('Error', 'Invalid date/time. Use YYYY-MM-DD and HH:MM format.');
-      return;
-    }
+  const formatDate = (d: Date) => d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  const formatTime = (d: Date) => d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
 
+  const addTask = async () => {
+    if (!taskName.trim()) {
+      Alert.alert('Error', 'Task name is required.');
+      return;
+    }
+    const now = new Date();
+    if (selectedDate <= now) {
+      Alert.alert('Error', 'Please select a future date and time.');
+      return;
+    }
     setSaving(true);
     try {
-      // Convert local time to UTC ISO for backend
-      const utcIso = eventDate.toISOString().replace('Z', '');
+      const utcIso = selectedDate.toISOString().replace('Z', '');
       await axios.post(ENDPOINTS.addImportantTask, {
         taskName: taskName.trim(),
         eventTime: utcIso,
         userEmail: user!.email,
         userId: user!.id,
       });
-
-      // Schedule local push notification 30 min before
-      await scheduleTaskReminder(taskName.trim(), eventDate);
-
+      await scheduleTaskReminder(taskName.trim(), selectedDate);
       Alert.alert('✅ Reminder Set', `You'll get a notification 30 minutes before "${taskName}"`);
-      setTaskName(''); setDateStr(''); setTimeStr('');
+      setTaskName('');
+      setSelectedDate(new Date());
       setModalVisible(false);
       fetchTasks();
     } catch (e) {
@@ -127,30 +125,78 @@ export default function ImportantScreen() {
 
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
+          <ScrollView style={styles.modalCard} keyboardShouldPersistTaps="handled">
             <Text style={styles.modalTitle}>Set Reminder</Text>
 
             <Text style={styles.label}>Task Name</Text>
             <TextInput style={styles.input} placeholder="e.g. Submit assignment" placeholderTextColor="#64748B"
               value={taskName} onChangeText={setTaskName} />
 
-            <Text style={styles.label}>Date <Text style={styles.hint}>(YYYY-MM-DD)</Text></Text>
-            <TextInput style={styles.input} placeholder="2026-05-20" placeholderTextColor="#64748B"
-              value={dateStr} onChangeText={setDateStr} keyboardType="numbers-and-punctuation" />
+            {/* Date Picker */}
+            <Text style={styles.label}>Date</Text>
+            <TouchableOpacity style={styles.pickerBtn} onPress={() => { setShowTimePicker(false); setShowDatePicker(true); }}>
+              <Ionicons name="calendar-outline" size={18} color="#6C63FF" />
+              <Text style={styles.pickerText}>{formatDate(selectedDate)}</Text>
+              <Ionicons name="chevron-down-outline" size={16} color="#94A3B8" />
+            </TouchableOpacity>
 
-            <Text style={styles.label}>Time <Text style={styles.hint}>(HH:MM, 24h)</Text></Text>
-            <TextInput style={styles.input} placeholder="14:30" placeholderTextColor="#64748B"
-              value={timeStr} onChangeText={setTimeStr} keyboardType="numbers-and-punctuation" />
+            {showDatePicker && (
+              <DateTimePicker
+                value={selectedDate}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                minimumDate={new Date()}
+                onChange={(event, date) => {
+                  if (Platform.OS === 'android') setShowDatePicker(false);
+                  if (date) {
+                    const updated = new Date(selectedDate);
+                    updated.setFullYear(date.getFullYear(), date.getMonth(), date.getDate());
+                    setSelectedDate(updated);
+                  }
+                }}
+              />
+            )}
+
+            {/* Time Picker */}
+            <Text style={styles.label}>Time</Text>
+            <TouchableOpacity style={styles.pickerBtn} onPress={() => { setShowDatePicker(false); setShowTimePicker(true); }}>
+              <Ionicons name="time-outline" size={18} color="#F59E0B" />
+              <Text style={styles.pickerText}>{formatTime(selectedDate)}</Text>
+              <Ionicons name="chevron-down-outline" size={16} color="#94A3B8" />
+            </TouchableOpacity>
+
+            {showTimePicker && (
+              <DateTimePicker
+                value={selectedDate}
+                mode="time"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={(event, date) => {
+                  if (Platform.OS === 'android') setShowTimePicker(false);
+                  if (date) {
+                    const updated = new Date(selectedDate);
+                    updated.setHours(date.getHours(), date.getMinutes());
+                    setSelectedDate(updated);
+                  }
+                }}
+              />
+            )}
+
+            <View style={styles.selectedBox}>
+              <Ionicons name="alarm-outline" size={16} color="#F59E0B" />
+              <Text style={styles.selectedText}>
+                Reminder: {formatDate(selectedDate)} at {formatTime(selectedDate)}
+              </Text>
+            </View>
 
             <View style={styles.modalBtns}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setModalVisible(false)}>
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.saveBtn} onPress={addTask} disabled={saving}>
-                {saving ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.saveText}>Set Reminder</Text>}
+                {saving ? <ActivityIndicator color="#0F0F1A" size="small" /> : <Text style={styles.saveText}>Set Reminder</Text>}
               </TouchableOpacity>
             </View>
-          </View>
+          </ScrollView>
         </View>
       </Modal>
     </View>
@@ -175,12 +221,15 @@ const styles = StyleSheet.create({
   done: { color: '#22C55E' }, pending: { color: '#F59E0B' },
   empty: { textAlign: 'center', color: '#475569', marginTop: 60, fontSize: 15 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
-  modalCard: { backgroundColor: '#1A1A2E', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24 },
+  modalCard: { backgroundColor: '#1A1A2E', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, maxHeight: '90%' },
   modalTitle: { fontSize: 20, fontWeight: '700', color: '#E2E8F0', marginBottom: 16 },
-  label: { fontSize: 13, color: '#94A3B8', marginBottom: 6, fontWeight: '600' },
-  hint: { color: '#475569', fontWeight: '400' },
+  label: { fontSize: 13, color: '#94A3B8', marginBottom: 8, fontWeight: '600' },
   input: { backgroundColor: '#0F0F1A', borderRadius: 12, padding: 14, color: '#E2E8F0', fontSize: 15, marginBottom: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
-  modalBtns: { flexDirection: 'row', gap: 12, marginTop: 8 },
+  pickerBtn: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#0F0F1A', borderRadius: 12, padding: 14, marginBottom: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  pickerText: { flex: 1, color: '#E2E8F0', fontSize: 15 },
+  selectedBox: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(245,158,11,0.1)', borderRadius: 10, padding: 12, marginBottom: 16 },
+  selectedText: { fontSize: 13, color: '#F59E0B', fontWeight: '600' },
+  modalBtns: { flexDirection: 'row', gap: 12, marginTop: 4, marginBottom: 24 },
   cancelBtn: { flex: 1, padding: 14, borderRadius: 12, backgroundColor: '#0F0F1A', alignItems: 'center' },
   cancelText: { color: '#94A3B8', fontWeight: '600' },
   saveBtn: { flex: 1, padding: 14, borderRadius: 12, backgroundColor: '#F59E0B', alignItems: 'center' },

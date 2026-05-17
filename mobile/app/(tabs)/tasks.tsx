@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  TextInput, Modal, Alert, RefreshControl, ActivityIndicator
+  TextInput, Modal, Alert, RefreshControl, ActivityIndicator, Platform, ScrollView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios';
+import * as Notifications from 'expo-notifications';
 import { useAuth } from '../../src/context/AuthContext';
 import { ENDPOINTS } from '../../src/config/api';
 
@@ -24,6 +26,21 @@ const CATEGORY_COLORS: Record<string, string> = {
   Study: '#6C63FF', Health: '#22C55E', Work: '#F59E0B',
   Personal: '#EF4444', Entertainment: '#EC4899',
 };
+const CATEGORY_TOKENS: Record<string, number> = {
+  Study: 10, Health: 8, Work: 12, Personal: 6, Entertainment: 6,
+};
+
+async function sendTaskCreatedNotification(taskText: string, category: string) {
+  const tokens = CATEGORY_TOKENS[category] ?? 6;
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: '✅ Task Added!',
+      body: `"${taskText}" — You'll earn +${tokens} tokens on completion!`,
+      sound: 'default',
+    },
+    trigger: null, // immediate
+  });
+}
 
 export default function TasksScreen() {
   const { user } = useAuth();
@@ -37,8 +54,11 @@ export default function TasksScreen() {
   const [text, setText] = useState('');
   const [category, setCategory] = useState('Study');
   const [priority, setPriority] = useState('Medium');
-  const [dueDate, setDueDate] = useState('');
+  const [dueDate, setDueDate] = useState<Date | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // Date picker state
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const fetchTasks = useCallback(async () => {
     if (!user) return;
@@ -51,24 +71,41 @@ export default function TasksScreen() {
 
   useEffect(() => { fetchTasks(); }, [fetchTasks]);
 
+  const formatDate = (d: Date) => d.toISOString().split('T')[0]; // YYYY-MM-DD
+
   const addTask = async () => {
     if (!text.trim()) { Alert.alert('Error', 'Task description is required.'); return; }
     setSaving(true);
     try {
       await axios.post(ENDPOINTS.addTask, {
         text: text.trim(), category, priority,
-        dueDate: dueDate.trim() || null, userId: user!.id,
+        dueDate: dueDate ? formatDate(dueDate) : null,
+        userId: user!.id,
       });
-      setText(''); setDueDate(''); setCategory('Study'); setPriority('Medium');
+      // Send immediate notification
+      await sendTaskCreatedNotification(text.trim(), category);
+      setText(''); setDueDate(null); setCategory('Study'); setPriority('Medium');
       setModalVisible(false);
       fetchTasks();
     } catch (e) { Alert.alert('Error', 'Failed to add task.'); }
     finally { setSaving(false); }
   };
 
-  const completeTask = async (id: string) => {
+  const completeTask = async (id: string, taskText: string, cat: string) => {
     try {
-      await axios.put(ENDPOINTS.completeTask(id));
+      const res = await axios.put(ENDPOINTS.completeTask(id));
+      const tokensAwarded = res.data?.tokensAwarded ?? 0;
+      // Notify tokens earned
+      if (tokensAwarded > 0) {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: '🎉 Task Completed!',
+            body: `"${taskText}" done! +${tokensAwarded} tokens earned 🏆`,
+            sound: 'default',
+          },
+          trigger: null,
+        });
+      }
       fetchTasks();
     } catch (e) { Alert.alert('Error', 'Failed to complete task.'); }
   };
@@ -102,7 +139,7 @@ export default function TasksScreen() {
       </View>
       <View style={styles.taskActions}>
         {item.status !== 'Completed' && (
-          <TouchableOpacity onPress={() => completeTask(item.id)} style={styles.doneBtn}>
+          <TouchableOpacity onPress={() => completeTask(item.id, item.text, item.category)} style={styles.doneBtn}>
             <Ionicons name="checkmark-circle" size={26} color="#22C55E" />
           </TouchableOpacity>
         )}
@@ -122,7 +159,6 @@ export default function TasksScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Filter Tabs */}
       <View style={styles.filterRow}>
         {(['All', 'Pending', 'Completed'] as const).map(f => (
           <TouchableOpacity key={f} style={[styles.filterTab, filter === f && styles.filterActive]} onPress={() => setFilter(f)}>
@@ -147,7 +183,7 @@ export default function TasksScreen() {
       {/* Add Task Modal */}
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
+          <ScrollView style={styles.modalCard} keyboardShouldPersistTaps="handled">
             <Text style={styles.modalTitle}>New Task</Text>
 
             <TextInput style={styles.input} placeholder="What needs to be done?" placeholderTextColor="#64748B"
@@ -171,19 +207,42 @@ export default function TasksScreen() {
               ))}
             </View>
 
-            <Text style={styles.label}>Due Date <Text style={styles.optional}>(YYYY-MM-DD)</Text></Text>
-            <TextInput style={styles.input} placeholder="2026-05-20" placeholderTextColor="#64748B"
-              value={dueDate} onChangeText={setDueDate} />
+            <Text style={styles.label}>Due Date</Text>
+            <TouchableOpacity style={styles.dateBtn} onPress={() => setShowDatePicker(true)}>
+              <Ionicons name="calendar-outline" size={18} color="#6C63FF" />
+              <Text style={styles.dateBtnText}>
+                {dueDate ? formatDate(dueDate) : 'Pick a date (optional)'}
+              </Text>
+              {dueDate && (
+                <TouchableOpacity onPress={() => setDueDate(null)}>
+                  <Ionicons name="close-circle" size={18} color="#EF4444" />
+                </TouchableOpacity>
+              )}
+            </TouchableOpacity>
+
+            {showDatePicker && (
+              <DateTimePicker
+                value={dueDate ?? new Date()}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                minimumDate={new Date()}
+                onChange={(event, selectedDate) => {
+                  setShowDatePicker(Platform.OS === 'ios');
+                  if (selectedDate) setDueDate(selectedDate);
+                  if (Platform.OS === 'android') setShowDatePicker(false);
+                }}
+              />
+            )}
 
             <View style={styles.modalBtns}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={() => setModalVisible(false)}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => { setModalVisible(false); setShowDatePicker(false); }}>
                 <Text style={styles.cancelText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.saveBtn} onPress={addTask} disabled={saving}>
                 {saving ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.saveText}>Add Task</Text>}
               </TouchableOpacity>
             </View>
-          </View>
+          </ScrollView>
         </View>
       </Modal>
     </View>
@@ -213,16 +272,17 @@ const styles = StyleSheet.create({
   doneBtn: { padding: 4 }, delBtn: { padding: 4 },
   empty: { textAlign: 'center', color: '#475569', marginTop: 60, fontSize: 15 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
-  modalCard: { backgroundColor: '#1A1A2E', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24 },
+  modalCard: { backgroundColor: '#1A1A2E', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, maxHeight: '90%' },
   modalTitle: { fontSize: 20, fontWeight: '700', color: '#E2E8F0', marginBottom: 16 },
   input: { backgroundColor: '#0F0F1A', borderRadius: 12, padding: 14, color: '#E2E8F0', fontSize: 15, marginBottom: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
   label: { fontSize: 13, color: '#94A3B8', marginBottom: 8, fontWeight: '600' },
-  optional: { color: '#475569', fontWeight: '400' },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 14 },
   chip: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, backgroundColor: '#0F0F1A', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
   chipActive: { backgroundColor: '#6C63FF' },
   chipText: { fontSize: 13, color: '#94A3B8', fontWeight: '600' },
-  modalBtns: { flexDirection: 'row', gap: 12, marginTop: 8 },
+  dateBtn: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#0F0F1A', borderRadius: 12, padding: 14, marginBottom: 14, borderWidth: 1, borderColor: 'rgba(108,99,255,0.3)' },
+  dateBtnText: { flex: 1, color: '#E2E8F0', fontSize: 15 },
+  modalBtns: { flexDirection: 'row', gap: 12, marginTop: 8, marginBottom: 24 },
   cancelBtn: { flex: 1, padding: 14, borderRadius: 12, backgroundColor: '#0F0F1A', alignItems: 'center' },
   cancelText: { color: '#94A3B8', fontWeight: '600' },
   saveBtn: { flex: 1, padding: 14, borderRadius: 12, backgroundColor: '#6C63FF', alignItems: 'center' },
