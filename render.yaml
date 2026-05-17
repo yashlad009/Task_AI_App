@@ -1,12 +1,14 @@
 services:
   - type: web
-    name: tasktracker-apms
+    name: Task_AI_App
     runtime: docker
     plan: free
-    dockerfilePath: backend/demo/Dockerfile
+    dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /healthz
     envVars:
+      - key: PORT
+        value: 10000
       - key: DATABASE_URL
         sync: false
       - key: DATABASE_USERNAME
@@ -15,11 +17,11 @@ services:
         sync: false
       - key: HIBERNATE_DDL_AUTO
         value: update
-      - key: MAIL_HOST
-        value: smtp.gmail.com
       - key: MAIL_USERNAME
         sync: false
       - key: MAIL_PASSWORD
+        sync: false
+      - key: BREVO_API_KEY
         sync: false
       - key: GEMINI_API_KEY
         sync: false
