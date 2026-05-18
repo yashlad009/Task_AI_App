@@ -33,22 +33,23 @@ function StatCard({ icon, value, label, color, index }: {
   icon: any; value: number | string; label: string; color: string; index: number;
 }) {
   const scale = useSharedValue(1);
-  const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const scaleStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   return (
-    <Animated.View
-      entering={FadeInDown.delay(index * 80).duration(400).springify()}
-      style={[styles.statCard, { borderColor: color }, animStyle]}
-    >
-      <TouchableOpacity
-        onPressIn={() => { scale.value = withSpring(0.93); }}
-        onPressOut={() => { scale.value = withSpring(1); }}
-        activeOpacity={1}
-      >
-        <Ionicons name={icon} size={20} color={color} />
-        <Text style={styles.statNum}>{value}</Text>
-        <Text style={styles.statLabel}>{label}</Text>
-      </TouchableOpacity>
+    // Outer: entering animation only
+    <Animated.View entering={FadeInDown.delay(index * 80).duration(400).springify()} style={{ flex: 1 }}>
+      {/* Inner: press scale only */}
+      <Animated.View style={[styles.statCard, { borderColor: color }, scaleStyle]}>
+        <TouchableOpacity
+          onPressIn={() => { scale.value = withSpring(0.93); }}
+          onPressOut={() => { scale.value = withSpring(1); }}
+          activeOpacity={1}
+        >
+          <Ionicons name={icon} size={20} color={color} />
+          <Text style={styles.statNum}>{value}</Text>
+          <Text style={styles.statLabel}>{label}</Text>
+        </TouchableOpacity>
+      </Animated.View>
     </Animated.View>
   );
 }
@@ -77,23 +78,24 @@ function ActionBtn({ icon, label, color, onPress, index }: {
   icon: any; label: string; color: string; onPress: () => void; index: number;
 }) {
   const scale = useSharedValue(1);
-  const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const scaleStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   return (
-    <Animated.View
-      entering={FadeInUp.delay(300 + index * 70).duration(400).springify()}
-      style={[styles.actionBtn, animStyle]}
-    >
-      <TouchableOpacity
-        onPress={onPress}
-        onPressIn={() => { scale.value = withSpring(0.91); }}
-        onPressOut={() => { scale.value = withSpring(1); }}
-        activeOpacity={1}
-        style={styles.actionBtnInner}
-      >
-        <Ionicons name={icon} size={24} color={color} />
-        <Text style={styles.actionText}>{label}</Text>
-      </TouchableOpacity>
+    // Outer: entering only
+    <Animated.View entering={FadeInUp.delay(300 + index * 70).duration(400).springify()} style={{ flex: 1 }}>
+      {/* Inner: press scale only */}
+      <Animated.View style={[styles.actionBtn, scaleStyle]}>
+        <TouchableOpacity
+          onPress={onPress}
+          onPressIn={() => { scale.value = withSpring(0.91); }}
+          onPressOut={() => { scale.value = withSpring(1); }}
+          activeOpacity={1}
+          style={styles.actionBtnInner}
+        >
+          <Ionicons name={icon} size={24} color={color} />
+          <Text style={styles.actionText}>{label}</Text>
+        </TouchableOpacity>
+      </Animated.View>
     </Animated.View>
   );
 }

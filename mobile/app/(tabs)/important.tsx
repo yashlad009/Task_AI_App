@@ -26,11 +26,11 @@ function ReminderRow({ item, index }: { item: ImportantTask; index: number }) {
   const formatted = dt.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
 
   return (
-    <Animated.View
-      entering={FadeInRight.delay(index * 70).duration(400).springify()}
-      style={[styles.taskCard, item.processed && styles.taskProcessed, scaleStyle]}
-    >
-      <TouchableOpacity
+    // Outer: entering only
+    <Animated.View entering={FadeInRight.delay(index * 70).duration(400).springify()}>
+      {/* Inner: press scale only */}
+      <Animated.View style={[styles.taskCard, item.processed && styles.taskProcessed, scaleStyle]}>
+        <TouchableOpacity
         onPressIn={() => { scale.value = withSpring(0.97); }}
         onPressOut={() => { scale.value = withSpring(1); }}
         activeOpacity={1}
@@ -48,6 +48,7 @@ function ReminderRow({ item, index }: { item: ImportantTask; index: number }) {
           </Text>
         </View>
       </TouchableOpacity>
+      </Animated.View>
     </Animated.View>
   );
 }

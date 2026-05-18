@@ -50,14 +50,14 @@ function TaskRow({ item, index, onComplete, onDelete }: {
   item: Task; index: number; onComplete: () => void; onDelete: () => void;
 }) {
   const scale = useSharedValue(1);
-  const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const scaleStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   return (
-    <Animated.View
-      entering={FadeInLeft.delay(index * 55).duration(350).springify()}
-      style={[styles.taskCard, animStyle]}
-    >
-      <TouchableOpacity
+    // Outer: entering only
+    <Animated.View entering={FadeInLeft.delay(index * 55).duration(350).springify()}>
+      {/* Inner: press scale only */}
+      <Animated.View style={[styles.taskCard, scaleStyle]}>
+        <TouchableOpacity
         onPressIn={() => { scale.value = withSpring(0.97); }}
         onPressOut={() => { scale.value = withSpring(1); }}
         activeOpacity={1}
@@ -85,6 +85,7 @@ function TaskRow({ item, index, onComplete, onDelete }: {
           </TouchableOpacity>
         </View>
       </TouchableOpacity>
+      </Animated.View>
     </Animated.View>
   );
 }

@@ -49,11 +49,11 @@ function AnimatedBar({ count, maxCount, isToday, index }: { count: number; maxCo
   const targetH = Math.max((count / maxCount) * 80, count > 0 ? 8 : 4);
   useEffect(() => { height.value = withTiming(targetH, { duration: 600 }); }, [count]);
   const barStyle = useAnimatedStyle(() => ({ height: height.value }));
+  // Outer: entering only — Inner: height animation only
   return (
-    <Animated.View
-      entering={FadeInUp.delay(index * 60).duration(400)}
-      style={[styles.bar, barStyle, { backgroundColor: isToday ? '#6C63FF' : count > 0 ? '#22C55E' : '#1E2235' }]}
-    />
+    <Animated.View entering={FadeInUp.delay(index * 60).duration(400)}>
+      <Animated.View style={[styles.bar, barStyle, { backgroundColor: isToday ? '#6C63FF' : count > 0 ? '#22C55E' : '#1E2235' }]} />
+    </Animated.View>
   );
 }
 

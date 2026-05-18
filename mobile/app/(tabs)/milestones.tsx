@@ -34,11 +34,11 @@ function MilestoneCard({ item, index, onEdit, onDelete }: {
   const barColor = item.progress === 100 ? '#22C55E' : '#6C63FF';
 
   return (
-    <Animated.View
-      entering={FadeInDown.delay(index * 80).duration(400).springify()}
-      style={[styles.card, scaleStyle]}
-    >
-      <TouchableOpacity
+    // Outer: entering only
+    <Animated.View entering={FadeInDown.delay(index * 80).duration(400).springify()}>
+      {/* Inner: press scale only */}
+      <Animated.View style={[styles.card, scaleStyle]}>
+        <TouchableOpacity
         onPressIn={() => { scale.value = withSpring(0.97); }}
         onPressOut={() => { scale.value = withSpring(1); }}
         activeOpacity={1}
@@ -62,6 +62,7 @@ function MilestoneCard({ item, index, onEdit, onDelete }: {
         </View>
         {item.progress === 100 && <Text style={styles.celebrate}>🎉 Completed!</Text>}
       </TouchableOpacity>
+      </Animated.View>
     </Animated.View>
   );
 }
