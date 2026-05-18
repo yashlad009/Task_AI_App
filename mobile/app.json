@@ -19,6 +19,13 @@
     "scheme": "tasktracker",
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f3d2a0bb-82a5-4192-ac66-20b76092195c"
+      }
+    },
+    "owner": "yashlad009"
   }
 }
