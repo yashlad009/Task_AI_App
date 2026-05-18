@@ -1,9 +1,18 @@
 import axios from 'axios';
 
-// Set global timeout to 60s — Render free tier can take up to 50s to wake up
-axios.defaults.timeout = 60000;
+// Set global timeout to 90s — Render free tier can take up to 50s to wake up
+axios.defaults.timeout = 90000;
 
 export const API_BASE_URL = 'https://task-ai-app.onrender.com';
+
+// Keep-alive ping — call this on app start to wake the server early
+export async function pingServer(): Promise<void> {
+  try {
+    await axios.get(`${API_BASE_URL}/healthz`, { timeout: 90000 });
+  } catch (_) {
+    // Ignore errors — this is just a warm-up ping
+  }
+}
 
 export const ENDPOINTS = {
   // Auth
@@ -35,6 +44,8 @@ export const ENDPOINTS = {
 
   // AI Chat
   aiChat: (userId: string) => `${API_BASE_URL}/api/ai/chat/${userId}`,
+  aiChatHistory: (userId: string) => `${API_BASE_URL}/api/ai/history/${userId}`,
+  aiClearHistory: (userId: string) => `${API_BASE_URL}/api/ai/history/${userId}`,
 
   // Queries
   sendQuery: `${API_BASE_URL}/queries/send`,

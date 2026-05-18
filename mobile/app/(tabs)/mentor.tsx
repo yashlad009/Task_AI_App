@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity,
-  KeyboardAvoidingView, Platform, ActivityIndicator,
+  KeyboardAvoidingView, Platform, ActivityIndicator, Alert,
 } from 'react-native';
 import Animated, { FadeInDown, FadeInLeft, FadeInRight } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,11 +9,23 @@ import axios from 'axios';
 import { useAuth } from '../../src/context/AuthContext';
 import { ENDPOINTS } from '../../src/config/api';
 
-interface Message { id: string; role: 'user' | 'ai'; text: string; }
+interface Message {
+  id: string;
+  role: 'user' | 'ai';
+  content?: string;  // from backend history
+  text?: string;     // local messages
+}
 
-// Proper component — hooks at top level, entering animation per message
+function getMessageText(msg: Message): string {
+  return msg.content ?? msg.text ?? '';
+}
+
+// Proper component — hooks at top level
 function MessageBubble({ item }: { item: Message }) {
-  const entering = item.role === 'user' ? FadeInRight.duration(300).springify() : FadeInLeft.duration(300).springify();
+  const entering = item.role === 'user'
+    ? FadeInRight.duration(300).springify()
+    : FadeInLeft.duration(300).springify();
+
   return (
     <Animated.View entering={entering} style={[styles.bubble, item.role === 'user' ? styles.userBubble : styles.aiBubble]}>
       {item.role === 'ai' && (
@@ -22,7 +34,9 @@ function MessageBubble({ item }: { item: Message }) {
         </View>
       )}
       <View style={[styles.bubbleContent, item.role === 'user' ? styles.userContent : styles.aiContent]}>
-        <Text style={[styles.bubbleText, item.role === 'user' ? styles.userText : styles.aiText]}>{item.text}</Text>
+        <Text style={[styles.bubbleText, item.role === 'user' ? styles.userText : styles.aiText]}>
+          {getMessageText(item)}
+        </Text>
       </View>
     </Animated.View>
   );
@@ -30,34 +44,97 @@ function MessageBubble({ item }: { item: Message }) {
 
 export default function MentorScreen() {
   const { user } = useAuth();
-  const [messages, setMessages] = useState<Message[]>([
-    { id: '0', role: 'ai', text: "Hey! I'm Task AI, your AI mentor. Ask me anything about your tasks, productivity, or how to stay on track. 🚀" }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(true);
   const listRef = useRef<FlatList>(null);
+
+  // Load chat history on mount
+  const loadHistory = useCallback(async () => {
+    if (!user) return;
+    try {
+      const res = await axios.get(ENDPOINTS.aiChatHistory(user.id));
+      if (res.data && res.data.length > 0) {
+        setMessages(res.data);
+      } else {
+        // No history — show welcome message
+        setMessages([{
+          id: '0', role: 'ai',
+          text: "Hey! I'm Task AI, your AI mentor. Ask me anything about your tasks, productivity, or how to stay on track. 🚀",
+        }]);
+      }
+    } catch (e) {
+      // On error still show welcome
+      setMessages([{
+        id: '0', role: 'ai',
+        text: "Hey! I'm Task AI, your AI mentor. Ask me anything about your tasks, productivity, or how to stay on track. 🚀",
+      }]);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => { loadHistory(); }, [loadHistory]);
 
   const sendMessage = async () => {
     const msg = input.trim();
     if (!msg || loading) return;
     setInput('');
+
     const userMsg: Message = { id: Date.now().toString(), role: 'user', text: msg };
     setMessages(prev => [...prev, userMsg]);
     setLoading(true);
+
     try {
       const res = await axios.post(ENDPOINTS.aiChat(user!.id), { message: msg });
       const aiMsg: Message = { id: (Date.now() + 1).toString(), role: 'ai', text: res.data.response };
       setMessages(prev => [...prev, aiMsg]);
     } catch (e) {
-      setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), role: 'ai', text: 'Sorry, I had trouble connecting. Please try again.' }]);
+      setMessages(prev => [...prev, {
+        id: (Date.now() + 1).toString(), role: 'ai',
+        text: 'Sorry, I had trouble connecting. Please try again.',
+      }]);
     } finally {
       setLoading(false);
       setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
     }
   };
 
+  const clearHistory = () => {
+    Alert.alert('Clear Chat', 'Delete all chat history?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Clear', style: 'destructive', onPress: async () => {
+          try {
+            await axios.delete(ENDPOINTS.aiClearHistory(user!.id));
+            setMessages([{
+              id: '0', role: 'ai',
+              text: "Chat cleared! I'm Task AI, your AI mentor. How can I help you today? 🚀",
+            }]);
+          } catch (e) {
+            Alert.alert('Error', 'Failed to clear history.');
+          }
+        }
+      }
+    ]);
+  };
+
+  if (historyLoading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#6C63FF" />
+        <Text style={{ color: '#94A3B8', marginTop: 12, fontSize: 14 }}>Loading chat history...</Text>
+      </View>
+    );
+  }
+
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={90}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={90}
+    >
       <Animated.View entering={FadeInDown.duration(500).springify()} style={styles.header}>
         <View style={styles.headerLeft}>
           <View style={styles.avatarCircle}>
@@ -68,6 +145,9 @@ export default function MentorScreen() {
             <Text style={styles.subtitle}>AI Productivity Mentor</Text>
           </View>
         </View>
+        <TouchableOpacity onPress={clearHistory} style={styles.clearBtn}>
+          <Ionicons name="trash-outline" size={18} color="#475569" />
+        </TouchableOpacity>
       </Animated.View>
 
       <FlatList
@@ -116,6 +196,7 @@ const styles = StyleSheet.create({
   avatarCircle:    { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(108,99,255,0.15)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(108,99,255,0.3)' },
   title:           { fontSize: 18, fontWeight: '700', color: '#E2E8F0' },
   subtitle:        { fontSize: 12, color: '#94A3B8' },
+  clearBtn:        { padding: 8 },
   messageList:     { padding: 16, paddingBottom: 8 },
   bubble:          { flexDirection: 'row', marginBottom: 12, alignItems: 'flex-end' },
   userBubble:      { justifyContent: 'flex-end' },

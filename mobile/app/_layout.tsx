@@ -3,11 +3,18 @@ import { StatusBar } from 'expo-status-bar';
 import { AuthProvider, useAuth } from '../src/context/AuthContext';
 import { useEffect } from 'react';
 import { useRouter, useSegments } from 'expo-router';
+import { pingServer } from '../src/config/api';
 
 function RootLayoutNav() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const segments = useSegments();
+
+  useEffect(() => {
+    // Ping server immediately on app open so it wakes up
+    // before the user even types their credentials
+    pingServer();
+  }, []);
 
   useEffect(() => {
     if (isLoading) return;

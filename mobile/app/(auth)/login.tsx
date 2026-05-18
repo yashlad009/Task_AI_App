@@ -31,25 +31,43 @@ export default function LoginScreen() {
     }
     setLoading(true);
     setSlowHint(false);
-    // Show hint after 4 seconds if still loading
     slowTimer.current = setTimeout(() => setSlowHint(true), 4000);
-    try {
-      const res = await axios.post(ENDPOINTS.login, { email: email.trim(), password });
-      const userData = res.data;
-      await login(userData);
-      if (userData.role === 'ADMIN') {
-        router.replace('/(admin)/dashboard');
-      } else {
-        router.replace('/(tabs)/dashboard');
+
+    // Try up to 2 times — first attempt may hit cold start timeout
+    let lastError: any = null;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const res = await axios.post(ENDPOINTS.login, { email: email.trim(), password });
+        const userData = res.data;
+        await login(userData);
+        if (slowTimer.current) clearTimeout(slowTimer.current);
+        setLoading(false);
+        setSlowHint(false);
+        if (userData.role === 'ADMIN') {
+          router.replace('/(admin)/dashboard');
+        } else {
+          router.replace('/(tabs)/dashboard');
+        }
+        return; // success
+      } catch (err: any) {
+        lastError = err;
+        // If it's a 401/400 (wrong credentials) — don't retry
+        if (err.response?.status === 400 || err.response?.status === 401) break;
+        // If it's a timeout and we have another attempt, retry silently
+        if (attempt < 2) continue;
       }
-    } catch (err: any) {
-      const msg = err.response?.data?.error || 'Login failed. Please try again.';
-      Alert.alert('Login Failed', msg);
-    } finally {
-      if (slowTimer.current) clearTimeout(slowTimer.current);
-      setLoading(false);
-      setSlowHint(false);
     }
+
+    // All attempts failed
+    if (slowTimer.current) clearTimeout(slowTimer.current);
+    setLoading(false);
+    setSlowHint(false);
+
+    const isTimeout = !lastError?.response;
+    const msg = isTimeout
+      ? 'Server is still starting up. Please wait 10 seconds and try again.'
+      : lastError?.response?.data?.error || 'Login failed. Please try again.';
+    Alert.alert(isTimeout ? 'Server Waking Up ⏳' : 'Login Failed', msg);
   };
 
   return (
@@ -106,7 +124,7 @@ export default function LoginScreen() {
           {slowHint && (
             <View style={styles.hintBox}>
               <Text style={styles.hintText}>
-                ⏳ Server is waking up — this can take up to 30 seconds on first use. Please wait...
+                ⏳ Server is waking up from sleep — first login can take up to 60 seconds. Please keep waiting...
               </Text>
             </View>
           )}
