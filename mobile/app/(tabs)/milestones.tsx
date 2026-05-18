@@ -1,8 +1,13 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  TextInput, Modal, Alert, RefreshControl, ActivityIndicator, Animated
+  TextInput, Modal, Alert, RefreshControl, ActivityIndicator,
 } from 'react-native';
+import Animated, {
+  FadeInDown, FadeInUp, ZoomIn,
+  useSharedValue, useAnimatedStyle, withSpring, withTiming,
+  interpolate, Extrapolation,
+} from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { useAuth } from '../../src/context/AuthContext';
@@ -10,29 +15,34 @@ import { ENDPOINTS } from '../../src/config/api';
 
 interface Milestone { id: string; name: string; progress: number; celebrated: boolean; userId: string; }
 
-// Animated milestone card with progress bar
-function MilestoneCard({ item, onEdit, onDelete }: { item: Milestone; onEdit: () => void; onDelete: () => void }) {
-  const anim     = useRef(new Animated.Value(0)).current;
-  const slide    = useRef(new Animated.Value(30)).current;
-  const barWidth = useRef(new Animated.Value(0)).current;
-  const scale    = useRef(new Animated.Value(1)).current;
+// Proper component — hooks at top level
+function MilestoneCard({ item, index, onEdit, onDelete }: {
+  item: Milestone; index: number; onEdit: () => void; onDelete: () => void;
+}) {
+  const scale    = useSharedValue(1);
+  const barWidth = useSharedValue(0);
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(anim,     { toValue: 1,            duration: 500, useNativeDriver: true }),
-      Animated.timing(slide,    { toValue: 0,            duration: 500, useNativeDriver: true }),
-      Animated.timing(barWidth, { toValue: item.progress, duration: 900, delay: 200, useNativeDriver: false }),
-    ]).start();
+    barWidth.value = withTiming(item.progress, { duration: 900 });
   }, [item.progress]);
 
-  const pressIn  = () => Animated.spring(scale, { toValue: 0.97, useNativeDriver: true }).start();
-  const pressOut = () => Animated.spring(scale, { toValue: 1,    useNativeDriver: true }).start();
+  const scaleStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const barStyle   = useAnimatedStyle(() => ({
+    width: `${interpolate(barWidth.value, [0, 100], [0, 100], Extrapolation.CLAMP)}%`,
+  }));
 
   const barColor = item.progress === 100 ? '#22C55E' : '#6C63FF';
 
   return (
-    <Animated.View style={[styles.card, { opacity: anim, transform: [{ translateY: slide }, { scale }] }]}>
-      <TouchableOpacity onPressIn={pressIn} onPressOut={pressOut} activeOpacity={1}>
+    <Animated.View
+      entering={FadeInDown.delay(index * 80).duration(400).springify()}
+      style={[styles.card, scaleStyle]}
+    >
+      <TouchableOpacity
+        onPressIn={() => { scale.value = withSpring(0.97); }}
+        onPressOut={() => { scale.value = withSpring(1); }}
+        activeOpacity={1}
+      >
         <View style={styles.cardHeader}>
           <Text style={styles.cardName}>{item.name}</Text>
           <View style={styles.cardActions}>
@@ -44,21 +54,13 @@ function MilestoneCard({ item, onEdit, onDelete }: { item: Milestone; onEdit: ()
             </TouchableOpacity>
           </View>
         </View>
-
-        {/* Animated progress bar */}
         <View style={styles.progressRow}>
           <View style={styles.progressBg}>
-            <Animated.View style={[styles.progressFill, {
-              width: barWidth.interpolate({ inputRange: [0, 100], outputRange: ['0%', '100%'] }),
-              backgroundColor: barColor,
-            }]} />
+            <Animated.View style={[styles.progressFill, barStyle, { backgroundColor: barColor }]} />
           </View>
           <Text style={styles.progressText}>{item.progress}%</Text>
         </View>
-
-        {item.progress === 100 && (
-          <Text style={styles.celebrate}>🎉 Completed!</Text>
-        )}
+        {item.progress === 100 && <Text style={styles.celebrate}>🎉 Completed!</Text>}
       </TouchableOpacity>
     </Animated.View>
   );
@@ -76,9 +78,6 @@ export default function MilestonesScreen() {
   const [progress, setProgress] = useState('0');
   const [saving, setSaving] = useState(false);
 
-  // Header animation
-  const headerAnim = useRef(new Animated.Value(0)).current;
-
   const fetchMilestones = useCallback(async () => {
     if (!user) return;
     try {
@@ -88,10 +87,7 @@ export default function MilestonesScreen() {
     finally { setLoading(false); setRefreshing(false); }
   }, [user]);
 
-  useEffect(() => {
-    fetchMilestones();
-    Animated.timing(headerAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
-  }, [fetchMilestones]);
+  useEffect(() => { fetchMilestones(); }, [fetchMilestones]);
 
   const addMilestone = async () => {
     if (!name.trim()) { Alert.alert('Error', 'Milestone name is required.'); return; }
@@ -121,16 +117,13 @@ export default function MilestonesScreen() {
       { text: 'Delete', style: 'destructive', onPress: async () => {
         try { await axios.delete(ENDPOINTS.deleteMilestone(id)); fetchMilestones(); }
         catch (e) { Alert.alert('Error', 'Failed to delete.'); }
-      }}
+      }},
     ]);
   };
 
   return (
     <View style={styles.container}>
-      <Animated.View style={[styles.header, {
-        opacity: headerAnim,
-        transform: [{ translateY: headerAnim.interpolate({ inputRange: [0, 1], outputRange: [-16, 0] }) }]
-      }]}>
+      <Animated.View entering={FadeInDown.duration(500).springify()} style={styles.header}>
         <Text style={styles.title}>Milestones</Text>
         <TouchableOpacity style={styles.addBtn} onPress={() => setAddModal(true)}>
           <Ionicons name="add" size={24} color="#fff" />
@@ -143,9 +136,9 @@ export default function MilestonesScreen() {
         <FlatList
           data={milestones}
           keyExtractor={i => i.id}
-          renderItem={({ item }) => (
+          renderItem={({ item, index }) => (
             <MilestoneCard
-              item={item}
+              item={item} index={index}
               onEdit={() => { setSelected(item); setProgress(String(item.progress)); setUpdateModal(true); }}
               onDelete={() => deleteMilestone(item.id)}
             />
@@ -199,29 +192,29 @@ export default function MilestonesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0F0F1A' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, paddingTop: 56 },
-  title: { fontSize: 24, fontWeight: '700', color: '#E2E8F0' },
-  addBtn: { backgroundColor: '#EC4899', borderRadius: 12, padding: 8 },
-  card: { backgroundColor: '#1A1A2E', borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  cardName: { fontSize: 15, fontWeight: '600', color: '#E2E8F0', flex: 1 },
-  cardActions: { flexDirection: 'row', alignItems: 'center' },
-  progressRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  progressBg: { flex: 1, height: 8, backgroundColor: '#0F0F1A', borderRadius: 4, overflow: 'hidden' },
+  container:    { flex: 1, backgroundColor: '#0F0F1A' },
+  center:       { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  header:       { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, paddingTop: 56 },
+  title:        { fontSize: 24, fontWeight: '700', color: '#E2E8F0' },
+  addBtn:       { backgroundColor: '#EC4899', borderRadius: 12, padding: 8 },
+  card:         { backgroundColor: '#1A1A2E', borderRadius: 16, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' },
+  cardHeader:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  cardName:     { fontSize: 15, fontWeight: '600', color: '#E2E8F0', flex: 1 },
+  cardActions:  { flexDirection: 'row', alignItems: 'center' },
+  progressRow:  { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  progressBg:   { flex: 1, height: 8, backgroundColor: '#0F0F1A', borderRadius: 4, overflow: 'hidden' },
   progressFill: { height: '100%', borderRadius: 4 },
   progressText: { fontSize: 13, fontWeight: '700', color: '#E2E8F0', minWidth: 36, textAlign: 'right' },
-  celebrate: { fontSize: 13, color: '#22C55E', marginTop: 8, fontWeight: '600' },
-  empty: { textAlign: 'center', color: '#475569', marginTop: 60, fontSize: 15 },
+  celebrate:    { fontSize: 13, color: '#22C55E', marginTop: 8, fontWeight: '600' },
+  empty:        { textAlign: 'center', color: '#475569', marginTop: 60, fontSize: 15 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
-  modalCard: { backgroundColor: '#1A1A2E', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24 },
-  modalTitle: { fontSize: 20, fontWeight: '700', color: '#E2E8F0', marginBottom: 16 },
-  label: { fontSize: 13, color: '#94A3B8', marginBottom: 6, fontWeight: '600' },
-  input: { backgroundColor: '#0F0F1A', borderRadius: 12, padding: 14, color: '#E2E8F0', fontSize: 15, marginBottom: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
-  modalBtns: { flexDirection: 'row', gap: 12, marginTop: 8 },
-  cancelBtn: { flex: 1, padding: 14, borderRadius: 12, backgroundColor: '#0F0F1A', alignItems: 'center' },
-  cancelText: { color: '#94A3B8', fontWeight: '600' },
-  saveBtn: { flex: 1, padding: 14, borderRadius: 12, backgroundColor: '#6C63FF', alignItems: 'center' },
-  saveText: { color: '#fff', fontWeight: '700' },
+  modalCard:    { backgroundColor: '#1A1A2E', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24 },
+  modalTitle:   { fontSize: 20, fontWeight: '700', color: '#E2E8F0', marginBottom: 16 },
+  label:        { fontSize: 13, color: '#94A3B8', marginBottom: 6, fontWeight: '600' },
+  input:        { backgroundColor: '#0F0F1A', borderRadius: 12, padding: 14, color: '#E2E8F0', fontSize: 15, marginBottom: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  modalBtns:    { flexDirection: 'row', gap: 12, marginTop: 8 },
+  cancelBtn:    { flex: 1, padding: 14, borderRadius: 12, backgroundColor: '#0F0F1A', alignItems: 'center' },
+  cancelText:   { color: '#94A3B8', fontWeight: '600' },
+  saveBtn:      { flex: 1, padding: 14, borderRadius: 12, backgroundColor: '#6C63FF', alignItems: 'center' },
+  saveText:     { color: '#fff', fontWeight: '700' },
 });
