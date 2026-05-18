@@ -13,15 +13,15 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:       #0F0F1A;
-      --surface:  #1A1A2E;
-      --border:   rgba(255,255,255,0.07);
-      --accent:   #6C63FF;
-      --accent2:  #EC4899;
-      --green:    #22C55E;
-      --text:     #E2E8F0;
-      --muted:    #94A3B8;
-      --subtle:   #475569;
+      --bg:      #0F0F1A;
+      --surface: #1A1A2E;
+      --border:  rgba(255,255,255,0.07);
+      --accent:  #6C63FF;
+      --accent2: #EC4899;
+      --green:   #22C55E;
+      --text:    #E2E8F0;
+      --muted:   #94A3B8;
+      --subtle:  #475569;
     }
 
     html { scroll-behavior: smooth; }
@@ -38,18 +38,19 @@
     nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 32px;
-      background: rgba(15,15,26,0.85);
-      backdrop-filter: blur(12px);
+      padding: 14px 24px;
+      background: rgba(15,15,26,0.88);
+      backdrop-filter: blur(14px);
       border-bottom: 1px solid var(--border);
     }
     .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-    .nav-logo img { width: 32px; height: 32px; border-radius: 8px; }
-    .nav-logo span { font-size: 18px; font-weight: 700; color: var(--text); }
+    .nav-logo img { width: 30px; height: 30px; border-radius: 8px; }
+    .nav-logo span { font-size: 17px; font-weight: 700; color: var(--text); }
     .nav-logo span b { color: var(--accent); }
     .nav-link {
       color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500;
-      padding: 8px 16px; border-radius: 8px; transition: all 0.2s;
+      padding: 7px 14px; border-radius: 8px; transition: all 0.2s;
+      white-space: nowrap;
     }
     .nav-link:hover { color: var(--text); background: var(--surface); }
 
@@ -58,7 +59,7 @@
       min-height: 100vh;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       text-align: center;
-      padding: 120px 24px 80px;
+      padding: 100px 20px 60px;
       position: relative;
     }
 
@@ -69,205 +70,194 @@
       border-radius: 100px;
       padding: 6px 16px;
       font-size: 13px; font-weight: 600; color: var(--accent);
-      margin-bottom: 28px;
+      margin-bottom: 24px;
       animation: fadeSlideDown 0.6s ease both;
     }
-    .hero-badge i { font-size: 12px; }
 
+    /* ── ROBOT ── */
+    .robot-hero-wrap {
+      position: relative;
+      margin-bottom: 28px;
+      animation: fadeSlideDown 0.6s 0.05s ease both;
+    }
+    .robot-glow {
+      position: absolute; inset: -30px;
+      background: radial-gradient(ellipse at center, rgba(108,99,255,0.22) 0%, transparent 70%);
+      pointer-events: none; border-radius: 50%;
+    }
+
+    /* Robot SVG animations */
+    @keyframes robot-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    @keyframes wave-arm    { 0%,100%{transform:rotate(0deg)} 30%{transform:rotate(-35deg)} 60%{transform:rotate(15deg)} }
+    @keyframes typing-dot  { 0%,80%,100%{opacity:0.3} 40%{opacity:1} }
+    @keyframes slide-up    { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+    .robot-body-anim { animation: robot-float 3s ease-in-out infinite; }
+    .robot-arm-wave  { transform-origin: 94px 96px; animation: wave-arm 2s ease-in-out infinite; }
+
+    .speech-bubble {
+      background: var(--surface);
+      border: 1px solid rgba(108,99,255,0.25);
+      border-radius: 16px 16px 16px 4px;
+      padding: 12px 16px;
+      max-width: 280px;
+      font-size: 14px; line-height: 1.6; color: var(--text);
+      animation: slide-up .5s ease-out .3s both;
+      margin: 0 auto;
+      text-align: left;
+    }
+    .typing-dots { display: flex; gap: 4px; align-items: center; padding: 2px 0; }
+    .typing-dots span {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--muted); animation: typing-dot 1.4s infinite;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: .2s; }
+    .typing-dots span:nth-child(3) { animation-delay: .4s; }
+
+    /* ── HERO TEXT ── */
     .hero h1 {
-      font-size: clamp(2.4rem, 6vw, 4.2rem);
-      font-weight: 800;
-      line-height: 1.15;
-      letter-spacing: -0.02em;
-      margin-bottom: 20px;
-      animation: fadeSlideDown 0.7s 0.1s ease both;
+      font-size: clamp(2rem, 6vw, 4rem);
+      font-weight: 800; line-height: 1.15; letter-spacing: -0.02em;
+      margin-bottom: 16px;
+      animation: fadeSlideDown 0.7s 0.15s ease both;
     }
     .hero h1 .grad {
       background: linear-gradient(135deg, var(--accent), var(--accent2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-
     .hero p {
-      font-size: clamp(1rem, 2.5vw, 1.2rem);
-      color: var(--muted);
-      max-width: 560px;
-      line-height: 1.7;
-      margin-bottom: 40px;
-      animation: fadeSlideDown 0.7s 0.2s ease both;
+      font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+      color: var(--muted); max-width: 520px; line-height: 1.7;
+      margin: 0 auto 36px;
+      animation: fadeSlideDown 0.7s 0.25s ease both;
     }
 
     .hero-btns {
-      display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
-      animation: fadeSlideDown 0.7s 0.3s ease both;
+      display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+      animation: fadeSlideDown 0.7s 0.35s ease both;
     }
 
     .btn-download {
       display: inline-flex; align-items: center; gap: 10px;
-      background: var(--accent);
-      color: #fff;
-      font-size: 16px; font-weight: 700;
-      padding: 16px 32px;
-      border-radius: 14px;
-      text-decoration: none;
-      border: none; cursor: pointer;
+      background: var(--accent); color: #fff;
+      font-size: 15px; font-weight: 700;
+      padding: 14px 28px; border-radius: 14px;
+      text-decoration: none; border: none; cursor: pointer;
       transition: transform 0.18s, box-shadow 0.18s, background 0.18s;
-      box-shadow: 0 8px 32px rgba(108,99,255,0.35);
+      box-shadow: 0 8px 28px rgba(108,99,255,0.35);
     }
-    .btn-download:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 14px 40px rgba(108,99,255,0.5);
-      background: #7c75ff;
-    }
+    .btn-download:hover { transform: translateY(-3px); box-shadow: 0 14px 40px rgba(108,99,255,0.5); background: #7c75ff; }
     .btn-download:active { transform: translateY(0); }
-    .btn-download i { font-size: 20px; }
+    .btn-download i { font-size: 18px; }
 
     .btn-web {
       display: inline-flex; align-items: center; gap: 10px;
-      background: transparent;
-      color: var(--text);
-      font-size: 15px; font-weight: 600;
-      padding: 15px 28px;
-      border-radius: 14px;
-      text-decoration: none;
-      border: 1px solid var(--border);
+      background: transparent; color: var(--text);
+      font-size: 14px; font-weight: 600;
+      padding: 13px 24px; border-radius: 14px;
+      text-decoration: none; border: 1px solid var(--border);
       transition: all 0.18s;
     }
     .btn-web:hover { background: var(--surface); border-color: rgba(255,255,255,0.15); }
 
     .hero-note {
-      margin-top: 18px;
-      font-size: 12px; color: var(--subtle);
-      animation: fadeSlideDown 0.7s 0.4s ease both;
+      margin-top: 16px; font-size: 12px; color: var(--subtle);
+      animation: fadeSlideDown 0.7s 0.45s ease both;
     }
     .hero-note i { color: var(--green); margin-right: 4px; }
 
-    /* ── MOCKUP ── */
-    .mockup-wrap {
-      margin-top: 64px;
-      position: relative;
-      animation: fadeSlideUp 0.8s 0.5s ease both;
-    }
-    .mockup-glow {
-      position: absolute; inset: -40px;
-      background: radial-gradient(ellipse at center, rgba(108,99,255,0.18) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    .mockup-img {
-      width: 260px;
-      border-radius: 32px;
-      border: 2px solid rgba(108,99,255,0.3);
-      box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05);
-      position: relative;
-    }
-
     /* ── FEATURES ── */
-    .section {
-      padding: 80px 24px;
-      max-width: 1100px;
-      margin: 0 auto;
-    }
+    .section { padding: 72px 20px; max-width: 1080px; margin: 0 auto; }
     .section-label {
-      text-align: center;
-      font-size: 13px; font-weight: 600; color: var(--accent);
-      text-transform: uppercase; letter-spacing: 0.1em;
-      margin-bottom: 12px;
+      text-align: center; font-size: 12px; font-weight: 600; color: var(--accent);
+      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px;
     }
     .section-title {
-      text-align: center;
-      font-size: clamp(1.6rem, 4vw, 2.4rem);
-      font-weight: 800; letter-spacing: -0.02em;
-      margin-bottom: 48px;
+      text-align: center; font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 800; letter-spacing: -0.02em; margin-bottom: 40px;
     }
-
     .features-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
     }
     .feature-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 28px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 18px; padding: 24px;
       transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
     }
     .feature-card:hover {
       transform: translateY(-4px);
       border-color: rgba(108,99,255,0.3);
-      box-shadow: 0 12px 40px rgba(108,99,255,0.12);
+      box-shadow: 0 12px 36px rgba(108,99,255,0.1);
     }
     .feature-icon {
-      width: 48px; height: 48px;
-      border-radius: 12px;
+      width: 44px; height: 44px; border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 22px;
-      margin-bottom: 16px;
+      font-size: 20px; margin-bottom: 14px;
     }
-    .feature-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-    .feature-card p  { font-size: 14px; color: var(--muted); line-height: 1.6; }
+    .feature-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .feature-card p  { font-size: 13px; color: var(--muted); line-height: 1.6; }
 
     /* ── STORY ── */
     .story-section {
-      padding: 80px 24px;
+      padding: 72px 20px;
       background: var(--surface);
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
     }
-    .story-inner {
-      max-width: 720px;
-      margin: 0 auto;
-      text-align: center;
-    }
+    .story-inner { max-width: 680px; margin: 0 auto; text-align: center; }
     .story-avatar {
-      width: 72px; height: 72px;
-      border-radius: 50%;
+      width: 64px; height: 64px; border-radius: 50%;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       display: flex; align-items: center; justify-content: center;
-      font-size: 28px; font-weight: 800; color: #fff;
-      margin: 0 auto 20px;
+      font-size: 26px; font-weight: 800; color: #fff;
+      margin: 0 auto 18px;
     }
-    .story-inner h2 { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800; margin-bottom: 16px; }
-    .story-inner p  { font-size: 15px; color: var(--muted); line-height: 1.8; margin-bottom: 12px; }
-    .story-inner .highlight { color: var(--accent); font-weight: 600; }
+    .story-inner h2 { font-size: clamp(1.3rem, 3vw, 1.9rem); font-weight: 800; margin-bottom: 14px; }
+    .story-inner p  { font-size: 14px; color: var(--muted); line-height: 1.8; margin-bottom: 10px; }
+    .highlight { color: var(--accent); font-weight: 600; }
 
     /* ── CTA ── */
-    .cta-section {
-      padding: 100px 24px;
-      text-align: center;
-    }
-    .cta-section h2 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; margin-bottom: 16px; }
-    .cta-section p  { font-size: 16px; color: var(--muted); margin-bottom: 36px; }
+    .cta-section { padding: 90px 20px; text-align: center; }
+    .cta-section h2 { font-size: clamp(1.6rem, 4vw, 2.6rem); font-weight: 800; margin-bottom: 14px; }
+    .cta-section p  { font-size: 15px; color: var(--muted); margin-bottom: 32px; }
 
     /* ── FOOTER ── */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 32px 24px;
-      text-align: center;
-    }
+    footer { border-top: 1px solid var(--border); padding: 28px 20px; text-align: center; }
     footer p { font-size: 13px; color: var(--subtle); }
     footer a { color: var(--accent); text-decoration: none; }
     footer a:hover { text-decoration: underline; }
-    .footer-links { display: flex; gap: 20px; justify-content: center; margin-top: 12px; }
+    .footer-links { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
     .footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; }
     .footer-links a:hover { color: var(--text); }
 
     /* ── ANIMATIONS ── */
     @keyframes fadeSlideDown {
-      from { opacity: 0; transform: translateY(-20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeSlideUp {
-      from { opacity: 0; transform: translateY(30px); }
+      from { opacity: 0; transform: translateY(-18px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ── RESPONSIVE ── */
-    @media (max-width: 600px) {
-      nav { padding: 14px 20px; }
-      .hero { padding: 100px 20px 60px; }
-      .mockup-img { width: 200px; }
+    /* ── MOBILE RESPONSIVE ── */
+    @media (max-width: 480px) {
+      nav { padding: 12px 16px; }
+      .nav-logo span { font-size: 15px; }
+      .nav-link { font-size: 13px; padding: 6px 10px; }
+      .hero { padding: 90px 16px 50px; }
+      .hero h1 { font-size: 1.9rem; }
+      .hero p { font-size: 0.95rem; }
+      .btn-download { font-size: 14px; padding: 13px 22px; }
+      .btn-web { font-size: 13px; padding: 12px 18px; }
+      .hero-btns { flex-direction: column; align-items: center; width: 100%; }
+      .btn-download, .btn-web { width: 100%; justify-content: center; }
+      .speech-bubble { font-size: 13px; max-width: 240px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .section { padding: 52px 16px; }
+      .cta-section { padding: 64px 16px; }
+    }
+
+    @media (max-width: 360px) {
+      .hero h1 { font-size: 1.6rem; }
     }
   </style>
 </head>
@@ -276,7 +266,7 @@
   <!-- NAV -->
   <nav>
     <a href="download.html" class="nav-logo">
-      <img src="apms3.png" alt="Task Tracker Logo" />
+      <img src="apms3.png" alt="Task Tracker" />
       <span>Task <b>Tracker</b></span>
     </a>
     <a href="login.html" class="nav-link">Web App →</a>
@@ -284,9 +274,50 @@
 
   <!-- HERO -->
   <section class="hero">
+
     <div class="hero-badge">
       <i class="fas fa-rocket"></i>
       My First Android App — Built with ❤️
+    </div>
+
+    <!-- ROBOT ANIMATION -->
+    <div class="robot-hero-wrap">
+      <div class="robot-glow"></div>
+      <svg class="robot-body-anim" width="110" height="148" viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Antenna -->
+        <line x1="60" y1="10" x2="60" y2="28" stroke="#94A3B8" stroke-width="2"/>
+        <circle cx="60" cy="8" r="4" fill="#6C63FF"/>
+        <!-- Head -->
+        <rect x="22" y="28" width="76" height="58" rx="14" fill="#1A1A2E" stroke="rgba(108,99,255,0.4)" stroke-width="1.5"/>
+        <!-- Eyes -->
+        <g><circle cx="42" cy="52" r="10" fill="#E8F0FE"/><circle cx="42" cy="52" r="6" fill="#6C63FF"/><circle cx="45" cy="49" r="2" fill="white"/></g>
+        <g><circle cx="78" cy="52" r="10" fill="#E8F0FE"/><circle cx="78" cy="52" r="6" fill="#6C63FF"/><circle cx="81" cy="49" r="2" fill="white"/></g>
+        <!-- Smile -->
+        <path d="M46 68 Q60 78 74 68" stroke="#6C63FF" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <!-- Body -->
+        <rect x="28" y="92" width="64" height="52" rx="10" fill="#1A1A2E" stroke="rgba(108,99,255,0.4)" stroke-width="1.5"/>
+        <!-- Chest display -->
+        <rect x="38" y="102" width="44" height="26" rx="6" fill="rgba(108,99,255,0.15)"/>
+        <rect x="42" y="108" width="12" height="4" rx="2" fill="#6C63FF"/>
+        <rect x="58" y="108" width="18" height="4" rx="2" fill="rgba(108,99,255,0.4)"/>
+        <rect x="42" y="116" width="24" height="4" rx="2" fill="rgba(108,99,255,0.4)"/>
+        <!-- Left arm -->
+        <rect x="8" y="93" width="18" height="38" rx="8" fill="#1A1A2E" stroke="rgba(108,99,255,0.4)" stroke-width="1.5"/>
+        <!-- Right arm (waving) -->
+        <g class="robot-arm-wave">
+          <rect x="94" y="93" width="18" height="38" rx="8" fill="#1A1A2E" stroke="rgba(108,99,255,0.4)" stroke-width="1.5"/>
+        </g>
+        <!-- Legs -->
+        <rect x="36" y="148" width="20" height="14" rx="6" fill="#1A1A2E" stroke="rgba(108,99,255,0.4)" stroke-width="1.5"/>
+        <rect x="64" y="148" width="20" height="14" rx="6" fill="#1A1A2E" stroke="rgba(108,99,255,0.4)" stroke-width="1.5"/>
+      </svg>
+
+      <!-- Speech bubble -->
+      <div class="speech-bubble" id="speech-bubble">
+        <div id="bubble-content">
+          <div class="typing-dots"><span></span><span></span><span></span></div>
+        </div>
+      </div>
     </div>
 
     <h1>
@@ -317,62 +348,40 @@
       Free · Android · No Play Store needed · Just install &amp; go
     </p>
 
-    <div class="mockup-wrap">
-      <div class="mockup-glow"></div>
-      <img src="apms3.png" alt="Task Tracker App" class="mockup-img" />
-    </div>
   </section>
 
   <!-- FEATURES -->
   <section class="section">
     <p class="section-label">What's inside</p>
     <h2 class="section-title">Everything you need to stay on track</h2>
-
     <div class="features-grid">
       <div class="feature-card">
-        <div class="feature-icon" style="background:rgba(108,99,255,0.15); color:#6C63FF;">
-          <i class="fas fa-list-check"></i>
-        </div>
+        <div class="feature-icon" style="background:rgba(108,99,255,0.15);color:#6C63FF;"><i class="fas fa-list-check"></i></div>
         <h3>Smart Task Management</h3>
         <p>Create tasks with categories, priorities, and deadlines. Get notified exactly when they're due.</p>
       </div>
-
       <div class="feature-card">
-        <div class="feature-icon" style="background:rgba(34,197,94,0.15); color:#22C55E;">
-          <i class="fas fa-fire"></i>
-        </div>
+        <div class="feature-icon" style="background:rgba(34,197,94,0.15);color:#22C55E;"><i class="fas fa-fire"></i></div>
         <h3>Streak & Gamification</h3>
-        <p>Earn tokens for every completed task. Unlock Bronze, Silver, Gold, and Elite certificates as you progress.</p>
+        <p>Earn tokens for every completed task. Unlock Bronze, Silver, Gold, and Elite certificates.</p>
       </div>
-
       <div class="feature-card">
-        <div class="feature-icon" style="background:rgba(245,158,11,0.15); color:#F59E0B;">
-          <i class="fas fa-bell"></i>
-        </div>
+        <div class="feature-icon" style="background:rgba(245,158,11,0.15);color:#F59E0B;"><i class="fas fa-bell"></i></div>
         <h3>Smart Reminders</h3>
         <p>Set important task reminders and get push notifications 30 minutes before your deadlines.</p>
       </div>
-
       <div class="feature-card">
-        <div class="feature-icon" style="background:rgba(236,72,153,0.15); color:#EC4899;">
-          <i class="fas fa-chart-line"></i>
-        </div>
+        <div class="feature-icon" style="background:rgba(236,72,153,0.15);color:#EC4899;"><i class="fas fa-chart-line"></i></div>
         <h3>Analytics Dashboard</h3>
         <p>Weekly charts, completion rates, streak tracking, and category-wise token breakdown.</p>
       </div>
-
       <div class="feature-card">
-        <div class="feature-icon" style="background:rgba(108,99,255,0.15); color:#6C63FF;">
-          <i class="fas fa-robot"></i>
-        </div>
+        <div class="feature-icon" style="background:rgba(108,99,255,0.15);color:#6C63FF;"><i class="fas fa-robot"></i></div>
         <h3>AI Mentor (Gemini)</h3>
         <p>Powered by Google Gemini. Your AI mentor knows your tasks, deadlines, and streak — and gives real advice.</p>
       </div>
-
       <div class="feature-card">
-        <div class="feature-icon" style="background:rgba(34,197,94,0.15); color:#22C55E;">
-          <i class="fas fa-flag-checkered"></i>
-        </div>
+        <div class="feature-icon" style="background:rgba(34,197,94,0.15);color:#22C55E;"><i class="fas fa-flag-checkered"></i></div>
         <h3>Milestone Tracker</h3>
         <p>Set long-term goals and track progress with animated progress bars. Celebrate every 100%.</p>
       </div>
@@ -392,8 +401,7 @@
       </p>
       <p>
         I built this to solve a real problem — keeping track of assignments, deadlines, and
-        study goals as an engineering student. Every feature in this app is something I
-        personally needed.
+        study goals as an engineering student. Every feature in this app is something I personally needed.
       </p>
       <p>
         If you're a student looking for a focused, no-nonsense productivity tool —
@@ -411,7 +419,7 @@
       <i class="fab fa-android"></i>
       Download Task Tracker APK
     </a>
-    <p style="margin-top:16px; font-size:13px; color:var(--subtle);">
+    <p style="margin-top:14px;font-size:12px;color:var(--subtle);">
       Android only · Free · No account required to browse
     </p>
   </section>
@@ -426,6 +434,48 @@
       <a href="https://www.linkedin.com/in/yash-lad-4bb46632a" target="_blank">LinkedIn</a>
     </div>
   </footer>
+
+  <!-- ROBOT SPEECH SCRIPT -->
+  <script>
+    const msgs = [
+      "Hey! 👋 Welcome to Task Tracker.",
+      "I'm your AI mentor — built to help you own every day.",
+      "Download the app and let's get started! 🚀"
+    ];
+    let idx = 0;
+    let t1, t2;
+
+    function typeMsg(msg) {
+      const el = document.getElementById('bubble-content');
+      el.innerHTML = '';
+      const span = document.createElement('span');
+      el.appendChild(span);
+      let i = 0;
+      const timer = setInterval(() => {
+        span.textContent += msg[i++];
+        if (i >= msg.length) {
+          clearInterval(timer);
+          idx++;
+          if (idx < msgs.length) {
+            t2 = setTimeout(() => {
+              el.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+              t1 = setTimeout(() => typeMsg(msgs[idx]), 1000);
+            }, 2200);
+          } else {
+            // Loop back after pause
+            t2 = setTimeout(() => {
+              idx = 0;
+              el.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+              t1 = setTimeout(() => typeMsg(msgs[0]), 1000);
+            }, 3000);
+          }
+        }
+      }, 38);
+    }
+
+    // Start after short delay
+    setTimeout(() => typeMsg(msgs[0]), 1000);
+  </script>
 
 </body>
 </html>
