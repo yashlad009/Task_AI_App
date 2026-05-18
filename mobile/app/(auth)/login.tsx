@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform,
@@ -18,6 +18,8 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [slowHint, setSlowHint] = useState(false);
+  const slowTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const btnScale = useSharedValue(1);
   const btnStyle = useAnimatedStyle(() => ({ transform: [{ scale: btnScale.value }] }));
@@ -28,6 +30,9 @@ export default function LoginScreen() {
       return;
     }
     setLoading(true);
+    setSlowHint(false);
+    // Show hint after 4 seconds if still loading
+    slowTimer.current = setTimeout(() => setSlowHint(true), 4000);
     try {
       const res = await axios.post(ENDPOINTS.login, { email: email.trim(), password });
       const userData = res.data;
@@ -41,7 +46,9 @@ export default function LoginScreen() {
       const msg = err.response?.data?.error || 'Login failed. Please try again.';
       Alert.alert('Login Failed', msg);
     } finally {
+      if (slowTimer.current) clearTimeout(slowTimer.current);
       setLoading(false);
+      setSlowHint(false);
     }
   };
 
@@ -89,9 +96,20 @@ export default function LoginScreen() {
               onPressOut={() => { btnScale.value = withSpring(1); }}
               disabled={loading}
             >
-              {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Sign In</Text>}
+              {loading
+                ? <ActivityIndicator color="#fff" />
+                : <Text style={styles.btnText}>Sign In</Text>}
             </TouchableOpacity>
           </Animated.View>
+
+          {/* Show hint when server is waking up */}
+          {slowHint && (
+            <View style={styles.hintBox}>
+              <Text style={styles.hintText}>
+                ⏳ Server is waking up — this can take up to 30 seconds on first use. Please wait...
+              </Text>
+            </View>
+          )}
 
           <TouchableOpacity onPress={() => router.push('/(auth)/register')} style={styles.link}>
             <Text style={styles.linkText}>Don't have an account? <Text style={styles.linkAccent}>Register</Text></Text>
@@ -119,4 +137,6 @@ const styles = StyleSheet.create({
   link:      { marginTop: 20, alignItems: 'center' },
   linkText:  { color: '#94A3B8', fontSize: 14 },
   linkAccent:{ color: '#6C63FF', fontWeight: '700' },
+  hintBox:   { marginTop: 14, backgroundColor: 'rgba(108,99,255,0.1)', borderRadius: 10, padding: 12, borderWidth: 1, borderColor: 'rgba(108,99,255,0.2)' },
+  hintText:  { fontSize: 13, color: '#94A3B8', textAlign: 'center', lineHeight: 20 },
 });

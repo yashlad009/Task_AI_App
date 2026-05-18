@@ -1,3 +1,8 @@
+import axios from 'axios';
+
+// Set global timeout to 60s — Render free tier can take up to 50s to wake up
+axios.defaults.timeout = 60000;
+
 export const API_BASE_URL = 'https://task-ai-app.onrender.com';
 
 export const ENDPOINTS = {
