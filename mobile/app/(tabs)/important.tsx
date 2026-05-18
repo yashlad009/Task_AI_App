@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  TextInput, Modal, Alert, RefreshControl, ActivityIndicator, Platform, ScrollView
+  TextInput, Modal, Alert, RefreshControl, ActivityIndicator, Platform, ScrollView, Animated
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -18,6 +18,44 @@ interface ImportantTask {
   processed: boolean;
 }
 
+// Animated reminder card — proper component so hooks are valid
+function ReminderRow({ item, index }: { item: ImportantTask; index: number }) {
+  const anim  = useRef(new Animated.Value(0)).current;
+  const slide = useRef(new Animated.Value(20)).current;
+  const scale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(anim,  { toValue: 1, duration: 450, delay: index * 70, useNativeDriver: true }),
+      Animated.timing(slide, { toValue: 0, duration: 450, delay: index * 70, useNativeDriver: true }),
+    ]).start();
+  }, []);
+
+  const pressIn  = () => Animated.spring(scale, { toValue: 0.97, useNativeDriver: true }).start();
+  const pressOut = () => Animated.spring(scale, { toValue: 1,    useNativeDriver: true }).start();
+
+  const dt = new Date(item.eventTime);
+  const formatted = dt.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+
+  return (
+    <Animated.View style={[styles.taskCard, item.processed && styles.taskProcessed, { opacity: anim, transform: [{ translateY: slide }, { scale }] }]}>
+      <TouchableOpacity onPressIn={pressIn} onPressOut={pressOut} activeOpacity={1} style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+        <View style={styles.taskLeft}>
+          <Ionicons name={item.processed ? 'checkmark-circle' : 'alarm'} size={22}
+            color={item.processed ? '#22C55E' : '#F59E0B'} />
+        </View>
+        <View style={styles.taskBody}>
+          <Text style={styles.taskName}>{item.taskName}</Text>
+          <Text style={styles.taskTime}>📅 {formatted}</Text>
+          <Text style={[styles.taskStatus, item.processed ? styles.done : styles.pending]}>
+            {item.processed ? 'Reminder sent' : 'Reminder pending'}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+}
+
 export default function ImportantScreen() {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<ImportantTask[]>([]);
@@ -30,6 +68,9 @@ export default function ImportantScreen() {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  // Header animation
+  const headerAnim = useRef(new Animated.Value(0)).current;
+
   const fetchTasks = useCallback(async () => {
     if (!user) return;
     try {
@@ -39,7 +80,10 @@ export default function ImportantScreen() {
     finally { setLoading(false); setRefreshing(false); }
   }, [user]);
 
-  useEffect(() => { fetchTasks(); }, [fetchTasks]);
+  useEffect(() => {
+    fetchTasks();
+    Animated.timing(headerAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
+  }, [fetchTasks]);
 
   const formatDate = (d: Date) => d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
   const formatTime = (d: Date) => d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
@@ -76,34 +120,21 @@ export default function ImportantScreen() {
     }
   };
 
-  const renderTask = ({ item }: { item: ImportantTask }) => {
-    const dt = new Date(item.eventTime);
-    const formatted = dt.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
-    return (
-      <View style={[styles.taskCard, item.processed && styles.taskProcessed]}>
-        <View style={styles.taskLeft}>
-          <Ionicons name={item.processed ? 'checkmark-circle' : 'alarm'} size={22}
-            color={item.processed ? '#22C55E' : '#F59E0B'} />
-        </View>
-        <View style={styles.taskBody}>
-          <Text style={styles.taskName}>{item.taskName}</Text>
-          <Text style={styles.taskTime}>📅 {formatted}</Text>
-          <Text style={[styles.taskStatus, item.processed ? styles.done : styles.pending]}>
-            {item.processed ? 'Reminder sent' : 'Reminder pending'}
-          </Text>
-        </View>
-      </View>
-    );
-  };
+  const renderTask = ({ item, index }: { item: ImportantTask; index: number }) => (
+    <ReminderRow item={item} index={index} />
+  );
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <Animated.View style={[styles.header, {
+        opacity: headerAnim,
+        transform: [{ translateY: headerAnim.interpolate({ inputRange: [0, 1], outputRange: [-20, 0] }) }],
+      }]}>
         <Text style={styles.title}>Important</Text>
         <TouchableOpacity style={styles.addBtn} onPress={() => setModalVisible(true)}>
           <Ionicons name="add" size={24} color="#fff" />
         </TouchableOpacity>
-      </View>
+      </Animated.View>
 
       <View style={styles.infoBox}>
         <Ionicons name="information-circle-outline" size={16} color="#6C63FF" />

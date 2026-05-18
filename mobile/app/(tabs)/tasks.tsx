@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  TextInput, Modal, Alert, RefreshControl, ActivityIndicator, Platform, ScrollView
+  TextInput, Modal, Alert, RefreshControl, ActivityIndicator, Platform, ScrollView, Animated
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -57,6 +57,55 @@ async function scheduleDueNotification(taskText: string, dueDateTime: Date): Pro
   return id;
 }
 
+// Animated task row — extracted as a proper component so hooks are valid
+function TaskRow({
+  item, index, onComplete, onDelete,
+}: {
+  item: Task; index: number; onComplete: () => void; onDelete: () => void;
+}) {
+  const anim  = useRef(new Animated.Value(0)).current;
+  const slide = useRef(new Animated.Value(-20)).current;
+  const scale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(anim,  { toValue: 1, duration: 400, delay: index * 60, useNativeDriver: true }),
+      Animated.timing(slide, { toValue: 0, duration: 400, delay: index * 60, useNativeDriver: true }),
+    ]).start();
+  }, []);
+
+  const pressIn  = () => Animated.spring(scale, { toValue: 0.97, useNativeDriver: true }).start();
+  const pressOut = () => Animated.spring(scale, { toValue: 1,    useNativeDriver: true }).start();
+
+  return (
+    <Animated.View style={[styles.taskCard, { opacity: anim, transform: [{ translateX: slide }, { scale }] }]}>
+      <TouchableOpacity onPressIn={pressIn} onPressOut={pressOut} activeOpacity={1} style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+        <View style={[styles.categoryDot, { backgroundColor: CATEGORY_COLORS[item.category] ?? '#6C63FF' }]} />
+        <View style={styles.taskBody}>
+          <Text style={[styles.taskText, item.status === 'Completed' && styles.taskDone]}>{item.text}</Text>
+          <View style={styles.taskMeta}>
+            <Text style={styles.metaTag}>{item.category}</Text>
+            <Text style={[styles.metaTag, item.priority === 'High' ? styles.high : item.priority === 'Low' ? styles.low : styles.medium]}>
+              {item.priority}
+            </Text>
+            {item.dueDate && <Text style={styles.metaTag}>📅 {item.dueDate}</Text>}
+          </View>
+        </View>
+        <View style={styles.taskActions}>
+          {item.status !== 'Completed' && (
+            <TouchableOpacity onPress={onComplete} style={styles.doneBtn}>
+              <Ionicons name="checkmark-circle" size={26} color="#22C55E" />
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity onPress={onDelete} style={styles.delBtn}>
+            <Ionicons name="trash-outline" size={20} color="#EF4444" />
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+}
+
 export default function TasksScreen() {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -77,6 +126,9 @@ export default function TasksScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
 
+  // Header animation
+  const headerAnim = useRef(new Animated.Value(0)).current;
+
   const fetchTasks = useCallback(async () => {
     if (!user) return;
     try {
@@ -86,7 +138,10 @@ export default function TasksScreen() {
     finally { setLoading(false); setRefreshing(false); }
   }, [user]);
 
-  useEffect(() => { fetchTasks(); }, [fetchTasks]);
+  useEffect(() => {
+    fetchTasks();
+    Animated.timing(headerAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
+  }, [fetchTasks]);
 
   const formatDateOnly = (d: Date) => d.toISOString().split('T')[0];
   const formatTimeDisplay = (d: Date) => d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
@@ -172,40 +227,26 @@ export default function TasksScreen() {
 
   const filtered = tasks.filter(t => filter === 'All' || t.status === filter);
 
-  const renderTask = ({ item }: { item: Task }) => (
-    <View style={styles.taskCard}>
-      <View style={[styles.categoryDot, { backgroundColor: CATEGORY_COLORS[item.category] ?? '#6C63FF' }]} />
-      <View style={styles.taskBody}>
-        <Text style={[styles.taskText, item.status === 'Completed' && styles.taskDone]}>{item.text}</Text>
-        <View style={styles.taskMeta}>
-          <Text style={styles.metaTag}>{item.category}</Text>
-          <Text style={[styles.metaTag, item.priority === 'High' ? styles.high : item.priority === 'Low' ? styles.low : styles.medium]}>
-            {item.priority}
-          </Text>
-          {item.dueDate && <Text style={styles.metaTag}>📅 {item.dueDate}</Text>}
-        </View>
-      </View>
-      <View style={styles.taskActions}>
-        {item.status !== 'Completed' && (
-          <TouchableOpacity onPress={() => completeTask(item.id, item.text, item.category)} style={styles.doneBtn}>
-            <Ionicons name="checkmark-circle" size={26} color="#22C55E" />
-          </TouchableOpacity>
-        )}
-        <TouchableOpacity onPress={() => deleteTask(item.id)} style={styles.delBtn}>
-          <Ionicons name="trash-outline" size={20} color="#EF4444" />
-        </TouchableOpacity>
-      </View>
-    </View>
+  const renderTask = ({ item, index }: { item: Task; index: number }) => (
+    <TaskRow
+      item={item}
+      index={index}
+      onComplete={() => completeTask(item.id, item.text, item.category)}
+      onDelete={() => deleteTask(item.id)}
+    />
   );
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <Animated.View style={[styles.header, {
+        opacity: headerAnim,
+        transform: [{ translateY: headerAnim.interpolate({ inputRange: [0, 1], outputRange: [-20, 0] }) }],
+      }]}>
         <Text style={styles.title}>Daily Tasks</Text>
         <TouchableOpacity style={styles.addBtn} onPress={() => setModalVisible(true)}>
           <Ionicons name="add" size={24} color="#fff" />
         </TouchableOpacity>
-      </View>
+      </Animated.View>
 
       <View style={styles.filterRow}>
         {(['All', 'Pending', 'Completed'] as const).map(f => (

@@ -1,7 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity,
-  KeyboardAvoidingView, Platform, ActivityIndicator
+  KeyboardAvoidingView, Platform, ActivityIndicator, Animated
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
@@ -14,6 +14,36 @@ interface Message {
   text: string;
 }
 
+// Animated message bubble — proper component so hooks are valid
+function MessageBubble({ item }: { item: Message }) {
+  const anim  = useRef(new Animated.Value(0)).current;
+  const slide = useRef(new Animated.Value(12)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(anim,  { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.timing(slide, { toValue: 0, duration: 300, useNativeDriver: true }),
+    ]).start();
+  }, []);
+
+  return (
+    <Animated.View style={[
+      styles.bubble,
+      item.role === 'user' ? styles.userBubble : styles.aiBubble,
+      { opacity: anim, transform: [{ translateY: slide }] },
+    ]}>
+      {item.role === 'ai' && (
+        <View style={styles.aiAvatar}>
+          <Ionicons name="sparkles" size={14} color="#6C63FF" />
+        </View>
+      )}
+      <View style={[styles.bubbleContent, item.role === 'user' ? styles.userContent : styles.aiContent]}>
+        <Text style={[styles.bubbleText, item.role === 'user' ? styles.userText : styles.aiText]}>{item.text}</Text>
+      </View>
+    </Animated.View>
+  );
+}
+
 export default function MentorScreen() {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
@@ -22,6 +52,12 @@ export default function MentorScreen() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const listRef = useRef<FlatList>(null);
+  // Header animation
+  const headerAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(headerAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
+  }, []);
 
   const sendMessage = async () => {
     const msg = input.trim();
@@ -45,22 +81,14 @@ export default function MentorScreen() {
     }
   };
 
-  const renderMessage = ({ item }: { item: Message }) => (
-    <View style={[styles.bubble, item.role === 'user' ? styles.userBubble : styles.aiBubble]}>
-      {item.role === 'ai' && (
-        <View style={styles.aiAvatar}>
-          <Ionicons name="sparkles" size={14} color="#6C63FF" />
-        </View>
-      )}
-      <View style={[styles.bubbleContent, item.role === 'user' ? styles.userContent : styles.aiContent]}>
-        <Text style={[styles.bubbleText, item.role === 'user' ? styles.userText : styles.aiText]}>{item.text}</Text>
-      </View>
-    </View>
-  );
+  const renderMessage = ({ item }: { item: Message }) => <MessageBubble item={item} />;
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={90}>
-      <View style={styles.header}>
+      <Animated.View style={[styles.header, {
+        opacity: headerAnim,
+        transform: [{ translateY: headerAnim.interpolate({ inputRange: [0, 1], outputRange: [-16, 0] }) }],
+      }]}>
         <View style={styles.headerLeft}>
           <View style={styles.avatarCircle}>
             <Ionicons name="sparkles" size={20} color="#6C63FF" />
@@ -70,7 +98,7 @@ export default function MentorScreen() {
             <Text style={styles.subtitle}>AI Productivity Mentor</Text>
           </View>
         </View>
-      </View>
+      </Animated.View>
 
       <FlatList
         ref={listRef}

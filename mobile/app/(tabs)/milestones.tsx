@@ -1,19 +1,67 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  TextInput, Modal, Alert, RefreshControl, ActivityIndicator
+  TextInput, Modal, Alert, RefreshControl, ActivityIndicator, Animated
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { useAuth } from '../../src/context/AuthContext';
 import { ENDPOINTS } from '../../src/config/api';
 
-interface Milestone {
-  id: string;
-  name: string;
-  progress: number;
-  celebrated: boolean;
-  userId: string;
+interface Milestone { id: string; name: string; progress: number; celebrated: boolean; userId: string; }
+
+// Animated milestone card with progress bar
+function MilestoneCard({ item, onEdit, onDelete }: { item: Milestone; onEdit: () => void; onDelete: () => void }) {
+  const anim     = useRef(new Animated.Value(0)).current;
+  const slide    = useRef(new Animated.Value(30)).current;
+  const barWidth = useRef(new Animated.Value(0)).current;
+  const scale    = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(anim,     { toValue: 1,            duration: 500, useNativeDriver: true }),
+      Animated.timing(slide,    { toValue: 0,            duration: 500, useNativeDriver: true }),
+      Animated.timing(barWidth, { toValue: item.progress, duration: 900, delay: 200, useNativeDriver: false }),
+    ]).start();
+  }, [item.progress]);
+
+  const pressIn  = () => Animated.spring(scale, { toValue: 0.97, useNativeDriver: true }).start();
+  const pressOut = () => Animated.spring(scale, { toValue: 1,    useNativeDriver: true }).start();
+
+  const barColor = item.progress === 100 ? '#22C55E' : '#6C63FF';
+
+  return (
+    <Animated.View style={[styles.card, { opacity: anim, transform: [{ translateY: slide }, { scale }] }]}>
+      <TouchableOpacity onPressIn={pressIn} onPressOut={pressOut} activeOpacity={1}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.cardName}>{item.name}</Text>
+          <View style={styles.cardActions}>
+            <TouchableOpacity onPress={onEdit}>
+              <Ionicons name="pencil-outline" size={18} color="#6C63FF" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={onDelete} style={{ marginLeft: 12 }}>
+              <Ionicons name="trash-outline" size={18} color="#EF4444" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Animated progress bar */}
+        <View style={styles.progressRow}>
+          <View style={styles.progressBg}>
+            <Animated.View style={[styles.progressFill, {
+              width: barWidth.interpolate({ inputRange: [0, 100], outputRange: ['0%', '100%'] }),
+              backgroundColor: barColor,
+            }]} />
+          </View>
+          <Text style={styles.progressText}>{item.progress}%</Text>
+        </View>
+
+        {item.progress === 100 && (
+          <Text style={styles.celebrate}>🎉 Completed!</Text>
+        )}
+      </TouchableOpacity>
+    </Animated.View>
+  );
 }
 
 export default function MilestonesScreen() {
@@ -28,6 +76,9 @@ export default function MilestonesScreen() {
   const [progress, setProgress] = useState('0');
   const [saving, setSaving] = useState(false);
 
+  // Header animation
+  const headerAnim = useRef(new Animated.Value(0)).current;
+
   const fetchMilestones = useCallback(async () => {
     if (!user) return;
     try {
@@ -37,7 +88,10 @@ export default function MilestonesScreen() {
     finally { setLoading(false); setRefreshing(false); }
   }, [user]);
 
-  useEffect(() => { fetchMilestones(); }, [fetchMilestones]);
+  useEffect(() => {
+    fetchMilestones();
+    Animated.timing(headerAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
+  }, [fetchMilestones]);
 
   const addMilestone = async () => {
     if (!name.trim()) { Alert.alert('Error', 'Milestone name is required.'); return; }
@@ -64,46 +118,24 @@ export default function MilestonesScreen() {
   const deleteMilestone = async (id: string) => {
     Alert.alert('Delete', 'Remove this milestone?', [
       { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete', style: 'destructive', onPress: async () => {
-          try { await axios.delete(ENDPOINTS.deleteMilestone(id)); fetchMilestones(); }
-          catch (e) { Alert.alert('Error', 'Failed to delete.'); }
-        }
-      }
+      { text: 'Delete', style: 'destructive', onPress: async () => {
+        try { await axios.delete(ENDPOINTS.deleteMilestone(id)); fetchMilestones(); }
+        catch (e) { Alert.alert('Error', 'Failed to delete.'); }
+      }}
     ]);
   };
 
-  const renderMilestone = ({ item }: { item: Milestone }) => (
-    <View style={styles.card}>
-      <View style={styles.cardHeader}>
-        <Text style={styles.cardName}>{item.name}</Text>
-        <View style={styles.cardActions}>
-          <TouchableOpacity onPress={() => { setSelected(item); setProgress(String(item.progress)); setUpdateModal(true); }}>
-            <Ionicons name="pencil-outline" size={18} color="#6C63FF" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => deleteMilestone(item.id)} style={{ marginLeft: 12 }}>
-            <Ionicons name="trash-outline" size={18} color="#EF4444" />
-          </TouchableOpacity>
-        </View>
-      </View>
-      <View style={styles.progressRow}>
-        <View style={styles.progressBg}>
-          <View style={[styles.progressFill, { width: `${item.progress}%`, backgroundColor: item.progress === 100 ? '#22C55E' : '#6C63FF' }]} />
-        </View>
-        <Text style={styles.progressText}>{item.progress}%</Text>
-      </View>
-      {item.progress === 100 && <Text style={styles.celebrate}>🎉 Completed!</Text>}
-    </View>
-  );
-
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <Animated.View style={[styles.header, {
+        opacity: headerAnim,
+        transform: [{ translateY: headerAnim.interpolate({ inputRange: [0, 1], outputRange: [-16, 0] }) }]
+      }]}>
         <Text style={styles.title}>Milestones</Text>
         <TouchableOpacity style={styles.addBtn} onPress={() => setAddModal(true)}>
           <Ionicons name="add" size={24} color="#fff" />
         </TouchableOpacity>
-      </View>
+      </Animated.View>
 
       {loading ? (
         <View style={styles.center}><ActivityIndicator color="#6C63FF" /></View>
@@ -111,7 +143,13 @@ export default function MilestonesScreen() {
         <FlatList
           data={milestones}
           keyExtractor={i => i.id}
-          renderItem={renderMilestone}
+          renderItem={({ item }) => (
+            <MilestoneCard
+              item={item}
+              onEdit={() => { setSelected(item); setProgress(String(item.progress)); setUpdateModal(true); }}
+              onDelete={() => deleteMilestone(item.id)}
+            />
+          )}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchMilestones(); }} tintColor="#6C63FF" />}
           contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
           ListEmptyComponent={<Text style={styles.empty}>No milestones yet. Set a goal!</Text>}
@@ -124,8 +162,7 @@ export default function MilestonesScreen() {
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>New Milestone</Text>
             <Text style={styles.label}>Goal Name</Text>
-            <TextInput style={styles.input} placeholder="e.g. Complete DSA course" placeholderTextColor="#64748B"
-              value={name} onChangeText={setName} />
+            <TextInput style={styles.input} placeholder="e.g. Complete DSA course" placeholderTextColor="#64748B" value={name} onChangeText={setName} />
             <View style={styles.modalBtns}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setAddModal(false)}>
                 <Text style={styles.cancelText}>Cancel</Text>
@@ -145,8 +182,7 @@ export default function MilestonesScreen() {
             <Text style={styles.modalTitle}>Update Progress</Text>
             <Text style={styles.cardName}>{selected?.name}</Text>
             <Text style={styles.label}>Progress (0–100)</Text>
-            <TextInput style={styles.input} placeholder="75" placeholderTextColor="#64748B"
-              value={progress} onChangeText={setProgress} keyboardType="number-pad" />
+            <TextInput style={styles.input} placeholder="75" placeholderTextColor="#64748B" value={progress} onChangeText={setProgress} keyboardType="number-pad" />
             <View style={styles.modalBtns}>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setUpdateModal(false)}>
                 <Text style={styles.cancelText}>Cancel</Text>

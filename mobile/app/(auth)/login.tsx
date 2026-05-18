@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView, Platform
+  ScrollView, ActivityIndicator, Alert, KeyboardAvoidingView,
+  Platform, Animated
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
@@ -14,6 +15,25 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Animations
+  const logoAnim   = useRef(new Animated.Value(0)).current;
+  const cardAnim   = useRef(new Animated.Value(0)).current;
+  const cardSlide  = useRef(new Animated.Value(40)).current;
+  const btnScale   = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.sequence([
+      Animated.timing(logoAnim, { toValue: 1, duration: 700, useNativeDriver: true }),
+      Animated.parallel([
+        Animated.timing(cardAnim,  { toValue: 1, duration: 500, useNativeDriver: true }),
+        Animated.timing(cardSlide, { toValue: 0, duration: 500, useNativeDriver: true }),
+      ]),
+    ]).start();
+  }, []);
+
+  const pressBtnIn  = () => Animated.spring(btnScale, { toValue: 0.96, useNativeDriver: true }).start();
+  const pressBtnOut = () => Animated.spring(btnScale, { toValue: 1,    useNativeDriver: true }).start();
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -41,12 +61,15 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-        <View style={styles.header}>
+
+        {/* Animated logo */}
+        <Animated.View style={[styles.header, { opacity: logoAnim, transform: [{ translateY: logoAnim.interpolate({ inputRange: [0, 1], outputRange: [-20, 0] }) }] }]}>
           <Text style={styles.logo}>Task Tracker</Text>
           <Text style={styles.tagline}>Own today. Track priorities, finish faster.</Text>
-        </View>
+        </Animated.View>
 
-        <View style={styles.card}>
+        {/* Animated card */}
+        <Animated.View style={[styles.card, { opacity: cardAnim, transform: [{ translateY: cardSlide }] }]}>
           <Text style={styles.title}>Welcome back</Text>
           <Text style={styles.subtitle}>Sign in to your account</Text>
 
@@ -71,14 +94,23 @@ export default function LoginScreen() {
             secureTextEntry
           />
 
-          <TouchableOpacity style={styles.btn} onPress={handleLogin} disabled={loading}>
-            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Sign In</Text>}
-          </TouchableOpacity>
+          <Animated.View style={{ transform: [{ scale: btnScale }] }}>
+            <TouchableOpacity
+              style={styles.btn}
+              onPress={handleLogin}
+              onPressIn={pressBtnIn}
+              onPressOut={pressBtnOut}
+              disabled={loading}
+            >
+              {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Sign In</Text>}
+            </TouchableOpacity>
+          </Animated.View>
 
           <TouchableOpacity onPress={() => router.push('/(auth)/register')} style={styles.link}>
             <Text style={styles.linkText}>Don't have an account? <Text style={styles.linkAccent}>Register</Text></Text>
           </TouchableOpacity>
-        </View>
+        </Animated.View>
+
       </ScrollView>
     </KeyboardAvoidingView>
   );

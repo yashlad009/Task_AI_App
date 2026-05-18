@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  RefreshControl, ActivityIndicator
+  RefreshControl, ActivityIndicator, Animated
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -23,12 +23,81 @@ interface Analytics {
   };
 }
 
+// Animated stat card
+function StatCard({ icon, value, label, color, delay }: { icon: any; value: number | string; label: string; color: string; delay: number }) {
+  const anim  = useRef(new Animated.Value(0)).current;
+  const slide = useRef(new Animated.Value(30)).current;
+  const scale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(anim,  { toValue: 1, duration: 500, delay, useNativeDriver: true }),
+      Animated.timing(slide, { toValue: 0, duration: 500, delay, useNativeDriver: true }),
+    ]).start();
+  }, []);
+
+  const pressIn  = () => Animated.spring(scale, { toValue: 0.94, useNativeDriver: true }).start();
+  const pressOut = () => Animated.spring(scale, { toValue: 1,    useNativeDriver: true }).start();
+
+  return (
+    <Animated.View style={[styles.statCard, { borderColor: color, opacity: anim, transform: [{ translateY: slide }, { scale }] }]}>
+      <TouchableOpacity onPressIn={pressIn} onPressOut={pressOut} activeOpacity={1}>
+        <Ionicons name={icon} size={20} color={color} />
+        <Text style={styles.statNum}>{value}</Text>
+        <Text style={styles.statLabel}>{label}</Text>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+}
+
+// Animated progress bar
+function AnimatedProgressBar({ percent }: { percent: number }) {
+  const width = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(width, { toValue: percent, duration: 900, delay: 300, useNativeDriver: false }).start();
+  }, [percent]);
+  return (
+    <View style={styles.progressBg}>
+      <Animated.View style={[styles.progressFill, { width: width.interpolate({ inputRange: [0, 100], outputRange: ['0%', '100%'] }) }]} />
+    </View>
+  );
+}
+
+// Animated action button
+function ActionBtn({ icon, label, color, onPress, delay }: { icon: any; label: string; color: string; onPress: () => void; delay: number }) {
+  const anim  = useRef(new Animated.Value(0)).current;
+  const slide = useRef(new Animated.Value(20)).current;
+  const scale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(anim,  { toValue: 1, duration: 400, delay, useNativeDriver: true }),
+      Animated.timing(slide, { toValue: 0, duration: 400, delay, useNativeDriver: true }),
+    ]).start();
+  }, []);
+
+  const pressIn  = () => Animated.spring(scale, { toValue: 0.92, useNativeDriver: true }).start();
+  const pressOut = () => Animated.spring(scale, { toValue: 1,    useNativeDriver: true }).start();
+
+  return (
+    <Animated.View style={[styles.actionBtn, { opacity: anim, transform: [{ translateY: slide }, { scale }] }]}>
+      <TouchableOpacity onPress={onPress} onPressIn={pressIn} onPressOut={pressOut} activeOpacity={1} style={styles.actionBtnInner}>
+        <Ionicons name={icon} size={24} color={color} />
+        <Text style={styles.actionText}>{label}</Text>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+}
+
 export default function DashboardScreen() {
   const { user, logout } = useAuth();
   const router = useRouter();
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Header animation
+  const headerAnim = useRef(new Animated.Value(0)).current;
 
   const fetchAnalytics = useCallback(async () => {
     if (!user) return;
@@ -43,7 +112,10 @@ export default function DashboardScreen() {
     }
   }, [user]);
 
-  useEffect(() => { fetchAnalytics(); }, [fetchAnalytics]);
+  useEffect(() => {
+    fetchAnalytics();
+    Animated.timing(headerAnim, { toValue: 1, duration: 600, useNativeDriver: true }).start();
+  }, [fetchAnalytics]);
 
   const onRefresh = () => { setRefreshing(true); fetchAnalytics(); };
 
@@ -52,12 +124,17 @@ export default function DashboardScreen() {
   }
 
   const g = analytics?.gamification;
-  const unlockedCount = g?.achievements.filter(a => a.unlocked).length ?? 0;
 
   return (
-    <ScrollView style={styles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#6C63FF" />}>
-      {/* Header */}
-      <View style={styles.header}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#6C63FF" />}
+    >
+      {/* Animated Header */}
+      <Animated.View style={[styles.header, {
+        opacity: headerAnim,
+        transform: [{ translateY: headerAnim.interpolate({ inputRange: [0, 1], outputRange: [-20, 0] }) }]
+      }]}>
         <View>
           <Text style={styles.greeting}>Hey, {user?.email.split('@')[0]} 👋</Text>
           <Text style={styles.subGreeting}>Own today.</Text>
@@ -65,30 +142,14 @@ export default function DashboardScreen() {
         <TouchableOpacity onPress={logout} style={styles.logoutBtn}>
           <Ionicons name="log-out-outline" size={22} color="#94A3B8" />
         </TouchableOpacity>
-      </View>
+      </Animated.View>
 
-      {/* Stats Row */}
+      {/* Animated Stats Row */}
       <View style={styles.statsRow}>
-        <View style={[styles.statCard, { borderColor: '#6C63FF' }]}>
-          <Ionicons name="clipboard-outline" size={20} color="#6C63FF" />
-          <Text style={styles.statNum}>{analytics?.total ?? 0}</Text>
-          <Text style={styles.statLabel}>Total</Text>
-        </View>
-        <View style={[styles.statCard, { borderColor: '#22C55E' }]}>
-          <Ionicons name="checkmark-circle-outline" size={20} color="#22C55E" />
-          <Text style={styles.statNum}>{analytics?.completed ?? 0}</Text>
-          <Text style={styles.statLabel}>Done</Text>
-        </View>
-        <View style={[styles.statCard, { borderColor: '#EF4444' }]}>
-          <Ionicons name="time-outline" size={20} color="#EF4444" />
-          <Text style={styles.statNum}>{analytics?.pending ?? 0}</Text>
-          <Text style={styles.statLabel}>Pending</Text>
-        </View>
-        <View style={[styles.statCard, { borderColor: '#F59E0B' }]}>
-          <Ionicons name="flash-outline" size={20} color="#F59E0B" />
-          <Text style={styles.statNum}>{analytics?.efficiency ?? 0}%</Text>
-          <Text style={styles.statLabel}>Rate</Text>
-        </View>
+        <StatCard icon="clipboard-outline"       value={analytics?.total ?? 0}      label="Total"   color="#6C63FF" delay={100} />
+        <StatCard icon="checkmark-circle-outline" value={analytics?.completed ?? 0}  label="Done"    color="#22C55E" delay={180} />
+        <StatCard icon="time-outline"             value={analytics?.pending ?? 0}    label="Pending" color="#EF4444" delay={260} />
+        <StatCard icon="flash-outline"            value={`${analytics?.efficiency ?? 0}%`} label="Rate" color="#F59E0B" delay={340} />
       </View>
 
       {/* Gamification Card */}
@@ -99,15 +160,12 @@ export default function DashboardScreen() {
         </View>
         <Text style={styles.gamLevel}>Level {g?.level ?? 1}</Text>
 
-        {/* Progress Bar */}
-        <View style={styles.progressBg}>
-          <View style={[styles.progressFill, { width: `${g?.progressPercent ?? 0}%` }]} />
-        </View>
+        <AnimatedProgressBar percent={g?.progressPercent ?? 0} />
+
         {g?.nextReward && (
           <Text style={styles.nextReward}>Next: {g.nextReward.icon} {g.nextReward.name} at {g.nextReward.threshold} tokens</Text>
         )}
 
-        {/* Achievements */}
         <View style={styles.achieveRow}>
           {g?.achievements.map(a => (
             <View key={a.key} style={[styles.achieveBadge, !a.unlocked && styles.achieveLocked]}>
@@ -118,25 +176,13 @@ export default function DashboardScreen() {
         </View>
       </View>
 
-      {/* Quick Actions */}
+      {/* Animated Quick Actions */}
       <Text style={styles.sectionTitle}>Quick Actions</Text>
       <View style={styles.actionsRow}>
-        <TouchableOpacity style={styles.actionBtn} onPress={() => router.push('/(tabs)/tasks')}>
-          <Ionicons name="add-circle-outline" size={24} color="#6C63FF" />
-          <Text style={styles.actionText}>Add Task</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn} onPress={() => router.push('/(tabs)/important')}>
-          <Ionicons name="alarm-outline" size={24} color="#F59E0B" />
-          <Text style={styles.actionText}>Reminder</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn} onPress={() => router.push('/(tabs)/mentor')}>
-          <Ionicons name="sparkles-outline" size={24} color="#22C55E" />
-          <Text style={styles.actionText}>AI Mentor</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn} onPress={() => router.push('/(tabs)/milestones')}>
-          <Ionicons name="trending-up-outline" size={24} color="#EC4899" />
-          <Text style={styles.actionText}>Milestones</Text>
-        </TouchableOpacity>
+        <ActionBtn icon="add-circle-outline"   label="Add Task"   color="#6C63FF" onPress={() => router.push('/(tabs)/tasks')}      delay={400} />
+        <ActionBtn icon="alarm-outline"        label="Reminder"   color="#F59E0B" onPress={() => router.push('/(tabs)/important')}  delay={460} />
+        <ActionBtn icon="sparkles-outline"     label="AI Mentor"  color="#22C55E" onPress={() => router.push('/(tabs)/mentor')}     delay={520} />
+        <ActionBtn icon="trending-up-outline"  label="Milestones" color="#EC4899" onPress={() => router.push('/(tabs)/milestones')} delay={580} />
       </View>
     </ScrollView>
   );
@@ -151,7 +197,7 @@ const styles = StyleSheet.create({
   logoutBtn: { padding: 8 },
   statsRow: { flexDirection: 'row', paddingHorizontal: 16, gap: 8, marginBottom: 16 },
   statCard: { flex: 1, backgroundColor: '#1A1A2E', borderRadius: 14, padding: 12, alignItems: 'center', borderWidth: 1, gap: 4 },
-  statNum: { fontSize: 20, fontWeight: '700', color: '#E2E8F0' },
+  statNum: { fontSize: 20, fontWeight: '700', color: '#E2E8F0', marginTop: 4 },
   statLabel: { fontSize: 11, color: '#94A3B8' },
   gamCard: { marginHorizontal: 16, backgroundColor: '#1A1A2E', borderRadius: 16, padding: 18, marginBottom: 20, borderWidth: 1, borderColor: 'rgba(108,99,255,0.3)' },
   gamHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
@@ -168,6 +214,7 @@ const styles = StyleSheet.create({
   achieveName: { fontSize: 10, color: '#94A3B8', marginTop: 2, textAlign: 'center' },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: '#E2E8F0', paddingHorizontal: 16, marginBottom: 12 },
   actionsRow: { flexDirection: 'row', paddingHorizontal: 16, gap: 10, marginBottom: 32 },
-  actionBtn: { flex: 1, backgroundColor: '#1A1A2E', borderRadius: 14, padding: 14, alignItems: 'center', gap: 6, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)' },
+  actionBtn: { flex: 1, backgroundColor: '#1A1A2E', borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)' },
+  actionBtnInner: { padding: 14, alignItems: 'center', gap: 6 },
   actionText: { fontSize: 11, color: '#94A3B8', fontWeight: '600', textAlign: 'center' },
 });
