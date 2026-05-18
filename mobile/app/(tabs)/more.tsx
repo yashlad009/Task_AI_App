@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  TextInput, Alert, ActivityIndicator
+  TextInput, Alert, ActivityIndicator, Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { useAuth } from '../../src/context/AuthContext';
 import { ENDPOINTS } from '../../src/config/api';
+
+const APP_VERSION = '1.2.0';
+const DOWNLOAD_PAGE = 'https://task-ai-app.onrender.com/download.html';
 
 export default function MoreScreen() {
   const { user, logout } = useAuth();
@@ -90,6 +93,22 @@ export default function MoreScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* App Update */}
+      <TouchableOpacity
+        style={styles.updateCard}
+        onPress={() => Linking.openURL(DOWNLOAD_PAGE)}
+        activeOpacity={0.8}
+      >
+        <View style={styles.updateLeft}>
+          <Ionicons name="download-outline" size={20} color="#6C63FF" />
+          <View>
+            <Text style={styles.updateTitle}>Get Latest Version</Text>
+            <Text style={styles.updateSub}>Current: v{APP_VERSION} · Tap to download newest APK</Text>
+          </View>
+        </View>
+        <Ionicons name="open-outline" size={16} color="#6C63FF" />
+      </TouchableOpacity>
+
       {/* Logout */}
       <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
         <Ionicons name="log-out-outline" size={20} color="#EF4444" />
@@ -126,6 +145,10 @@ const styles = StyleSheet.create({
   btnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
   logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: 'rgba(239,68,68,0.1)', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: 'rgba(239,68,68,0.2)' },
   logoutText: { color: '#EF4444', fontWeight: '700', fontSize: 16 },
+  updateCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'rgba(108,99,255,0.08)', borderRadius: 14, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: 'rgba(108,99,255,0.2)' },
+  updateLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
+  updateTitle: { fontSize: 14, fontWeight: '700', color: '#E2E8F0' },
+  updateSub: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
   credits: { alignItems: 'center', marginTop: 28, marginBottom: 8 },
   creditsText: { fontSize: 15, color: '#6C63FF', fontWeight: '700' },
   creditsVersion: { fontSize: 12, color: '#475569', marginTop: 4 },

@@ -100,6 +100,9 @@ function ActionBtn({ icon, label, color, onPress, index }: {
   );
 }
 
+// App version — bump this with every new APK release
+const CURRENT_VERSION = '1.2.0';
+
 export default function DashboardScreen() {
   const { user, logout } = useAuth();
   const router = useRouter();
