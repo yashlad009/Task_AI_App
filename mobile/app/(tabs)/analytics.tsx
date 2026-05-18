@@ -70,6 +70,27 @@ function AnimatedBar2({ percent, color = '#6C63FF', delay = 300 }: { percent: nu
   );
 }
 
+// Animated achievement card — proper component so hooks are valid
+function AchievementCard({ a, index }: { a: { key: string; name: string; icon: string; unlocked: boolean; unlockedDate?: string }; index: number }) {
+  const anim  = useRef(new Animated.Value(0)).current;
+  const scale = useRef(new Animated.Value(0.8)).current;
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(anim,  { toValue: 1, duration: 400, delay: index * 80, useNativeDriver: true }),
+      Animated.spring(scale, { toValue: 1, delay: index * 80, useNativeDriver: true } as any),
+    ]).start();
+  }, []);
+  return (
+    <Animated.View style={[styles.achieveCard, !a.unlocked && styles.achieveLocked, { opacity: anim, transform: [{ scale }] }]}>
+      <Text style={styles.achieveIcon}>{a.icon}</Text>
+      <Text style={styles.achieveName}>{a.name}</Text>
+      {a.unlocked && a.unlockedDate
+        ? <Text style={styles.achieveDate}>{a.unlockedDate}</Text>
+        : <Text style={styles.achieveLockText}>🔒 Locked</Text>}
+    </Animated.View>
+  );
+}
+
 // Animated stat card
 function StatCard({ icon, value, label, color, delay }: { icon: any; value: string | number; label: string; color: string; delay: number }) {
   const anim  = useRef(new Animated.Value(0)).current;
@@ -202,25 +223,9 @@ export default function AnalyticsScreen() {
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Achievements</Text>
         <View style={styles.achieveGrid}>
-          {g?.achievements.map((a, i) => {
-            const anim  = useRef(new Animated.Value(0)).current;
-            const scale = useRef(new Animated.Value(0.8)).current;
-            useEffect(() => {
-              Animated.parallel([
-                Animated.timing(anim,  { toValue: 1,   duration: 400, delay: i * 80, useNativeDriver: true }),
-                Animated.spring(scale, { toValue: 1,   delay: i * 80, useNativeDriver: true } as any),
-              ]).start();
-            }, []);
-            return (
-              <Animated.View key={a.key} style={[styles.achieveCard, !a.unlocked && styles.achieveLocked, { opacity: anim, transform: [{ scale }] }]}>
-                <Text style={styles.achieveIcon}>{a.icon}</Text>
-                <Text style={styles.achieveName}>{a.name}</Text>
-                {a.unlocked && a.unlockedDate
-                  ? <Text style={styles.achieveDate}>{a.unlockedDate}</Text>
-                  : <Text style={styles.achieveLockText}>🔒 Locked</Text>}
-              </Animated.View>
-            );
-          })}
+          {g?.achievements.map((a, i) => (
+            <AchievementCard key={a.key} a={a} index={i} />
+          ))}
         </View>
       </View>
 
