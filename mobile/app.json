@@ -5,12 +5,22 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0F0F1A"
+    },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.yashlad.tasktracker"
     },
     "android": {
-      "package": "com.yashlad.tasktracker"
+      "package": "com.yashlad.tasktracker",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0F0F1A"
+      }
     },
     "plugins": [
       "expo-router",
