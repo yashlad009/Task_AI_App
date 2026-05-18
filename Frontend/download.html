@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task Tracker — Download the App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="network-theme.js" defer></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0F0F1A;
+      --surface:  #1A1A2E;
+      --border:   rgba(255,255,255,0.07);
+      --accent:   #6C63FF;
+      --accent2:  #EC4899;
+      --green:    #22C55E;
+      --text:     #E2E8F0;
+      --muted:    #94A3B8;
+      --subtle:   #475569;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 32px;
+      background: rgba(15,15,26,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo img { width: 32px; height: 32px; border-radius: 8px; }
+    .nav-logo span { font-size: 18px; font-weight: 700; color: var(--text); }
+    .nav-logo span b { color: var(--accent); }
+    .nav-link {
+      color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500;
+      padding: 8px 16px; border-radius: 8px; transition: all 0.2s;
+    }
+    .nav-link:hover { color: var(--text); background: var(--surface); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+    }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(108,99,255,0.12);
+      border: 1px solid rgba(108,99,255,0.3);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 13px; font-weight: 600; color: var(--accent);
+      margin-bottom: 28px;
+      animation: fadeSlideDown 0.6s ease both;
+    }
+    .hero-badge i { font-size: 12px; }
+
+    .hero h1 {
+      font-size: clamp(2.4rem, 6vw, 4.2rem);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+      animation: fadeSlideDown 0.7s 0.1s ease both;
+    }
+    .hero h1 .grad {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: var(--muted);
+      max-width: 560px;
+      line-height: 1.7;
+      margin-bottom: 40px;
+      animation: fadeSlideDown 0.7s 0.2s ease both;
+    }
+
+    .hero-btns {
+      display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+      animation: fadeSlideDown 0.7s 0.3s ease both;
+    }
+
+    .btn-download {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 16px; font-weight: 700;
+      padding: 16px 32px;
+      border-radius: 14px;
+      text-decoration: none;
+      border: none; cursor: pointer;
+      transition: transform 0.18s, box-shadow 0.18s, background 0.18s;
+      box-shadow: 0 8px 32px rgba(108,99,255,0.35);
+    }
+    .btn-download:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 40px rgba(108,99,255,0.5);
+      background: #7c75ff;
+    }
+    .btn-download:active { transform: translateY(0); }
+    .btn-download i { font-size: 20px; }
+
+    .btn-web {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: transparent;
+      color: var(--text);
+      font-size: 15px; font-weight: 600;
+      padding: 15px 28px;
+      border-radius: 14px;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      transition: all 0.18s;
+    }
+    .btn-web:hover { background: var(--surface); border-color: rgba(255,255,255,0.15); }
+
+    .hero-note {
+      margin-top: 18px;
+      font-size: 12px; color: var(--subtle);
+      animation: fadeSlideDown 0.7s 0.4s ease both;
+    }
+    .hero-note i { color: var(--green); margin-right: 4px; }
+
+    /* ── MOCKUP ── */
+    .mockup-wrap {
+      margin-top: 64px;
+      position: relative;
+      animation: fadeSlideUp 0.8s 0.5s ease both;
+    }
+    .mockup-glow {
+      position: absolute; inset: -40px;
+      background: radial-gradient(ellipse at center, rgba(108,99,255,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .mockup-img {
+      width: 260px;
+      border-radius: 32px;
+      border: 2px solid rgba(108,99,255,0.3);
+      box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05);
+      position: relative;
+    }
+
+    /* ── FEATURES ── */
+    .section {
+      padding: 80px 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .section-label {
+      text-align: center;
+      font-size: 13px; font-weight: 600; color: var(--accent);
+      text-transform: uppercase; letter-spacing: 0.1em;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      text-align: center;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 800; letter-spacing: -0.02em;
+      margin-bottom: 48px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(108,99,255,0.3);
+      box-shadow: 0 12px 40px rgba(108,99,255,0.12);
+    }
+    .feature-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+    .feature-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+    .feature-card p  { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* ── STORY ── */
+    .story-section {
+      padding: 80px 24px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .story-inner {
+      max-width: 720px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .story-avatar {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; font-weight: 800; color: #fff;
+      margin: 0 auto 20px;
+    }
+    .story-inner h2 { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800; margin-bottom: 16px; }
+    .story-inner p  { font-size: 15px; color: var(--muted); line-height: 1.8; margin-bottom: 12px; }
+    .story-inner .highlight { color: var(--accent); font-weight: 600; }
+
+    /* ── CTA ── */
+    .cta-section {
+      padding: 100px 24px;
+      text-align: center;
+    }
+    .cta-section h2 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; margin-bottom: 16px; }
+    .cta-section p  { font-size: 16px; color: var(--muted); margin-bottom: 36px; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 24px;
+      text-align: center;
+    }
+    footer p { font-size: 13px; color: var(--subtle); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    .footer-links { display: flex; gap: 20px; justify-content: center; margin-top: 12px; }
+    .footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; }
+    .footer-links a:hover { color: var(--text); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeSlideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      nav { padding: 14px 20px; }
+      .hero { padding: 100px 20px 60px; }
+      .mockup-img { width: 200px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="download.html" class="nav-logo">
+      <img src="apms3.png" alt="Task Tracker Logo" />
+      <span>Task <b>Tracker</b></span>
+    </a>
+    <a href="login.html" class="nav-link">Web App →</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">
+      <i class="fas fa-rocket"></i>
+      My First Android App — Built with ❤️
+    </div>
+
+    <h1>
+      Own your day.<br />
+      <span class="grad">Track. Complete. Level up.</span>
+    </h1>
+
+    <p>
+      Task Tracker is a productivity app built for engineering students.
+      Manage tasks, track streaks, earn certificates, and get AI-powered
+      guidance — all in one place.
+    </p>
+
+    <div class="hero-btns">
+      <a href="https://expo.dev/artifacts/eas/nqxDwUn36kfLRCzQgEoMCK.apk"
+         class="btn-download" target="_blank" rel="noopener">
+        <i class="fab fa-android"></i>
+        Download APK
+      </a>
+      <a href="login.html" class="btn-web">
+        <i class="fas fa-globe"></i>
+        Open Web App
+      </a>
+    </div>
+
+    <p class="hero-note">
+      <i class="fas fa-check-circle"></i>
+      Free · Android · No Play Store needed · Just install &amp; go
+    </p>
+
+    <div class="mockup-wrap">
+      <div class="mockup-glow"></div>
+      <img src="apms3.png" alt="Task Tracker App" class="mockup-img" />
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section">
+    <p class="section-label">What's inside</p>
+    <h2 class="section-title">Everything you need to stay on track</h2>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(108,99,255,0.15); color:#6C63FF;">
+          <i class="fas fa-list-check"></i>
+        </div>
+        <h3>Smart Task Management</h3>
+        <p>Create tasks with categories, priorities, and deadlines. Get notified exactly when they're due.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(34,197,94,0.15); color:#22C55E;">
+          <i class="fas fa-fire"></i>
+        </div>
+        <h3>Streak & Gamification</h3>
+        <p>Earn tokens for every completed task. Unlock Bronze, Silver, Gold, and Elite certificates as you progress.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(245,158,11,0.15); color:#F59E0B;">
+          <i class="fas fa-bell"></i>
+        </div>
+        <h3>Smart Reminders</h3>
+        <p>Set important task reminders and get push notifications 30 minutes before your deadlines.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(236,72,153,0.15); color:#EC4899;">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <h3>Analytics Dashboard</h3>
+        <p>Weekly charts, completion rates, streak tracking, and category-wise token breakdown.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(108,99,255,0.15); color:#6C63FF;">
+          <i class="fas fa-robot"></i>
+        </div>
+        <h3>AI Mentor (Gemini)</h3>
+        <p>Powered by Google Gemini. Your AI mentor knows your tasks, deadlines, and streak — and gives real advice.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(34,197,94,0.15); color:#22C55E;">
+          <i class="fas fa-flag-checkered"></i>
+        </div>
+        <h3>Milestone Tracker</h3>
+        <p>Set long-term goals and track progress with animated progress bars. Celebrate every 100%.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- STORY -->
+  <section class="story-section">
+    <div class="story-inner">
+      <div class="story-avatar">Y</div>
+      <h2>This is my first app. 🎉</h2>
+      <p>
+        Hi, I'm <span class="highlight">Yash Lad</span> — an engineering student who built Task Tracker
+        from scratch as my first full-stack project. What started as a simple to-do list
+        grew into a full productivity platform with a Spring Boot backend, PostgreSQL database,
+        AI integration, and a React Native mobile app.
+      </p>
+      <p>
+        I built this to solve a real problem — keeping track of assignments, deadlines, and
+        study goals as an engineering student. Every feature in this app is something I
+        personally needed.
+      </p>
+      <p>
+        If you're a student looking for a focused, no-nonsense productivity tool —
+        <span class="highlight">this one's for you.</span>
+      </p>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <h2>Ready to own your day?</h2>
+    <p>Download the APK, install it on your Android phone, and start tracking.</p>
+    <a href="https://expo.dev/artifacts/eas/nqxDwUn36kfLRCzQgEoMCK.apk"
+       class="btn-download" target="_blank" rel="noopener" style="display:inline-flex;">
+      <i class="fab fa-android"></i>
+      Download Task Tracker APK
+    </a>
+    <p style="margin-top:16px; font-size:13px; color:var(--subtle);">
+      Android only · Free · No account required to browse
+    </p>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>Built by <a href="https://github.com/yashlad009" target="_blank">Yash Lad</a> · Amazing Devs · 2026</p>
+    <div class="footer-links">
+      <a href="login.html">Web App</a>
+      <a href="mailto:tasktracker351@gmail.com">Contact</a>
+      <a href="https://github.com/yashlad009" target="_blank">GitHub</a>
+      <a href="https://www.linkedin.com/in/yash-lad-4bb46632a" target="_blank">LinkedIn</a>
+    </div>
+  </footer>
+
+</body>
+</html>
