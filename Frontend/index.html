@@ -618,34 +618,154 @@
 
         function downloadCertificate() {
             if (!currentCertificate) return;
-            const printWindow = window.open('', '_blank', 'width=900,height=700');
+            const printWindow = window.open('', '_blank', 'width=960,height=720');
             if (!printWindow) return;
-            printWindow.document.write(`
-                <html>
-                <head>
-                    <title>${currentCertificate.name}</title>
-                    <style>
-                        body { font-family: Inter, sans-serif; background: #f4f1ff; padding: 40px; color: #111827; }
-                        .certificate { max-width: 760px; margin: 0 auto; border: 12px solid #6C63FF; border-radius: 24px; padding: 48px; text-align: center; background: white; }
-                        h1 { font-size: 42px; margin-bottom: 12px; }
-                        h2 { font-size: 30px; margin: 18px 0; }
-                        p { font-size: 18px; line-height: 1.6; }
-                    </style>
-                </head>
-                <body>
-                    <div class="certificate">
-                        <p>Certificate of Achievement</p>
-                        <h1>${currentCertificate.icon} ${currentCertificate.name}</h1>
-                        <p>This certificate is proudly presented to</p>
-                        <h2>${currentUser.email || 'APMS PRO User'}</h2>
-                        <p>for consistent execution, focused completion, and unlocking a new APMS PRO milestone.</p>
-                        <p>${currentCertificate.unlockedDate || new Date().toLocaleDateString()}</p>
-                    </div>
-                </body>
-                </html>
-            `);
+
+            // Tier-specific design config
+            const tierConfig = {
+                'Bronze': {
+                    bg: 'linear-gradient(135deg, #1A0F00 0%, #2D1A00 50%, #3D2400 100%)',
+                    border: '#CD7F32', accent: '#E8A050', glow: 'rgba(205,127,50,0.6)',
+                    badge: '#CD7F32', shimmer: '#FFD4A0',
+                },
+                'Silver': {
+                    bg: 'linear-gradient(135deg, #0D0D14 0%, #141420 50%, #1E1E30 100%)',
+                    border: '#C0C0C0', accent: '#E8E8F0', glow: 'rgba(192,192,192,0.6)',
+                    badge: '#C0C0C0', shimmer: '#FFFFFF',
+                },
+                'Gold': {
+                    bg: 'linear-gradient(135deg, #1A1400 0%, #2D2400 50%, #3D3200 100%)',
+                    border: '#FFD700', accent: '#FFE566', glow: 'rgba(255,215,0,0.7)',
+                    badge: '#FFD700', shimmer: '#FFFACD',
+                },
+                'Elite 🚀': {
+                    bg: 'linear-gradient(135deg, #0A0014 0%, #14002D 50%, #1E0040 100%)',
+                    border: '#EC4899', accent: '#F472B6', glow: 'rgba(236,72,153,0.7)',
+                    badge: '#EC4899', shimmer: '#FFB3D9',
+                },
+            };
+
+            const t = tierConfig[currentCertificate.key] || tierConfig['Bronze'];
+            const userName = currentUser.email || 'Task Tracker User';
+            const date = currentCertificate.unlockedDate || new Date().toLocaleDateString();
+            const tokens = currentUser.tokens || 0;
+
+            printWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${currentCertificate.name}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #050510;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 40px;
+    }
+    .cert {
+      width: 760px;
+      background: ${t.bg};
+      border: 3px solid ${t.border};
+      border-radius: 24px;
+      padding: 52px 56px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 60px ${t.glow}, 0 0 120px ${t.glow}44;
+    }
+    /* Top glow bar */
+    .cert::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 4px;
+      background: ${t.border};
+      box-shadow: 0 0 20px ${t.glow};
+    }
+    /* Corner decorations */
+    .corner { position: absolute; width: 24px; height: 24px; border-color: ${t.border}; border-style: solid; }
+    .tl { top: 14px; left: 14px; border-width: 2px 0 0 2px; border-radius: 4px 0 0 0; }
+    .tr { top: 14px; right: 14px; border-width: 2px 2px 0 0; border-radius: 0 4px 0 0; }
+    .bl { bottom: 14px; left: 14px; border-width: 0 0 2px 2px; border-radius: 0 0 0 4px; }
+    .br { bottom: 14px; right: 14px; border-width: 0 2px 2px 0; border-radius: 0 0 4px 0; }
+    .org { font-size: 11px; color: #475569; letter-spacing: 3px; font-weight: 700; margin-bottom: 6px; }
+    .cert-label { font-size: 13px; color: #94A3B8; letter-spacing: 2px; font-weight: 700; margin-bottom: 28px; }
+    .icon-wrap {
+      width: 100px; height: 100px; border-radius: 50%;
+      border: 3px solid ${t.border};
+      background: rgba(255,255,255,0.04);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 52px; line-height: 1;
+      box-shadow: 0 0 30px ${t.glow}, inset 0 0 20px ${t.glow}33;
+    }
+    .tier-name { font-size: 32px; font-weight: 800; color: ${t.accent}; letter-spacing: -0.5px; margin-bottom: 16px; }
+    .divider { width: 80px; height: 2px; background: ${t.border}; margin: 0 auto 24px; opacity: 0.7; border-radius: 1px; }
+    .presented { font-size: 13px; color: #64748B; margin-bottom: 8px; }
+    .user-name { font-size: 28px; font-weight: 800; color: ${t.accent}; margin-bottom: 16px; letter-spacing: -0.3px; }
+    .body-text { font-size: 14px; color: #94A3B8; line-height: 1.7; max-width: 520px; margin: 0 auto 24px; }
+    .stats { display: flex; gap: 16px; justify-content: center; margin-bottom: 28px; }
+    .stat-chip {
+      border: 1px solid ${t.border}; border-radius: 12px; padding: 12px 24px;
+      background: rgba(255,255,255,0.03);
+    }
+    .stat-val { font-size: 20px; font-weight: 800; color: ${t.accent}; }
+    .stat-lbl { font-size: 11px; color: #64748B; margin-top: 2px; }
+    .footer {
+      border-top: 1px solid ${t.border}44;
+      padding-top: 16px;
+      display: flex; justify-content: space-between;
+      font-size: 11px; color: #475569;
+    }
+    @media print {
+      body { background: #050510; padding: 0; }
+      .cert { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="cert">
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+
+    <p class="org">TASK TRACKER · AMAZING DEVS</p>
+    <p class="cert-label">CERTIFICATE OF ACHIEVEMENT</p>
+
+    <div class="icon-wrap">${currentCertificate.icon}</div>
+    <h1 class="tier-name">${currentCertificate.name}</h1>
+    <div class="divider"></div>
+
+    <p class="presented">This certificate is proudly presented to</p>
+    <h2 class="user-name">${userName}</h2>
+
+    <p class="body-text">
+      for outstanding dedication, consistent task completion, and reaching
+      <strong style="color:${t.accent}">${currentCertificate.threshold || ''} tokens</strong>
+      on Task Tracker — demonstrating real focus and execution.
+    </p>
+
+    <div class="stats">
+      <div class="stat-chip">
+        <div class="stat-val">⚡ ${tokens}</div>
+        <div class="stat-lbl">Total Tokens</div>
+      </div>
+      <div class="stat-chip">
+        <div class="stat-val">${currentCertificate.icon} ${currentCertificate.key}</div>
+        <div class="stat-lbl">Achievement Tier</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>Awarded: ${date}</span>
+      <span>Yash Lad · Amazing Devs</span>
+    </div>
+  </div>
+  <script>window.onload = () => setTimeout(() => window.print(), 400);<\/script>
+</body>
+</html>`);
             printWindow.document.close();
-            setTimeout(() => printWindow.print(), 300);
         }
 
         function isCompleted(task) {

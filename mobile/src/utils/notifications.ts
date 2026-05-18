@@ -75,6 +75,7 @@ export async function scheduleTaskReminder(
       data: { taskName },
     },
     trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DATE,
       date: triggerTime,
     },
   });

@@ -24,6 +24,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="milestones" options={{ title: 'Goals', tabBarIcon: ({ color, size }) => <Ionicons name="trending-up-outline" size={size} color={color} /> }} />
       <Tabs.Screen name="analytics" options={{ title: 'Analytics', tabBarIcon: ({ color, size }) => <Ionicons name="bar-chart-outline" size={size} color={color} /> }} />
       <Tabs.Screen name="mentor" options={{ title: 'AI', tabBarIcon: ({ color, size }) => <Ionicons name="sparkles-outline" size={size} color={color} /> }} />
+      <Tabs.Screen name="certificates" options={{ title: 'Awards', tabBarIcon: ({ color, size }) => <Ionicons name="ribbon-outline" size={size} color={color} /> }} />
       <Tabs.Screen name="more" options={{ title: 'More', tabBarIcon: ({ color, size }) => <Ionicons name="ellipsis-horizontal-outline" size={size} color={color} /> }} />
     </Tabs>
   );

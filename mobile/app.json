@@ -24,7 +24,15 @@
     },
     "plugins": [
       "expo-router",
-      "expo-notifications"
+      "expo-notifications",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow Task Tracker to save certificates to your gallery.",
+          "savePhotosPermission": "Allow Task Tracker to save certificates to your gallery.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ]
     ],
     "scheme": "tasktracker",
     "experiments": {

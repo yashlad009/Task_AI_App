@@ -24,17 +24,17 @@ public class NotificationScheduler {
 
     @Scheduled(fixedRate = 30000) // Runs every 30 seconds
     public void checkAndNotify() {
-        // 1. Get current time in UTC
-        LocalDateTime nowUtc = LocalDateTime.now(ZoneId.of("UTC"));
+        // Current time in IST (India Standard Time) — tasks are stored in IST
+        LocalDateTime nowIST = LocalDateTime.now(ZoneId.of("Asia/Kolkata"));
 
-        // 2. Wide window to catch the task even with small lag
-        LocalDateTime alertWindowStart = nowUtc.minusHours(1);
-        LocalDateTime alertWindowEnd = nowUtc.plusMinutes(45);
+        // Fire reminder when task is between 25 and 35 minutes away (±5 min window)
+        LocalDateTime windowStart = nowIST.plusMinutes(25);
+        LocalDateTime windowEnd   = nowIST.plusMinutes(35);
 
-        // Debug: Print to console so we know the clock is ticking
-        System.out.println("⏰ [CLOCK] Checking DB at UTC: " + nowUtc.format(DateTimeFormatter.ofPattern("HH:mm:ss")));
+        System.out.println("⏰ [CLOCK] IST now: " + nowIST.format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+                + " | Window: " + windowStart.format(DateTimeFormatter.ofPattern("HH:mm"))
+                + " – " + windowEnd.format(DateTimeFormatter.ofPattern("HH:mm")));
 
-        // Fetch all unprocessed tasks
         List<ImportantTask> tasks = repository.findByProcessedFalse();
 
         if (tasks.isEmpty()) {
@@ -42,40 +42,32 @@ public class NotificationScheduler {
         }
 
         for (ImportantTask task : tasks) {
-            LocalDateTime taskTimeUtc = task.getEventTime();
+            LocalDateTime taskTime = task.getEventTime(); // stored as IST local time
 
-            System.out.println("🔍 Checking Task: " + task.getTaskName() + " | Time: " + taskTimeUtc);
+            System.out.println("🔍 Checking Task: " + task.getTaskName() + " | Time: " + taskTime);
 
-            // 3. The Logic Check
-            if (taskTimeUtc.isAfter(alertWindowStart) && taskTimeUtc.isBefore(alertWindowEnd)) {
-
+            if (taskTime.isAfter(windowStart) && taskTime.isBefore(windowEnd)) {
                 try {
-                    // Convert UTC to IST for the email body text
-                    LocalDateTime istTime = taskTimeUtc.atZone(ZoneId.of("UTC"))
-                            .withZoneSameInstant(ZoneId.of("Asia/Kolkata"))
-                            .toLocalDateTime();
-
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a");
-                    String formattedTimeIST = istTime.format(formatter);
+                    String formattedTime = taskTime.format(formatter);
 
                     System.out.println("🎯 MATCH! Triggering alert for: " + task.getTaskName());
 
                     notificationService.sendTaskReminder(
                             task.getUserEmail(),
                             task.getTaskName(),
-                            formattedTimeIST
+                            formattedTime
                     );
 
-                    // 4. Mark as processed and save
                     task.setProcessed(true);
                     repository.save(task);
-                    System.out.println("✅ SUCCESS: Task marked as processed in database.");
+                    System.out.println("✅ SUCCESS: Task marked as processed.");
 
                 } catch (Exception e) {
                     System.err.println("❌ MAIL ERROR: " + e.getMessage());
                 }
             } else {
-                System.out.println("⏩ Task '" + task.getTaskName() + "' is not in the 30-min window yet.");
+                System.out.println("⏩ Task '" + task.getTaskName() + "' not in 30-min window yet.");
             }
         }
     }

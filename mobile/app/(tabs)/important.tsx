@@ -22,8 +22,22 @@ interface ImportantTask {
 function ReminderRow({ item, index }: { item: ImportantTask; index: number }) {
   const scale = useSharedValue(1);
   const scaleStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
-  const dt = new Date(item.eventTime);
+
+  // The eventTime is stored without timezone (local IST time as-is).
+  // Parsing it directly as local time by replacing nothing — JS Date() treats
+  // strings without 'Z' or offset as LOCAL time on most platforms, but to be
+  // safe we explicitly parse it as local by appending no suffix.
+  const parseLocalTime = (timeStr: string): Date => {
+    // timeStr format: "2026-05-19T14:30:00" — treat as local device time
+    const [datePart, timePart] = timeStr.split('T');
+    const [year, month, day] = datePart.split('-').map(Number);
+    const [hour, minute, second] = (timePart || '00:00:00').split(':').map(Number);
+    return new Date(year, month - 1, day, hour, minute, second || 0);
+  };
+
+  const dt = parseLocalTime(item.eventTime);
   const formatted = dt.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+  const isPast = dt < new Date();
 
   return (
     // Outer: entering only
@@ -43,8 +57,8 @@ function ReminderRow({ item, index }: { item: ImportantTask; index: number }) {
         <View style={styles.taskBody}>
           <Text style={styles.taskName}>{item.taskName}</Text>
           <Text style={styles.taskTime}>📅 {formatted}</Text>
-          <Text style={[styles.taskStatus, item.processed ? styles.done : styles.pending]}>
-            {item.processed ? 'Reminder sent' : 'Reminder pending'}
+          <Text style={[styles.taskStatus, item.processed ? styles.done : isPast ? styles.past : styles.pending]}>
+            {item.processed ? '✅ Reminder sent' : isPast ? '⏰ Time passed' : '🔔 Reminder pending'}
           </Text>
         </View>
       </TouchableOpacity>
@@ -84,13 +98,17 @@ export default function ImportantScreen() {
     if (selectedDate <= new Date()) { Alert.alert('Error', 'Please select a future date and time.'); return; }
     setSaving(true);
     try {
-      const utcIso = selectedDate.toISOString().replace('Z', '');
+      // Send as local ISO string (no Z) so backend stores it as-is (local IST time)
+      const pad = (n: number) => String(n).padStart(2, '0');
+      const d = selectedDate;
+      const localIso = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:00`;
+
       await axios.post(ENDPOINTS.addImportantTask, {
-        taskName: taskName.trim(), eventTime: utcIso,
+        taskName: taskName.trim(), eventTime: localIso,
         userEmail: user!.email, userId: user!.id,
       });
       await scheduleTaskReminder(taskName.trim(), selectedDate);
-      Alert.alert('✅ Reminder Set', `You'll get a notification 30 minutes before "${taskName}"`);
+      Alert.alert('✅ Reminder Set', `You'll get a notification 30 minutes before "${taskName.trim()}"`);
       setTaskName(''); setSelectedDate(new Date()); setModalVisible(false); fetchTasks();
     } catch (e) { Alert.alert('Error', 'Failed to add reminder.'); }
     finally { setSaving(false); }
@@ -192,7 +210,7 @@ const styles = StyleSheet.create({
   taskName:     { fontSize: 15, fontWeight: '600', color: '#E2E8F0', marginBottom: 4 },
   taskTime:     { fontSize: 13, color: '#94A3B8', marginBottom: 4 },
   taskStatus:   { fontSize: 12, fontWeight: '600' },
-  done:         { color: '#22C55E' }, pending: { color: '#F59E0B' },
+  done:         { color: '#22C55E' }, pending: { color: '#F59E0B' }, past: { color: '#475569' },
   empty:        { textAlign: 'center', color: '#475569', marginTop: 60, fontSize: 15 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' },
   modalCard:    { backgroundColor: '#1A1A2E', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, maxHeight: '90%' },

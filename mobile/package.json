@@ -10,13 +10,13 @@
   "dependencies": {
     "@expo/vector-icons": "^14.0.4",
     "@react-native-async-storage/async-storage": "2.1.2",
-    "@react-native-community/datetimepicker": "^8.3.0",
     "@react-native-community/datetimepicker": "^9.1.0",
     "axios": "^1.7.9",
     "expo": "~53.0.0",
     "expo-constants": "~17.1.8",
     "expo-device": "~7.1.4",
     "expo-linking": "~7.1.7",
+    "expo-media-library": "~17.1.7",
     "expo-notifications": "~0.31.5",
     "expo-router": "~5.1.11",
     "expo-status-bar": "~2.2.3",
@@ -25,7 +25,8 @@
     "react-native-gesture-handler": "~2.24.0",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
-    "react-native-screens": "~4.11.1"
+    "react-native-screens": "~4.11.1",
+    "react-native-view-shot": "^4.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
